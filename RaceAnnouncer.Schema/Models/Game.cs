@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RaceAnnouncer.Schema.Models.BaseModels;
@@ -71,5 +73,17 @@ namespace RaceAnnouncer.Schema.Models
     }
 
     private string _name { get; set; } = null!;
+
+    /// <summary>
+    /// Trackers associated with this game
+    /// </summary>
+    [InverseProperty(nameof(Tracker.Game))]
+    public ICollection<Tracker> Trackers { get; set; } = null!;
+
+    /// <summary>
+    /// Races associated with this game
+    /// </summary>
+    [InverseProperty(nameof(Race.Game))]
+    public ICollection<Race> Races { get; set; } = null!;
   }
 }

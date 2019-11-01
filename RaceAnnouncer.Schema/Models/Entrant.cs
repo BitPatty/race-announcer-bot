@@ -45,7 +45,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_race")]
-    protected long RaceId { get; set; }
+    internal long RaceId { get; set; }
 
     /// <summary>
     /// The entrants current state

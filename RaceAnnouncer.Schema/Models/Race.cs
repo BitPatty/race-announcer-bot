@@ -38,7 +38,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_game")]
-    protected long GameId { get; set; }
+    internal long GameId { get; set; }
 
     /// <summary>
     /// The races goal
@@ -79,6 +79,13 @@ namespace RaceAnnouncer.Schema.Models
     /// <summary>
     /// The races entrants
     /// </summary>
+    [InverseProperty(nameof(Entrant.Race))]
     public ICollection<Entrant> Entrants { get; set; } = null!;
+
+    /// <summary>
+    /// Announcements associated with this race
+    /// </summary>
+    [InverseProperty(nameof(Announcement.Race))]
+    public ICollection<Announcement> Announcements { get; set; } = null!;
   }
 }

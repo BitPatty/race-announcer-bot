@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -210,15 +211,15 @@ namespace RaceAnnouncer.Bot
 
       foreach (SRLApiClient.Endpoints.Races.Race srlRace in races)
       {
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating game..");
+        Debug.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating game");
         Schema.Models.Game game = srlRace.Game.Convert();
         game = _context.AddOrUpdate(game);
 
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating race..");
+        Debug.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating race");
         Race race = srlRace.Convert(game);
         race = _context.AddOrUpdate(race);
 
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating entrants..");
+        Debug.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating entrants");
         foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
           _context.AddOrUpdate(entrant.Convert(race));
 
@@ -281,25 +282,6 @@ namespace RaceAnnouncer.Bot
     private static void OnDiscordReady(object? sender, EventArgs? e)
     {
       if (sender is DiscordService discordService) LoadChannels(discordService);
-
-#if DEBUG
-      if (_context.Games.Local.Count < 1000)
-      {
-        _srlService.GetGameList().ToList().ForEach(g => { try { _context.AddOrUpdate(g.Convert()); } catch { } });
-        _context.SaveChanges();
-      }
-      if (_context.Trackers.Local.Count < 1000)
-      {
-        Channel channel = _context.Channels.Local.First(c => c.Snowflake.Equals(526600389756190720));
-
-        foreach (Schema.Models.Game game in _context.Games.Local)
-        {
-          Tracker t = new Tracker(channel, game);
-          _context.Trackers.Add(t);
-        }
-        _context.SaveChanges();
-      }
-#endif
       _srlService.TriggersCauseUpdate = true;
     }
 

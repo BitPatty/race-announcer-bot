@@ -29,14 +29,14 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_channel")]
-    public long ChannelId { get; set; }
+    internal long ChannelId { get; set; }
 
     /// <summary>
     /// The game id associated with this tracker
     /// </summary>
     [Required]
     [Column("fk_t_game")]
-    public long GameId { get; set; }
+    internal long GameId { get; set; }
 
     /// <summary>
     /// The trackers state
@@ -62,6 +62,7 @@ namespace RaceAnnouncer.Schema.Models
     /// <summary>
     /// The announcements associated with this tracker
     /// </summary>
+    [InverseProperty(nameof(Announcement.Tracker))]
     public ICollection<Announcement> Announcements { get; set; } = null!;
   }
 }

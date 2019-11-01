@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using RaceAnnouncer.Schema.Models;
 using RaceAnnouncer.Schema.Models.Configurations;
+using RaceAnnouncer.Schema.Models.Enumerations;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
@@ -13,24 +13,38 @@ namespace RaceAnnouncer.Schema
   {
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
-    public static readonly Microsoft.Extensions.Logging.LoggerFactory _myLoggerFactory = new LoggerFactory(new[] { new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider() });
+    private static readonly Microsoft.Extensions.Logging.LoggerFactory _debugLogger
+      = new LoggerFactory(new[] { new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider() });
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-      optionsBuilder.UseLoggerFactory(_myLoggerFactory);
+#if DEBUG
+      optionsBuilder.UseLoggerFactory(_debugLogger);
+#endif
     }
 
     public void LoadRemote()
     {
       ChangeTracker.AutoDetectChangesEnabled = false;
 
-      Guilds.Load();
-      Channels.Load();
-      Games.Load();
-      Trackers.Load();
-      Races.Load();
-      Entrants.Load();
-      Announcements.Load();
+      Guilds
+        .Load();
+
+      Channels
+        .Load();
+
+      Games
+        .Load();
+
+      Trackers
+        .Where(t => t.State != TrackerState.Dead)
+        .Load();
+
+      Races
+        .Include(r => r.Entrants)
+        .Include(r => r.Announcements)
+        .Where(r => r.IsActive)
+        .Load();
     }
 
     public override int SaveChanges()

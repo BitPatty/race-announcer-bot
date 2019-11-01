@@ -31,21 +31,21 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_channel")]
-    protected long ChannelId { get; set; }
+    internal long ChannelId { get; set; }
 
     /// <summary>
     /// The tracker id associated with this announcement
     /// </summary>
     [Required]
     [Column("fk_t_tracker")]
-    protected long TrackerId { get; set; }
+    internal long TrackerId { get; set; }
 
     /// <summary>
     /// The race id associated with this announcement
     /// </summary>
     [Required]
     [Column("fk_t_race")]
-    protected long RaceId { get; set; }
+    internal long RaceId { get; set; }
 
     /// <summary>
     /// Timestamp of when the message was created

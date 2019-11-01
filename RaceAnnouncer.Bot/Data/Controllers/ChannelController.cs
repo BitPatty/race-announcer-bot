@@ -23,9 +23,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
     }
 
     public static void AssignAttributes(this Channel destination, Channel source)
-    {
-      destination.DisplayName = source.DisplayName;
-    }
+      => destination.DisplayName = source.DisplayName;
 
     public static Channel? GetChannel(
       this DatabaseContext context

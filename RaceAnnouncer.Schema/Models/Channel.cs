@@ -36,7 +36,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_guild")]
-    protected long GuildId { get; set; }
+    internal long GuildId { get; set; }
 
     /// <summary>
     /// The channels guild
@@ -45,6 +45,16 @@ namespace RaceAnnouncer.Schema.Models
     [ForeignKey(nameof(GuildId))]
     public Guild Guild { get; set; }
 
+    /// <summary>
+    /// Trackers associated with this channel
+    /// </summary>
+    [InverseProperty(nameof(Tracker.Channel))]
     public ICollection<Tracker> Trackers { get; set; } = null!;
+
+    /// <summary>
+    /// Announcements associated with this channel
+    /// </summary>
+    [InverseProperty(nameof(Announcement.Channel))]
+    public ICollection<Announcement> Announcements { get; set; } = null!;
   }
 }

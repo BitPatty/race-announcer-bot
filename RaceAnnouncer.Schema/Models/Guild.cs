@@ -20,7 +20,7 @@ namespace RaceAnnouncer.Schema.Models
     }
 
     /// <summary>
-    /// The guild displayname
+    /// The guilds display name
     /// </summary>
     [Required(AllowEmptyStrings = false)]
     [MaxLength(128)]
@@ -28,7 +28,7 @@ namespace RaceAnnouncer.Schema.Models
     public string DisplayName { get; set; }
 
     /// <summary>
-    /// The guilds channels
+    /// Channels associated with this Guild
     /// </summary>
     public ICollection<Channel> Channels { get; set; } = null!;
   }
