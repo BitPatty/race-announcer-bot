@@ -36,15 +36,16 @@ namespace RaceAnnouncer.Bot
       AppDomain.CurrentDomain.ProcessExit += ProcessShutdown;
       ParseCommandLineArgs(args);
 
-      Console.WriteLine("Initializing Database");
+      Logger.Debug("Initializing Database");
       InitDatabase();
 
-      Console.WriteLine("Initializing Srl");
+      Logger.Debug("Initializing SRL Service");
       InitSrlService();
 
-      Console.WriteLine("Initializing Discord");
+      Logger.Debug("Initializing Discord Service");
       InitDiscordService();
 
+      Logger.Debug("Starting Bot");
       StartBot().GetAwaiter().GetResult();
     }
 
@@ -106,20 +107,22 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Updating races..");
+        _context.ChangeTracker.DetectChanges();
+
+        Logger.Info("Updating races");
         IEnumerable<Race> updatedRaces = UpdateActiveRaces(e);
 
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Updating dropped races..");
+        Logger.Info("Updating dropped races");
         UpdateDroppedRaces(updatedRaces);
 
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Updating announcements..");
+        Logger.Info("Updating announcements");
         UpdateAnnouncements(GetUpdatedRaces());
 
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Races updated");
+        Logger.Info("Saving changes");
 
         _context.SaveChanges();
         _context.LoadRemote();
-        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Changes saved");
+        Logger.Info("Update completed");
       }
       catch { }
       finally
@@ -130,10 +133,11 @@ namespace RaceAnnouncer.Bot
 
     private static void UpdateAnnouncements(IEnumerable<Race> races)
     {
-      Console.WriteLine("Updating Announcements");
+      Logger.Info("Updating Announcements");
+
       foreach (Race race in races)
       {
-        Console.WriteLine($"Updating Announcements for ${race.SrlId}");
+        Logger.Info($"({race.SrlId}) Updating Announcements");
 
         foreach (Tracker tracker in _context.GetActiveTrackers(race.Game))
         {
@@ -141,7 +145,7 @@ namespace RaceAnnouncer.Bot
 
           if (announcement == null)
           {
-            Console.WriteLine($"({race.SrlId}) Creating message in {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
+            Logger.Info($"({race.SrlId}) Posting announcement in '{tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}'.");
 
             RestUserMessage? message = _discordService.SendMessageAsync(tracker.Channel.Snowflake, GetEmbed(race)).Result;
 
@@ -157,7 +161,7 @@ namespace RaceAnnouncer.Bot
           }
           else
           {
-            Console.WriteLine($"({race.SrlId}) Editing message {announcement.Snowflake} in {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
+            Logger.Info($"({race.SrlId}) Updating announcement {announcement.Snowflake} in {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
 
             Channel channel = _context.GetChannel(announcement);
             RestUserMessage? message = _discordService.FindMessageAsync(channel, announcement.Snowflake).Result;
@@ -169,7 +173,7 @@ namespace RaceAnnouncer.Bot
             }
             else
             {
-              Console.WriteLine($"({race.SrlId}) Failed to fetch message {announcement.Snowflake} in {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
+              Logger.Info($"({race.SrlId}) Failed to fetch message {announcement.Snowflake} in {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
             }
           }
 
@@ -207,19 +211,18 @@ namespace RaceAnnouncer.Bot
     private static List<Race> UpdateActiveRaces(IEnumerable<SRLApiClient.Endpoints.Races.Race> races)
     {
       List<Race> res = new List<Race>();
-      _context.ChangeTracker.DetectChanges();
 
       foreach (SRLApiClient.Endpoints.Races.Race srlRace in races)
       {
-        Debug.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating game");
+        Logger.Info($"({srlRace.Id}) Updating game");
         Schema.Models.Game game = srlRace.Game.Convert();
         game = _context.AddOrUpdate(game);
 
-        Debug.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating race");
+        Logger.Info($"({srlRace.Id}) Updating race");
         Race race = srlRace.Convert(game);
         race = _context.AddOrUpdate(race);
 
-        Debug.WriteLine($"{DateTime.Now.ToLongTimeString()}: ({srlRace.Id}) Updating entrants");
+        Logger.Info($"({srlRace.Id}) Updating entrants");
         foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
           _context.AddOrUpdate(entrant.Convert(race));
 
