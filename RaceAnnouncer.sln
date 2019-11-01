@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Bot", "RaceAnnouncer.Bot\RaceAnnouncer.Bot.csproj", "{513BB09C-70AF-4932-8668-A6A06439C720}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3F03D8E-BBA3-4AEF-81F2-C03982003919}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		rebuild_database.ps1 = rebuild_database.ps1
+		run_tests.ps1 = run_tests.ps1
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Schema", "RaceAnnouncer.Schema\RaceAnnouncer.Schema.csproj", "{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Tests", "RaceAnnouncer.Tests\RaceAnnouncer.Tests.csproj", "{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{513BB09C-70AF-4932-8668-A6A06439C720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{513BB09C-70AF-4932-8668-A6A06439C720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{513BB09C-70AF-4932-8668-A6A06439C720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{513BB09C-70AF-4932-8668-A6A06439C720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5E2B7850-CF5A-4990-A355-1488609E7DCA}
+	EndGlobalSection
+EndGlobal
