@@ -20,7 +20,12 @@ namespace RaceAnnouncer.Bot.Common
                                     Name = "Entrants",
                                     Value = race.Entrants.Count == 0
                                       ? "-"
-                                      : String.Join("\r\n", race.Entrants.Select(FormatEntrantStatus))
+                                      : String.Join("\r\n", race
+                                        .Entrants
+                                        .OrderBy(e => e.Place > 0 ? e.Place : 99)
+                                        .ThenBy(e => e.State)
+                                        .ThenBy(e => e.DisplayName)
+                                        .Select(FormatEntrantStatus))
                                   }
                                 },
       Footer          /**/ = new EmbedFooterBuilder() { Text = FormatRaceStatus(race) },
