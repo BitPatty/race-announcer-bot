@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -24,12 +24,16 @@ namespace RaceAnnouncer.Bot
   {
     private static string? _envFilePath = null;
 
-    private static DatabaseContext _context = null!;
-
     private static DiscordService _discordService = null!;
     private static SRLService _srlService = null!;
 
+    private static readonly ConcurrentQueue<ulong> _deletedGuilds = new ConcurrentQueue<ulong>();
+    private static readonly ConcurrentQueue<ulong> _deletedChannels = new ConcurrentQueue<ulong>();
+    private static readonly ConcurrentQueue<ulong> _addedChannels = new ConcurrentQueue<ulong>();
+
     private static bool _isInitialLoad = true;
+
+    private static readonly SemaphoreSlim _contextSemaphore = new SemaphoreSlim(1, 1);
 
     internal static void Main(string[] args)
     {
@@ -80,9 +84,23 @@ namespace RaceAnnouncer.Bot
 
     private static void InitDatabase()
     {
-      _context = new DatabaseContextFactory().CreateDbContext();
-      _context.Database.Migrate();
-      _context.LoadRemote();
+      _contextSemaphore.WaitAsync();
+
+      try
+      {
+        using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
+        context.Database.Migrate();
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Failed to migrate context! Exiting");
+        Logger.Error(ex.Message);
+        Environment.Exit(-1);
+      }
+      finally
+      {
+        _contextSemaphore.Release();
+      }
     }
 
     private static void InitDiscordService()
@@ -104,44 +122,47 @@ namespace RaceAnnouncer.Bot
     private static void OnSrlUpdate(object? sender, IReadOnlyCollection<SRLApiClient.Endpoints.Races.Race> e)
     {
       _srlService.TriggersCauseUpdate = false;
+      _contextSemaphore.Wait();
 
       try
       {
-        _context.ChangeTracker.DetectChanges();
+        using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
+
+        Logger.Info("Reloading context");
+        context.LoadRemote();
+        context.ChangeTracker.DetectChanges();
 
         Logger.Info("Updating races");
-        IEnumerable<Race> updatedRaces = UpdateActiveRaces(e);
+        IEnumerable<Race> updatedRaces = UpdateActiveRaces(context, e);
 
         Logger.Info("Updating dropped races");
-        UpdateDroppedRaces(updatedRaces);
+        UpdateDroppedRaces(context, updatedRaces);
 
         Logger.Info("Updating announcements");
-        UpdateAnnouncements(GetUpdatedRaces());
+        UpdateAnnouncements(context, GetUpdatedRaces(context));
 
         Logger.Info("Saving changes");
 
-        _context.SaveChanges();
-        _context.LoadRemote();
+        context.SaveChanges();
         Logger.Info("Update completed");
       }
       catch { }
       finally
       {
+        _contextSemaphore.Release();
         _srlService.TriggersCauseUpdate = true;
       }
     }
 
-    private static void UpdateAnnouncements(IEnumerable<Race> races)
+    private static void UpdateAnnouncements(DatabaseContext context, IEnumerable<Race> races)
     {
-      Logger.Info("Updating Announcements");
-
       foreach (Race race in races)
       {
         Logger.Info($"({race.SrlId}) Updating Announcements");
 
-        foreach (Tracker tracker in _context.GetActiveTrackers(race.Game))
+        foreach (Tracker tracker in context.GetActiveTrackers(race.Game))
         {
-          Announcement? announcement = _context.GetAnnouncement(race, tracker);
+          Announcement? announcement = context.GetAnnouncement(race, tracker);
 
           if (announcement == null)
           {
@@ -156,14 +177,14 @@ namespace RaceAnnouncer.Bot
                 MessageCreatedAt = DateTime.UtcNow
               };
 
-              _context.AddOrUpdate(announcement);
+              context.AddOrUpdate(announcement);
             }
           }
           else
           {
             Logger.Info($"({race.SrlId}) Updating announcement {announcement.Snowflake} in {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
 
-            Channel channel = _context.GetChannel(announcement);
+            Channel channel = context.GetChannel(announcement);
             RestUserMessage? message = _discordService.FindMessageAsync(channel, announcement.Snowflake).Result;
 
             if (message != null)
@@ -185,20 +206,20 @@ namespace RaceAnnouncer.Bot
     private static Embed GetEmbed(Race race)
       => EmbedFactory.Build(race);
 
-    public static void UpdateDroppedRaces(IEnumerable<Race> exclusions)
+    public static void UpdateDroppedRaces(DatabaseContext context, IEnumerable<Race> exclusions)
     {
-      foreach (Race race in _context.Races.Local.Where(r => r.IsActive && !exclusions.Contains(r)))
+      foreach (Race race in context.Races.Local.Where(r => r.IsActive && !exclusions.Contains(r)))
       {
         try
         {
           SRLApiClient.Endpoints.Races.Race srlRace = _srlService.GetRaceAsync(race.SrlId).Result;
-          Schema.Models.Game game = _context.AddOrUpdate(srlRace.Game.Convert());
+          Schema.Models.Game game = context.AddOrUpdate(srlRace.Game.Convert());
 
           race.AssignAttributes(srlRace.Convert(game));
           race.IsActive = srlRace.State != SRLApiClient.Endpoints.RaceState.Over;
 
           foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
-            _context.AddOrUpdate(entrant.Convert(race));
+            context.AddOrUpdate(entrant.Convert(race));
         }
         catch (Exception)
         {
@@ -208,7 +229,7 @@ namespace RaceAnnouncer.Bot
       }
     }
 
-    private static List<Race> UpdateActiveRaces(IEnumerable<SRLApiClient.Endpoints.Races.Race> races)
+    private static List<Race> UpdateActiveRaces(DatabaseContext context, IEnumerable<SRLApiClient.Endpoints.Races.Race> races)
     {
       List<Race> res = new List<Race>();
 
@@ -216,15 +237,20 @@ namespace RaceAnnouncer.Bot
       {
         Logger.Info($"({srlRace.Id}) Updating game");
         Schema.Models.Game game = srlRace.Game.Convert();
-        game = _context.AddOrUpdate(game);
+        game = context.AddOrUpdate(game);
 
         Logger.Info($"({srlRace.Id}) Updating race");
         Race race = srlRace.Convert(game);
-        race = _context.AddOrUpdate(race);
+        race = context.AddOrUpdate(race);
 
         Logger.Info($"({srlRace.Id}) Updating entrants");
         foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
-          _context.AddOrUpdate(entrant.Convert(race));
+          context.AddOrUpdate(entrant.Convert(race));
+
+        IEnumerable<Entrant> registeredEntrants = context.GetEntrants(race);
+
+        foreach (Entrant e in registeredEntrants.Where(e => !srlRace.Entrants.Any(s => s.Name.Equals(e.DisplayName))))
+          context.DeleteEntrant(e);
 
         res.Add(race);
       }
@@ -232,15 +258,15 @@ namespace RaceAnnouncer.Bot
       return res;
     }
 
-    private static List<Race> GetUpdatedRaces()
+    private static List<Race> GetUpdatedRaces(DatabaseContext context)
     {
-      _context.ChangeTracker.DetectChanges();
+      context.ChangeTracker.DetectChanges();
 
       List<Race> races = new List<Race>();
 
       if (_isInitialLoad)
       {
-        foreach (Race race in _context.Races.Local)
+        foreach (Race race in context.Races.Local)
         {
           if ((DateTime.UtcNow - race.UpdatedAt) < TimeSpan.FromHours(12))
             races.Add(race);
@@ -250,10 +276,10 @@ namespace RaceAnnouncer.Bot
         return races;
       }
 
-      foreach (Race race in _context.Races.Local)
+      foreach (Race race in context.Races.Local)
       {
-        if (HasEntityChanged(_context.Entry(race))) races.Add(race);
-        else if (_context.GetEntrants(race).Any(e => HasEntityChanged(_context.Entry(e)))) races.Add(race);
+        if (HasEntityChanged(context.Entry(race))) races.Add(race);
+        else if (context.GetEntrants(race).Any(e => HasEntityChanged(context.Entry(e)))) races.Add(race);
       }
 
       return races;
@@ -265,42 +291,64 @@ namespace RaceAnnouncer.Bot
     private static void OnDiscordDisconnected(object? sender, Exception? e)
     {
       _srlService.TriggersCauseUpdate = false;
+
       _discordService.Stop();
+
       Thread.Sleep(10000);
+
       _discordService.Start().Wait();
     }
 
     private static void OnDiscordGuildLeft(object? sender, SocketGuild e)
-      => _context.DisableTrackersByGuild(e.Id);
+      => _deletedGuilds.Enqueue(e.Id);
 
     private static void OnDiscordChannelDeleted(object? sender, SocketTextChannel e)
-      => _context.DisableTrackersByChannel(e.Id);
+      => _deletedChannels.Enqueue(e.Id);
 
     private static void OnDiscordChannelCreated(object? sender, SocketTextChannel e)
-    {
-      Guild g = _context.AddOrUpdate(e.Guild.Convert());
-      _context.AddOrUpdate(e.Convert(g));
-    }
+      => _addedChannels.Enqueue(e.Id);
 
     private static void OnDiscordReady(object? sender, EventArgs? e)
     {
-      if (sender is DiscordService discordService) LoadChannels(discordService);
-      _srlService.TriggersCauseUpdate = true;
+      _contextSemaphore.Wait();
+      try
+      {
+        using (DatabaseContext context = new DatabaseContextFactory().CreateDbContext())
+        {
+          context.Channels.Load();
+          context.Guilds.Load();
+
+          LoadChannels(context, _discordService);
+          context.SaveChanges();
+        }
+
+        _srlService.TriggersCauseUpdate = true;
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Failed to load channels! Exiting.");
+        Logger.Error(ex.Message);
+        Environment.Exit(-1);
+      }
+      finally
+      {
+        _contextSemaphore.Release();
+      }
     }
 
-    private static void LoadChannels(DiscordService discordService)
+    private static void LoadChannels(DatabaseContext context, DiscordService discordService)
     {
       List<SocketTextChannel> textChannels = discordService.GetTextChannels().ToList();
       textChannels.ForEach(c =>
       {
-        Guild g = _context.AddOrUpdate(c.Guild.Convert());
-        _context.AddOrUpdate(c.Convert(g));
+        Guild g = context.AddOrUpdate(c.Guild.Convert());
+        context.AddOrUpdate(c.Convert(g));
       });
 
-      _context.Channels.Local.ToList().ForEach(c =>
+      context.Channels.Local.ToList().ForEach(c =>
       {
         if (!textChannels.Any(tc => tc.Id.Equals(c.Snowflake)))
-          _context.DisableTrackersByChannel(c.Snowflake);
+          context.DisableTrackersByChannel(c.Snowflake);
       });
     }
 
@@ -315,7 +363,7 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        _context.Dispose();
+        _contextSemaphore.Dispose();
       }
       catch { }
     }

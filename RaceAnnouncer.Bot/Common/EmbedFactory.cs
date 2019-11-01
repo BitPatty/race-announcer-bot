@@ -14,20 +14,29 @@ namespace RaceAnnouncer.Bot.Common
       Url             /**/ = $"http://www.speedrunslive.com/race/?id={race.SrlId}",
       Description     /**/ = $"Goal: {race.Goal ?? "-"}",
       Fields          /**/ = {
-                                  new EmbedFieldBuilder()
-                                  {
-                                    IsInline = false,
-                                    Name = "Entrants",
-                                    Value = race.Entrants.Count == 0
-                                      ? "-"
-                                      : String.Join("\r\n", race
-                                        .Entrants
-                                        .OrderBy(e => e.Place > 0 ? e.Place : 99)
-                                        .ThenBy(e => e.State)
-                                        .ThenBy(e => e.DisplayName)
-                                        .Select(FormatEntrantStatus))
-                                  }
-                                },
+                                new EmbedFieldBuilder()
+                                {
+                                  IsInline = false,
+                                  Name = "Entrants",
+                                  Value = race.Entrants.Count == 0
+                                    ? "-"
+                                    : race.Entrants.Count <= 15
+                                    ? String.Join("\r\n", race
+                                      .Entrants
+                                      .OrderBy(e => e.Place > 0 ? e.Place : 99)
+                                      .ThenBy(e => e.State)
+                                      .ThenBy(e => e.DisplayName)
+                                      .Select(FormatEntrantStatus))
+                                    : String.Join("\r\n", race
+                                      .Entrants
+                                      .OrderBy(e => e.Place > 0 ? e.Place : 99)
+                                      .ThenBy(e => e.State)
+                                      .ThenBy(e => e.DisplayName)
+                                      .Take(15)
+                                      .Select(FormatEntrantStatus))
+                                      + $"\r\n *+{race.Entrants.Count - 15} more..*"
+                                }
+                              },
       Footer          /**/ = new EmbedFooterBuilder() { Text = FormatRaceStatus(race) },
       Color           /**/ = GetStatusColor(race),
       Timestamp       /**/ = DateTime.Now

@@ -30,6 +30,14 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       destination.Race = source.Race;
     }
 
+    public static void DeleteEntrant(
+      this DatabaseContext context
+      , Entrant entrant)
+      => context
+          .Entrants
+          .Local
+          .Remove(entrant);
+
     public static Entrant? GetEntrant(
       this DatabaseContext context
       , Race race
