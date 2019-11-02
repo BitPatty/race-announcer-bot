@@ -31,8 +31,7 @@ namespace RaceAnnouncer.Schema.Models
       get => _srlId;
       set
       {
-        if (value < 1) throw new ArgumentException($"({nameof(SrlId)}) Value must be greater than 0: '{SrlId}' given.");
-        else _srlId = value;
+        _srlId = value;
       }
     }
 
