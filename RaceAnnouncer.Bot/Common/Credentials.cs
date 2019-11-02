@@ -5,7 +5,12 @@ namespace RaceAnnouncer.Bot.Common
 {
   public static class Credentials
   {
-    public static string ParseConnectionString(string? envPath = null)
+    /// <summary>
+    /// Builds the connection string based on the environment file
+    /// </summary>
+    /// <param name="envPath">The path to the environment file</param>
+    /// <returns>Returns the connection string</returns>
+    public static string BuildConnectionString(string? envPath = null)
     {
       DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 
@@ -18,11 +23,15 @@ namespace RaceAnnouncer.Bot.Common
       return $"Server={server};Port={port};Database={database};User={user};Password={pass};TreatTinyAsBoolean=true;DateTimeKind=Utc;Convert Zero Datetime=true;";
     }
 
-    public static string ParseDiscordToken(string? envPath = null)
+    /// <summary>
+    /// Loads the discord bot token from the environment file
+    /// </summary>
+    /// <param name="envPath">The path to the environment file</param>
+    /// <returns>Returns the discord bot token</returns>
+    public static string? ParseDiscordToken(string? envPath = null)
     {
       DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-
-      return Environment.GetEnvironmentVariable("DISCORD_TOKEN") ?? throw new Exception("foo");
+      return Environment.GetEnvironmentVariable("DISCORD_TOKEN");
     }
   }
 }

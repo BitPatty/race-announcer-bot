@@ -7,6 +7,11 @@ namespace RaceAnnouncer.Bot.Common
 {
   public static class EmbedFactory
   {
+    /// <summary>
+    /// Creates a new embed for the specified <paramref name="race"/>
+    /// </summary>
+    /// <param name="race">The race entity</param>
+    /// <returns>Returns the embed for the specified <paramref name="race"/></returns>
     public static Embed Build(Race race)
     => new EmbedBuilder()
     {
@@ -42,6 +47,11 @@ namespace RaceAnnouncer.Bot.Common
       Timestamp       /**/ = DateTime.Now
     }.Build();
 
+    /// <summary>
+    /// Formats the state string for the specified <paramref name="entrant"/>
+    /// </summary>
+    /// <param name="entrant">The entrant entity</param>
+    /// <returns>Returns the formatted string for the specified <paramref name="entrant"/></returns>
     private static string FormatEntrantStatus(Entrant entrant)
       => entrant.State switch
       {
@@ -51,6 +61,11 @@ namespace RaceAnnouncer.Bot.Common
         _                                                   /**/ => $"**{entrant.DisplayName}**: {entrant.State.ToString()}"
       };
 
+    /// <summary>
+    /// Formats the state string for the specified <paramref name="race"/>
+    /// </summary>
+    /// <param name="race">The race entity</param>
+    /// <returns>Returns the formatted string for the specified <paramref name="race"/></returns>
     private static string FormatRaceStatus(Race race)
       => race.State switch
       {
@@ -62,6 +77,11 @@ namespace RaceAnnouncer.Bot.Common
         _                                                   /**/  => "Unknown State",
       };
 
+    /// <summary>
+    /// Gets the embeds display color base on the <paramref name="race"/> state
+    /// </summary>
+    /// <param name="race">The race entity</param>
+    /// <returns>Returns the embeds display color</returns>
     private static Color GetStatusColor(Race race)
       => race.State switch
       {
@@ -72,6 +92,11 @@ namespace RaceAnnouncer.Bot.Common
         _                                                   /**/  => Color.LightOrange,
       };
 
+    /// <summary>
+    /// Formats a number of seconds to a human readable form
+    /// </summary>
+    /// <param name="seconds">The number of seconds</param>
+    /// <returns>Returns the human readable representation of the <paramref name="seconds"/></returns>
     private static string FormatSeconds(int? seconds)
       => TimeSpan.FromSeconds(seconds ?? 0).ToString(@"hh\:mm\:ss");
   }

@@ -11,7 +11,7 @@ namespace RaceAnnouncer.Bot.Data
     {
       DbContextOptionsBuilder<DatabaseContext> optionsBuilder
         = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseMySql(Credentials.ParseConnectionString(envPath));
+            .UseMySql(Credentials.BuildConnectionString(envPath));
 
       return new DatabaseContext(optionsBuilder.Options);
     }
@@ -20,7 +20,7 @@ namespace RaceAnnouncer.Bot.Data
     {
       DbContextOptionsBuilder<DatabaseContext> optionsBuilder
         = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseMySql(Credentials.ParseConnectionString());
+            .UseMySql(Credentials.BuildConnectionString());
 
       return new DatabaseContext(optionsBuilder.Options);
     }

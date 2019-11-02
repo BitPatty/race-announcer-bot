@@ -40,36 +40,78 @@ namespace RaceAnnouncer.Bot.Services
       _discordClient.LeftGuild          /**/ += OnClientLeftGuild;
     }
 
-    public async Task Authenticate(string token)
+    /// <summary>
+    /// Authenticates the bot
+    /// </summary>
+    /// <param name="token">The bots token</param>
+    public async Task AuthenticateAsync(string token)
      => await _discordClient.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
 
-    public async Task Start()
+    /// <summary>
+    /// Starts the client
+    /// </summary>
+    public async Task StartAsync()
       => await _discordClient.StartAsync().ConfigureAwait(false);
 
+    /// <summary>
+    /// Stops the client
+    /// </summary>
     public void Stop()
       => _discordClient.StopAsync().Wait();
 
+    /// <summary>
+    /// Gets the list of text channels
+    /// </summary>
+    /// <returns>Returns the list of text channels</returns>
     public IEnumerable<SocketTextChannel> GetTextChannels()
       => _discordClient.Guilds.SelectMany(g => g.TextChannels);
 
-    public SocketGuild GetGuild(ulong guildId)
+    /// <summary>
+    /// Gets the the guild with the specified <paramref name="guildId"/>
+    /// </summary>
+    /// <param name="guildId">The guilds snowflake</param>
+    /// <returns>Returns the guild</returns>
+    public SocketGuild? GetGuild(ulong guildId)
       => _discordClient.Guilds.FirstOrDefault(g => g.Id.Equals(guildId));
 
+    /// <summary>
+    /// Checks whether a channel is available
+    /// </summary>
+    /// <param name="channelId">The channels snowflake</param>
+    /// <returns>Returns the channel with the specified <paramref name="channelId"/></returns>
     public bool IsChannelAvailable(ulong channelId)
       => _discordClient.Guilds
           .Select(g => g.Channels.FirstOrDefault(c => c.Id.Equals(channelId))).Count() == 1;
 
     #region Messages
 
-    public async Task<RestUserMessage?> SendMessageAsync(ulong channelId, Embed embed)
+    /// <summary>
+    /// Sends an embed to the specified <paramref name="channelId"/>
+    /// </summary>
+    /// <param name="channelId">The channels snowflake</param>
+    /// <param name="embed"></param>
+    /// <returns>Returns the posted message</returns>
+    public async Task<RestUserMessage?> SendEmbedAsync(ulong channelId, Embed embed)
       => await _discordClient.Guilds
           .SelectMany(g => g.TextChannels.Where(c => c.Id.Equals(channelId)))
           .First()
           .SendMessageAsync(text: "", embed: embed).ConfigureAwait(false);
 
+    /// <summary>
+    /// Replaces an embed in an existing message
+    /// </summary>
+    /// <param name="message">The message</param>
+    /// <param name="embed">The new embed</param>
     public async Task ModifyMessageAsync(RestUserMessage message, Embed embed)
       => await message.ModifyAsync(m => { m.Embed = embed; m.Content = ""; }).ConfigureAwait(false);
 
+    /// <summary>
+    /// Attempts to find a message with the specified <paramref name="messageId"/>
+    /// in the specified <paramref name="channel"/>
+    /// </summary>
+    /// <param name="channel">The channel</param>
+    /// <param name="messageId">The messages snowflake</param>
+    /// <returns>Returns the message</returns>
     public async Task<RestUserMessage?> FindMessageAsync(Channel channel, ulong messageId)
       => await _discordClient.Guilds
           .SelectMany(g => g.TextChannels.Where(c => c.Id.Equals(channel.Snowflake)))
@@ -78,7 +120,7 @@ namespace RaceAnnouncer.Bot.Services
 
     #endregion Message
 
-    #region EventForwarder
+    #region EventForwarders
 
     private System.Threading.Tasks.Task OnClientConnected()
     {
@@ -122,7 +164,7 @@ namespace RaceAnnouncer.Bot.Services
       return Task.CompletedTask;
     }
 
-    #endregion EventForwarder
+    #endregion EventForwarders
 
     public void Dispose()
     {

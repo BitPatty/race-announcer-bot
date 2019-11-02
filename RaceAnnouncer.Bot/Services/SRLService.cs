@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using SRLApiClient;
@@ -16,7 +17,7 @@ namespace RaceAnnouncer.Bot.Services
 
     private readonly SRLClient _client;
 
-    public bool TriggersCauseUpdate = false;
+    public bool IsUpdateTriggerEnabled = false;
 
     public SRLService(double interval = 10000)
     {
@@ -42,11 +43,16 @@ namespace RaceAnnouncer.Bot.Services
 
     private void Timer_Elapsed(object sender, ElapsedEventArgs e)
     {
-      if (TriggersCauseUpdate)
+      if (IsUpdateTriggerEnabled)
       {
         try
         {
-          OnUpdate?.Invoke(this, _client.Races.GetActive());
+          OnUpdate?.Invoke(this, _client.Races
+            .GetActive()
+            .Where(r => r.Game.Id != 0 && !r.Game.Abbreviation.Equals("newgame"))
+            .ToList()
+            .AsReadOnly()
+          );
         }
         catch { }
       }

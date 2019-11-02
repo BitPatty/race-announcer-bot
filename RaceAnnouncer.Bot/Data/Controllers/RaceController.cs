@@ -3,7 +3,7 @@ using System.Linq;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 
-namespace RaceAnnouncer.Bot.Data
+namespace RaceAnnouncer.Bot.Data.Controllers
 {
   public static class RaceController
   {
