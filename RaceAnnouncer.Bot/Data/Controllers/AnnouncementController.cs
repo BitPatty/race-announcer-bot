@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 
@@ -40,34 +39,8 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Announcements
           .Local
-          .FirstOrDefault(a
+          .SingleOrDefault(a
             => a.Tracker.Equals(tracker)
             && a.Race.Equals(race));
-
-    public static Channel GetChannel(
-      this DatabaseContext context
-      , Announcement announcement)
-      => context
-          .Announcements
-          .Local
-          .First(a => a.Equals(announcement))
-          .Channel;
-
-    public static Race GetRace(
-      this DatabaseContext context
-      , Announcement announcement)
-      => context
-          .Announcements
-          .Local
-          .First(a => a.Equals(announcement))
-          .Race;
-
-    public static IEnumerable<Announcement> GetAnnouncements(
-      this DatabaseContext context
-      , List<Race> races)
-      => context
-          .Announcements
-          .Local
-          .Where(a => races.Contains(a.Race));
   }
 }

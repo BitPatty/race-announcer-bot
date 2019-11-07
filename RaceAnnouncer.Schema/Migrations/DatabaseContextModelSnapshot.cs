@@ -129,7 +129,6 @@ namespace RaceAnnouncer.Schema.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("Place")
-                        .IsRequired()
                         .HasColumnName("place")
                         .HasColumnType("int");
 
@@ -143,7 +142,6 @@ namespace RaceAnnouncer.Schema.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("Time")
-                        .IsRequired()
                         .HasColumnName("time")
                         .HasColumnType("int");
 
@@ -330,13 +328,13 @@ namespace RaceAnnouncer.Schema.Migrations
             modelBuilder.Entity("RaceAnnouncer.Schema.Models.Announcement", b =>
                 {
                     b.HasOne("RaceAnnouncer.Schema.Models.Channel", "Channel")
-                        .WithMany()
+                        .WithMany("Announcements")
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RaceAnnouncer.Schema.Models.Race", "Race")
-                        .WithMany()
+                        .WithMany("Announcements")
                         .HasForeignKey("RaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -369,7 +367,7 @@ namespace RaceAnnouncer.Schema.Migrations
             modelBuilder.Entity("RaceAnnouncer.Schema.Models.Race", b =>
                 {
                     b.HasOne("RaceAnnouncer.Schema.Models.Game", "Game")
-                        .WithMany()
+                        .WithMany("Races")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -384,7 +382,7 @@ namespace RaceAnnouncer.Schema.Migrations
                         .IsRequired();
 
                     b.HasOne("RaceAnnouncer.Schema.Models.Game", "Game")
-                        .WithMany()
+                        .WithMany("Trackers")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

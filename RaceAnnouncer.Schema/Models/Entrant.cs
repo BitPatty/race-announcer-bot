@@ -13,15 +13,6 @@ namespace RaceAnnouncer.Schema.Models
     protected Entrant() { }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
-    public Entrant(Race race, string name, EntrantState state)
-    {
-      RaceId = race.Id;
-      Race = race;
-
-      DisplayName = name;
-      State = state;
-    }
-
     public Entrant(Race race, string name, EntrantState state, int? time, int? place)
     {
       RaceId = race.Id;
@@ -57,14 +48,12 @@ namespace RaceAnnouncer.Schema.Models
     /// <summary>
     /// The entrants current time
     /// </summary>
-    [Required]
     [Column("time")]
     public Nullable<int> Time { get; set; }
 
     /// <summary>
     /// The entrants current place
     /// </summary>
-    [Required]
     [Column("place")]
     public Nullable<int> Place { get; set; }
 

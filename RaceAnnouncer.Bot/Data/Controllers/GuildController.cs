@@ -23,15 +23,10 @@ namespace RaceAnnouncer.Bot.Data.Controllers
     }
 
     public static void AssignAttributes(this Guild destination, Guild source)
-      => destination.DisplayName = source.DisplayName;
-
-    public static Guild? GetGuild(
-      this DatabaseContext context
-      , long guildId)
-      => context
-          .Guilds
-          .Local
-          .FirstOrDefault(g => g.Id.Equals(guildId));
+    {
+      destination.DisplayName = source.DisplayName;
+      destination.Snowflake = source.Snowflake;
+    }
 
     public static Guild? GetGuild(
       this DatabaseContext context

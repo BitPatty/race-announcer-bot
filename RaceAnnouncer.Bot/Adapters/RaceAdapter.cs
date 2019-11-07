@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using RaceAnnouncer.Bot.Common;
-using RaceAnnouncer.Bot.Data;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Data.Converters;
 using RaceAnnouncer.Bot.Services;

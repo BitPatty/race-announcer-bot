@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 
@@ -45,6 +46,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Entrants
           .Local
-          .FirstOrDefault(e => e.Race.Equals(race) && e.DisplayName.Equals(name));
+          .FirstOrDefault(e => e.Race.Equals(race) && e.DisplayName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
   }
 }

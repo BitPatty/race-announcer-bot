@@ -11,6 +11,11 @@ namespace RaceAnnouncer.Schema.Models.Configurations
     {
       RaceState state;
 
+      builder.Property(p => p.SrlId).HasConversion(
+        v => v.ToLower(),
+        v => v
+      );
+
       builder.Property(p => p.State).HasConversion(
         v => v.ToString(),
         v => Enum.TryParse(v, false, out state) ? state : RaceState.Unknown

@@ -23,7 +23,11 @@ namespace RaceAnnouncer.Bot.Data.Controllers
     }
 
     public static void AssignAttributes(this Game destination, Game source)
-      => destination.Name = source.Name;
+    {
+      destination.Abbreviation = source.Abbreviation;
+      destination.Name = source.Name;
+      destination.SrlId = source.SrlId;
+    }
 
     public static Game? GetGame(
       this DatabaseContext context
@@ -31,6 +35,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Games
           .Local
-          .FirstOrDefault(g => g.Abbreviation.Equals(abbreviation));
+          .FirstOrDefault(g => g.Abbreviation.Equals(abbreviation, System.StringComparison.CurrentCultureIgnoreCase));
   }
 }

@@ -10,6 +10,11 @@ namespace RaceAnnouncer.Schema.Models.Configurations
       builder.HasAlternateKey(p => p.SrlId);
       builder.HasAlternateKey(p => p.Abbreviation);
 
+      builder.Property(p => p.Abbreviation).HasConversion(
+        v => v.ToLower(),
+        v => v
+      );
+
       base.Configure(builder);
     }
   }

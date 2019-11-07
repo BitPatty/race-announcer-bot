@@ -146,8 +146,8 @@ namespace RaceAnnouncer.Schema.Migrations
                     name = table.Column<string>(nullable: false),
                     fk_t_race = table.Column<long>(nullable: false),
                     state = table.Column<string>(nullable: false),
-                    time = table.Column<int>(nullable: false),
-                    place = table.Column<int>(nullable: false)
+                    time = table.Column<int>(nullable: true),
+                    place = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {

@@ -9,7 +9,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
   {
     public static Race AddOrUpdate(this DatabaseContext context, Race race)
     {
-      Race? r = context.Races.Local.FirstOrDefault(res => res.SrlId.Equals(race.SrlId));
+      Race? r = context.GetRace(race.SrlId);
 
       if (r == null)
       {
@@ -50,24 +50,12 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Local
           .Where(e => e.Race.Equals(race));
 
-    public static IEnumerable<Entrant> GetEntrantsOrdered(
-      this DatabaseContext context
-      , Race race)
-      => context
-          .Entrants
-          .Local
-          .Where(e => e.Race.Equals(race))
-          .OrderBy(e => e.Place > 0 ? e.Place : 99)
-          .ThenBy(e => e.State)
-          .ThenBy(e => e.DisplayName);
-
     public static Race? GetRace(
       this DatabaseContext context
       , string srlId)
       => context
           .Races
           .Local
-          .OrderByDescending(res => res.UpdatedAt)
-          .FirstOrDefault(res => res.SrlId.Equals(srlId));
+          .SingleOrDefault(res => res.SrlId.Equals(srlId));
   }
 }

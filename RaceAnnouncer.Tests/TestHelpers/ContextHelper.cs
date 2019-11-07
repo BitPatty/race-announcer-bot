@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Data;
 using RaceAnnouncer.Schema;
-using RaceAnnouncer.Bot.Common;
-using System.IO;
 
-namespace RaceAnnouncer.Tests.Helpers
+namespace RaceAnnouncer.Tests.TestHelpers
 {
   public static class ContextHelper
   {
     public static DatabaseContext GetContext()
-      => new DatabaseContextFactory().CreateDbContext(Path.Combine(Directory.GetCurrentDirectory(), ".env.test"));
+      => new DatabaseContextFactory().CreateDbContext(TestFiles.EnvFile);
 
     public static void ResetDatabase(DatabaseContext context)
     {

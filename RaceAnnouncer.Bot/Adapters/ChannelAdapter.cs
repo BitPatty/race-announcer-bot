@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Discord.WebSocket;
-using RaceAnnouncer.Bot.Data;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Data.Converters;
 using RaceAnnouncer.Bot.Services;
@@ -42,7 +41,7 @@ namespace RaceAnnouncer.Bot.Adapters
       foreach (Channel c in context.Channels.Local)
       {
         if (!textChannels.Any(tc => tc.Id.Equals(c.Snowflake)))
-          context.DisableTrackersByChannel(c.Snowflake);
+          context.DisableTrackersByChannel(c);
       }
     }
 

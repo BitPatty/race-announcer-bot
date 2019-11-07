@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,7 +15,7 @@ namespace RaceAnnouncer.Schema.Models
 
     public Game(string abbreviation, string name, int srlId)
     {
-      Abbreviation = abbreviation;
+      Abbreviation = abbreviation.ToLower();
       Name = name;
       SrlId = srlId;
     }
@@ -49,7 +48,7 @@ namespace RaceAnnouncer.Schema.Models
       set
       {
         if (String.IsNullOrWhiteSpace(value)) throw new ArgumentException($"({nameof(Abbreviation)}) Invalid game abbreviation: '{Abbreviation}' given.");
-        else _abbreviation = value;
+        else _abbreviation = value.ToLower();
       }
     }
 

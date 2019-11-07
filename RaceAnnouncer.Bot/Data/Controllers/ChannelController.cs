@@ -23,15 +23,10 @@ namespace RaceAnnouncer.Bot.Data.Controllers
     }
 
     public static void AssignAttributes(this Channel destination, Channel source)
-      => destination.DisplayName = source.DisplayName;
-
-    public static Channel? GetChannel(
-      this DatabaseContext context
-      , long channelId)
-      => context
-          .Channels
-          .Local
-          .FirstOrDefault(c => c.Id.Equals(channelId));
+    {
+      destination.DisplayName = source.DisplayName;
+      destination.Guild = source.Guild;
+    }
 
     public static Channel? GetChannel(
       this DatabaseContext context
@@ -39,6 +34,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Channels
           .Local
-          .FirstOrDefault(g => g.Snowflake.Equals(snowflake));
+          .SingleOrDefault(g => g.Snowflake.Equals(snowflake));
   }
 }

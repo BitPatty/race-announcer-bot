@@ -5,7 +5,7 @@
     public static RaceAnnouncer.Schema.Models.Game Convert(
       this SRLApiClient.Endpoints.Games.Game game)
        => new Schema.Models.Game(
-            game.Abbreviation
+            game.Abbreviation.ToLower()
             , game.Name
             , game.Id);
 
@@ -15,7 +15,7 @@
       => new Schema.Models.Race(
             game
             , race.Goal
-            , race.Id
+            , race.Id.ToLower()
             , race.Time
             , race.State != SRLApiClient.Endpoints.RaceState.Over
             , race.State);
