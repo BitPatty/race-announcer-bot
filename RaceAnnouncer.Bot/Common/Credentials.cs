@@ -12,7 +12,7 @@ namespace RaceAnnouncer.Bot.Common
     /// <returns>Returns the connection string</returns>
     public static string BuildConnectionString(string? envPath = null)
     {
-      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".config"));
 
       string database   /**/ = Environment.GetEnvironmentVariable("DB_NAME")     /**/ ?? "";
       string server     /**/ = Environment.GetEnvironmentVariable("DB_SERVER")   /**/ ?? "localhost";
@@ -30,7 +30,7 @@ namespace RaceAnnouncer.Bot.Common
     /// <returns>Returns the discord bot token</returns>
     public static string? ParseDiscordToken(string? envPath = null)
     {
-      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".config"));
       return Environment.GetEnvironmentVariable("DISCORD_TOKEN");
     }
   }
