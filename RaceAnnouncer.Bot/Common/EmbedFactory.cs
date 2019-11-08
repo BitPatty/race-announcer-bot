@@ -15,9 +15,9 @@ namespace RaceAnnouncer.Bot.Common
     public static Embed Build(Race race)
     => new EmbedBuilder()
     {
-      Title           /**/ = $"Race room: {race.SrlId}",
+      Title           /**/ = $"Race room: #{race.SrlId}",
       Url             /**/ = $"http://www.speedrunslive.com/race/?id={race.SrlId}",
-      Description     /**/ = $"Goal: {race.Goal ?? "-"}",
+      Description     /**/ = $"Goal: {FormatGoal(race)}",
       Fields          /**/ = {
                                 new EmbedFieldBuilder()
                                 {
@@ -60,6 +60,18 @@ namespace RaceAnnouncer.Bot.Common
         SRLApiClient.Endpoints.EntrantState.Done            /**/ => $"**{entrant.DisplayName}**: {FormatSeconds(entrant.Time)}",
         _                                                   /**/ => $"**{entrant.DisplayName}**: {entrant.State.ToString()}"
       };
+
+    /// <summary>
+    /// Formats the goal according to discord character limit
+    /// </summary>
+    /// <param name="race">The race entity</param>
+    /// <returns>Returns the formatted goal description</returns>
+    private static string FormatGoal(Race race)
+    {
+      if (race.Goal == null) return "-";
+      if (race.Goal.Length > 2000) return race.Goal.Substring(0, 1800) + "...";
+      return race.Goal;
+    }
 
     /// <summary>
     /// Formats the state string for the specified <paramref name="race"/>
