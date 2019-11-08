@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "RaceAnnouncer.Bot": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
