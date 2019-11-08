@@ -58,14 +58,21 @@ namespace RaceAnnouncer.Bot.Adapters
     {
       Logger.Info($"({race.SrlId}) Posting announcement in '{tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}'.");
 
-      RestUserMessage? message = discordService
-          .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race))
-          .Result;
-
-      if (message != null)
+      try
       {
-        return new Announcement(tracker.Channel, tracker, race, message.Id)
-        { MessageCreatedAt = DateTime.UtcNow };
+        RestUserMessage? message = discordService
+            .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race))
+            .Result;
+
+        if (message != null)
+        {
+          return new Announcement(tracker.Channel, tracker, race, message.Id)
+          { MessageCreatedAt = DateTime.UtcNow };
+        }
+      }
+      catch (Exception ex)
+      {
+        Logger.Error($"({race.SrlId}) Exception thrown: {ex.Message}");
       }
 
       return null;
@@ -84,8 +91,15 @@ namespace RaceAnnouncer.Bot.Adapters
 
       if (message != null)
       {
-        discordService.ModifyMessageAsync(message, EmbedFactory.Build(announcement.Race)).Wait();
-        announcement.MessageUpdatedAt = DateTime.UtcNow;
+        try
+        {
+          discordService.ModifyMessageAsync(message, EmbedFactory.Build(announcement.Race)).Wait();
+          announcement.MessageUpdatedAt = DateTime.UtcNow;
+        }
+        catch (Exception ex)
+        {
+          Logger.Error($"({announcement.Race.SrlId}) Exception thrown: {ex.Message}");
+        }
       }
       else
       {

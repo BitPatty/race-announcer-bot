@@ -160,8 +160,10 @@ namespace RaceAnnouncer.Bot.Adapters
           foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
             context.AddOrUpdate(entrant.Convert(race));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+          Logger.Error($"({race.SrlId}) Exception thrown: {ex.Message}");
+
           race.IsActive = false;
           if (race.State != SRLApiClient.Endpoints.RaceState.Finished)
             race.State = SRLApiClient.Endpoints.RaceState.Unknown;

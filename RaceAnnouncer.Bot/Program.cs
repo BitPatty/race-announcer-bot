@@ -141,7 +141,10 @@ namespace RaceAnnouncer.Bot
         context.SaveChanges();
         Logger.Info("Update completed");
       }
-      catch { }
+      catch (Exception ex)
+      {
+        Logger.Error($"Exception thrown: {ex.Message}");
+      }
       finally
       {
         _contextSemaphore.Release();
