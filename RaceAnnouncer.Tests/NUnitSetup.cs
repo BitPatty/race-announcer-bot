@@ -14,7 +14,6 @@ public class NUnitSetup
   [OneTimeSetUp]
   public void OneTimeSetup()
   {
-    /*
     using DatabaseContext context = ContextHelper.GetContext();
     ContextHelper.ResetDatabase(context);
 
@@ -25,7 +24,6 @@ public class NUnitSetup
     AddEntrants(context);
     AddTrackers(context);
     AddAnnouncements(context);
-    */
   }
 
   private void AddGuilds(DatabaseContext context)

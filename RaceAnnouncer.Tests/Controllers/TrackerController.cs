@@ -8,6 +8,7 @@ using RaceAnnouncer.Schema.Models.Enumerations;
 namespace RaceAnnouncer.Tests.Controllers
 {
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8604:Possible null reference argument for parameter.", Justification = "Assertion")]
   public class TrackerController : BaseControllerTest
   {

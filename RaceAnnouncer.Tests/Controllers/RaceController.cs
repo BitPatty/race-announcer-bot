@@ -1,387 +1,76 @@
 ﻿using NUnit.Framework;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using RaceAnnouncer.Tests.TestHelpers;
-using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Schema;
 using RaceAnnouncer.Bot.Data.Controllers;
-
-#pragma warning disable CS8604 // Possible null reference argument.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
+using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.Tests.Controllers
 {
-  public class RaceController
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8604:Possible null reference argument for parameter.", Justification = "Assertion")]
+  public class RaceController : BaseControllerTest
   {
-    private DatabaseContext _context = ContextHelper.GetContext();
-
     [SetUp]
-    public void Setup()
+    public override void _Setup()
     {
       ResetContext();
-      ResetDatabase();
-      ResetContext();
-
-      _context.AddOrUpdate(new Guild(1, "Guild 1"));
-      _context.AddOrUpdate(new Guild(2, "Guild 2"));
-      _context.AddOrUpdate(new Guild(3, "Guild 3"));
-      _context.AddOrUpdate(new Guild(4, "Guild 4"));
-
-      _context.Channels.Add(new Channel(_context.GetGuild(1), 1, "Channel 1"));
-      _context.Channels.Add(new Channel(_context.GetGuild(1), 2, "Channel 2"));
-      _context.Channels.Add(new Channel(_context.GetGuild(2), 3, "Channel 3"));
-      _context.Channels.Add(new Channel(_context.GetGuild(3), 4, "Channel 4"));
-
-      _context.Games.Add(new Game("g1", "Game 1", 1));
-      _context.Games.Add(new Game("g2", "Game 2", 2));
-      _context.Games.Add(new Game("g3", "Game 3", 3));
-      _context.Games.Add(new Game("g4", "Game 4", 4));
-      _context.SaveChanges();
-
-      ResetContext();
-    }
-
-    public void ResetContext()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetContext(ref _context);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.LoadRemote();
-      });
-    }
-
-    public void ResetDatabase()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetDatabase(_context);
-      });
-
-      Assert.AreEqual(0
-        , _context.Guilds.Count());
     }
 
     [Test]
-    public void AddOrUpdate_Add_One()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
     {
-      Race race =
-        new Race(
-          _context.GetGame("g1")
-          , "goal"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Assert.AreEqual("g1"
-        , race.Game.Abbreviation);
-
-      Assert.AreEqual(0
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race);
-      });
-
-      Assert.AreEqual(1
-        , _context.Races.Local.Count);
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(race).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Races.Local.Count);
-
-      Assert.AreNotSame(race
-        , _context.Races.Local.First());
-
-      Assert.AreEqual("g1"
-        , _context.Races.Local.First().Game.Abbreviation);
-
-      Assert.AreEqual(race.Goal
-        , _context.Races.Local.First().Goal);
-
-      Assert.AreEqual(race.SrlId
-        , _context.Races.Local.First().SrlId);
-
-      Assert.AreEqual(race.State
-        , _context.Races.Local.First().State);
-
-      Assert.AreEqual(race.Time
-        , _context.Races.Local.First().Time);
-
-      Assert.AreEqual(race.IsActive
-        , _context.Races.Local.First().IsActive);
+      int raceCount = _context.Races.Local.Count;
+      _context.AddOrUpdate(RandomLocalRace);
+      SaveChanges();
+      Assert.AreEqual(raceCount, _context.Races.Local.Count);
     }
 
     [Test]
-    public void AddOrUpdate_Add_Two()
+    public override void AddOrUpdate_Add_Increases_Count()
     {
-      Race race1 =
-        new Race(
-          _context.GetGame("g1")
-          , "goal"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Race race2 =
-        new Race(
-          _context.GetGame("g1")
-          , "goal"
-          , "srl2"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Assert.AreEqual(0
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race2);
-      });
-
-      Assert.AreEqual(2
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(2
-        , _context.Races.Local.Count);
+      int raceCount = _context.Races.Local.Count;
+      _context.AddOrUpdate(GenerateRace(RandomLocalGame));
+      SaveChanges();
+      Assert.AreEqual(raceCount + 1, _context.Races.Local.Count);
     }
 
     [Test]
-    public void AddOrUpdate_Add_Duplicate()
+    public override void AddOrUpdate_Add_Stored_Correctly()
     {
-      Race race1 =
-        new Race(
-          _context.GetGame("g1")
-          , "goal"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
+      Race c1 = _context.AddOrUpdate(GenerateRace(RandomLocalGame));
+      SaveChanges();
 
-      Race race2 =
-        new Race(
-          _context.GetGame("g2")
-          , "goal2"
-          , "srl1"
-          , 456
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Assert.AreEqual(0
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race2);
-      });
-
-      Assert.AreEqual(1
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Races.Local.Count);
+      Race c2 = _context.GetRace(c1.SrlId);
+      Assert.AreEqual(c1.IsActive, c2.IsActive);
+      Assert.AreEqual(c1.Game.Abbreviation, c2.Game.Abbreviation);
+      Assert.AreEqual(c1.Goal, c2.Goal);
+      Assert.AreEqual(c1.State, c2.State);
+      Assert.AreEqual(c1.Time, c2.Time);
     }
 
     [Test]
-    public void AddOrUpdate_Add_Duplicate_Archived()
+    public override void AssignAttributes_Assigns_All_Attributes()
     {
-      Race race1 =
-        new Race(
-          _context.GetGame("g1")
-          , "goal"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
+      Race c1 = GenerateRace(RandomLocalGame);
+      Race c2 = RandomLocalRace;
 
-      Race race2 =
-        new Race(
-          _context.GetGame("g1")
-          , "goal"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Assert.AreEqual(0
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.Races.Local.First().IsActive = false;
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(0
-        , _context.Races.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race2);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Races.Local.Count);
-
-      Assert.AreEqual(2
-        , _context.Races.Count());
+      c2.AssignAttributes(c1);
+      Assert.AreEqual(c1.IsActive, c2.IsActive);
+      Assert.AreEqual(c1.Game.Abbreviation, c2.Game.Abbreviation);
+      Assert.AreEqual(c1.Goal, c2.Goal);
+      Assert.AreEqual(c1.State, c2.State);
+      Assert.AreEqual(c1.Time, c2.Time);
     }
 
     [Test]
-    public void AssignAttributes()
+    public void GetRace_Returns_NULL()
     {
-      Race race1 =
-        new Race(
-          _context.GetGame("g1")
-          , "goal1"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Race race2 =
-        new Race(
-          _context.GetGame("g2")
-          , "goal2"
-          , "srl2"
-          , 456
-          , false
-          , SRLApiClient.Endpoints.RaceState.Over);
-
-      Assert.DoesNotThrow(delegate
-      {
-        race1.AssignAttributes(race2);
-      });
-
-      Assert.AreEqual(race2.Game.Abbreviation
-        , race1.Game.Abbreviation);
-
-      Assert.AreEqual(race2.Goal
-        , race1.Goal);
-
-      Assert.AreEqual(race2.SrlId
-        , race1.SrlId);
-
-      Assert.AreEqual(race2.Time
-        , race1.Time);
-
-      Assert.AreEqual(race2.State
-        , race1.State);
-
-      Assert.AreEqual(race2.IsActive
-        , race1.IsActive);
+      Assert.IsNull(_context.GetRace(GenerateRace(RandomLocalGame).SrlId));
     }
 
     [Test]
-    public void GetGame()
+    public void GetRace_Returns_Race()
     {
-      Race race =
-        new Race(
-          _context.GetGame("g1")
-          , "goal1"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race);
-      });
-
-      Assert.AreEqual("g1"
-        , _context.GetGame(race).Abbreviation);
-    }
-
-    [Test]
-    public void GetRace()
-    {
-      Race race =
-        new Race(
-          _context.GetGame("g1")
-          , "goal1"
-          , "srl1"
-          , 123
-          , true
-          , SRLApiClient.Endpoints.RaceState.EntryOpen);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(race);
-      });
-
-      Assert.IsNotNull(_context.GetRace("srl1"));
-
-      Assert.AreEqual(race.SrlId
-        , _context.GetRace("srl1").SrlId);
+      Assert.IsNotNull(_context.GetRace(RandomLocalRace.SrlId));
     }
   }
 }

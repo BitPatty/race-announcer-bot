@@ -24,6 +24,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
 
     public static void AssignAttributes(this Channel destination, Channel source)
     {
+      destination.Snowflake = source.Snowflake;
       destination.DisplayName = source.DisplayName;
       destination.Guild = source.Guild;
     }

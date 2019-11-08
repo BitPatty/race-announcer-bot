@@ -1,204 +1,71 @@
 ﻿using NUnit.Framework;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using RaceAnnouncer.Tests.TestHelpers;
-using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Schema;
 using RaceAnnouncer.Bot.Data.Controllers;
+using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.Tests.Controllers
 {
-  public class ChannelController
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8604:Possible null reference argument for parameter.", Justification = "Assertion")]
+  public class ChannelController : BaseControllerTest
   {
-    private DatabaseContext _context = ContextHelper.GetContext();
-
     [SetUp]
-    public void Setup()
+    public override void _Setup()
     {
       ResetContext();
-      ResetDatabase();
-      ResetContext();
-
-      _context.Guilds.Add(new Guild(1, "Guild 1"));
-      _context.Guilds.Add(new Guild(2, "Guild 2"));
-      _context.Guilds.Add(new Guild(3, "Guild 3"));
-      _context.Guilds.Add(new Guild(4, "Guild 4"));
-      _context.SaveChanges();
-
-      ResetContext();
-    }
-
-    public void ResetContext()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetContext(ref _context);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.LoadRemote();
-      });
-    }
-
-    public void ResetDatabase()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetDatabase(_context);
-      });
-
-      Assert.AreEqual(0, _context.Guilds.Count());
     }
 
     [Test]
-    public void AddOrUpdate_Add_One()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
     {
-      Guild guild = null!;
-      Assert.DoesNotThrow(delegate
-      {
-        guild = _context.Guilds.Local.First();
-      });
-
-      Channel channel = new Channel(guild, 1, "bar");
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(channel);
-      });
-
-      Assert.AreEqual(1
-        , _context.Channels.Local.Count);
-
-      Assert.AreSame(channel
-        , _context.Channels.Local.First());
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(channel).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Channels.Local.Count);
-
-      Assert.AreNotSame(channel
-        , _context.Channels.Local.First());
-
-      Assert.AreEqual(channel.DisplayName
-        , _context.Channels.First().DisplayName);
-
-      Assert.AreEqual(channel.Snowflake
-        , _context.Channels.First().Snowflake);
-
-      Assert.AreEqual(1
-        , channel.Guild.Snowflake);
-
-      Assert.IsNotNull(channel.Guild);
+      int channelCount = _context.Channels.Local.Count;
+      _context.AddOrUpdate(RandomLocalChannel);
+      SaveChanges();
+      Assert.AreEqual(channelCount, _context.Channels.Local.Count);
     }
 
     [Test]
-    public void GetChannel()
+    public override void AddOrUpdate_Add_Increases_Count()
     {
-      Guild guild = null!;
-
-      Assert.DoesNotThrow(delegate
-      {
-        guild =
-          _context
-          .Guilds
-          .Local
-          .Single(g => g.Snowflake == 1);
-      });
-
-      Channel channel = new Channel(guild, 1, "foo");
-
-      _context.AddOrUpdate(channel);
-      _context.SaveChanges();
-
-      ResetContext();
-      Guild dbGuild = null!;
-      Channel? dbChannel = null;
-      Assert.DoesNotThrow(delegate
-      {
-        dbGuild =
-          _context
-          .Guilds
-          .Local
-          .Single(g => g.Snowflake == 1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        dbChannel = _context.GetChannel(1);
-      });
-
-      Assert.IsNotNull(dbChannel);
-
-      Assert.AreEqual(channel.DisplayName
-        , dbChannel?.DisplayName);
-
-      Assert.AreEqual(channel.Snowflake
-        , dbChannel?.Snowflake);
-
-      Assert.AreEqual(channel.Guild.Snowflake
-        , dbChannel?.Guild.Snowflake);
-
-      Assert.AreEqual(channel.Guild.Snowflake
-        , dbGuild.Snowflake);
+      int channelCount = _context.Channels.Local.Count;
+      _context.AddOrUpdate(GenerateChannel());
+      SaveChanges();
+      Assert.AreEqual(channelCount + 1, _context.Channels.Local.Count);
     }
 
     [Test]
-    public void GetChannel_NULL()
+    public override void AddOrUpdate_Add_Stored_Correctly()
     {
-      Channel? channel = null;
+      Channel c1 = _context.AddOrUpdate(GenerateChannel());
+      SaveChanges();
 
-      Assert.DoesNotThrow(delegate
-      {
-        channel = _context.GetChannel(1);
-      });
-
-      Assert.IsNull(channel);
+      Channel c2 = _context.GetChannel(c1.Snowflake);
+      Assert.AreEqual(c1.Snowflake, c2.Snowflake);
+      Assert.AreEqual(c1.DisplayName, c2.DisplayName);
     }
 
     [Test]
-    public void AssignAttributes()
+    public override void AssignAttributes_Assigns_All_Attributes()
     {
-      Guild guild1 = null!;
-      Guild guild2 = null!;
+      Channel c1 = GenerateChannel();
+      Channel c2 = RandomLocalChannel;
 
-      Assert.DoesNotThrow(delegate
-      {
-        guild1 =
-          _context
-          .Guilds
-          .Local
-          .Single(g => g.Snowflake == 1);
-      });
+      c2.AssignAttributes(c1);
+      Assert.AreEqual(c1.DisplayName, c2.DisplayName);
+      Assert.AreEqual(c1.Snowflake, c2.Snowflake);
+      Assert.AreSame(c1.Guild, c2.Guild);
+    }
 
-      Assert.DoesNotThrow(delegate
-      {
-        guild2 =
-          _context
-          .Guilds
-          .Local
-          .Single(g => g.Snowflake == 2);
-      });
+    [Test]
+    public void GetChannel_Returns_Channel()
+    {
+      Assert.IsNotNull(_context.GetChannel(RandomLocalChannel.Snowflake));
+    }
 
-      Channel channel1 = new Channel(guild1, 1, "foo");
-      Channel channel2 = new Channel(guild2, 2, "bar");
-
-      channel1.AssignAttributes(channel2);
-
-      Assert.AreEqual(channel2.DisplayName
-        , channel1.DisplayName);
-
-      Assert.AreSame(channel2.Guild
-        , channel1.Guild);
+    [Test]
+    public void GetChannel_Returns_NULL()
+    {
+      Assert.IsNull(_context.GetChannel(GenerateChannel().Snowflake));
     }
   }
 }

@@ -33,15 +33,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       destination.State = source.State;
     }
 
-    public static Game GetGame(
-      this DatabaseContext context
-      , Race race)
-      => context
-          .Races
-          .Local
-          .First(r => r.Equals(race))
-          .Game;
-
     public static IEnumerable<Entrant> GetEntrants(
       this DatabaseContext context
       , Race race)
@@ -49,6 +40,15 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Entrants
           .Local
           .Where(e => e.Race.Equals(race));
+
+    public static Game GetGame(
+          this DatabaseContext context
+      , Race race)
+      => context
+          .Races
+          .Local
+          .First(r => r.Equals(race))
+          .Game;
 
     public static Race? GetRace(
       this DatabaseContext context

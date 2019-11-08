@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Schema.Models;
 
