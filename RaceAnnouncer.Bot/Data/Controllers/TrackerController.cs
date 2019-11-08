@@ -24,27 +24,11 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       }
     }
 
-    public static IEnumerable<Tracker> GetActiveTrackers(this DatabaseContext context)
-      => context
-          .Trackers
-          .Local
-          .Where(t => t.State.Equals(TrackerState.Active));
-
-    public static IEnumerable<Tracker> GetActiveTrackers(this DatabaseContext context, Game game)
-      => context
-          .Trackers
-          .Local
-          .Where(t => t.Game.Equals(game) && t.State.Equals(TrackerState.Active));
-
-    public static Tracker? GetTracker(this DatabaseContext context, Game game, Channel channel)
-      => context
-          .Trackers
-          .Local
-          .FirstOrDefault(t
-            => t.Channel.Equals(channel)
-            && t.Game.Equals(game)
-            && t.State != TrackerState.Dead
-            && t.State != TrackerState.Unknown);
+    public static void AssignAttributes(this Tracker destination, Tracker source)
+    {
+      destination.Channel = source.Channel;
+      destination.Game = source.Game;
+    }
 
     public static void DisableTrackersByChannel(this DatabaseContext context, ulong snowflake)
       => context
@@ -70,10 +54,26 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .ToList()
           .ForEach(t => t.State = TrackerState.Dead);
 
-    public static void AssignAttributes(this Tracker destination, Tracker source)
-    {
-      destination.Channel = source.Channel;
-      destination.Game = source.Game;
-    }
+    public static IEnumerable<Tracker> GetActiveTrackers(this DatabaseContext context)
+                      => context
+          .Trackers
+          .Local
+          .Where(t => t.State.Equals(TrackerState.Active));
+
+    public static IEnumerable<Tracker> GetActiveTrackers(this DatabaseContext context, Game game)
+      => context
+          .Trackers
+          .Local
+          .Where(t => t.Game.Equals(game) && t.State.Equals(TrackerState.Active));
+
+    public static Tracker? GetTracker(this DatabaseContext context, Game game, Channel channel)
+      => context
+          .Trackers
+          .Local
+          .SingleOrDefault(t
+            => t.Channel.Equals(channel)
+            && t.Game.Equals(game)
+            && t.State != TrackerState.Dead
+            && t.State != TrackerState.Unknown);
   }
 }

@@ -25,6 +25,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
 
     public static void AssignAttributes(this Entrant destination, Entrant source)
     {
+      destination.DisplayName = source.DisplayName;
       destination.Time = source.Time;
       destination.State = source.State;
       destination.Place = source.Place;
@@ -46,6 +47,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Entrants
           .Local
-          .FirstOrDefault(e => e.Race.Equals(race) && e.DisplayName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+          .SingleOrDefault(e => e.Race.Equals(race) && e.DisplayName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
   }
 }

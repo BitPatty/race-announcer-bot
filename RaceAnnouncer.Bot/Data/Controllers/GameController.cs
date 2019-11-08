@@ -35,6 +35,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Games
           .Local
-          .FirstOrDefault(g => g.Abbreviation.Equals(abbreviation, System.StringComparison.CurrentCultureIgnoreCase));
+          .SingleOrDefault(g => g.Abbreviation.Equals(abbreviation, System.StringComparison.CurrentCultureIgnoreCase));
   }
 }

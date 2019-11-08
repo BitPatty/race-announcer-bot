@@ -1,475 +1,121 @@
-﻿using NUnit.Framework;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
 using System.Linq;
-using RaceAnnouncer.Tests.TestHelpers;
-using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Schema;
+using NUnit.Framework;
 using RaceAnnouncer.Bot.Data.Controllers;
+using RaceAnnouncer.Schema.Models;
 using RaceAnnouncer.Schema.Models.Enumerations;
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8604 // Possible null reference argument.
 
 namespace RaceAnnouncer.Tests.Controllers
 {
-  public class TrackerController
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8604:Possible null reference argument for parameter.", Justification = "Assertion")]
+  public class TrackerController : BaseControllerTest
   {
-    private DatabaseContext _context = ContextHelper.GetContext();
-
     [SetUp]
-    public void Setup()
+    public override void _Setup()
     {
       ResetContext();
-      ResetDatabase();
-      ResetContext();
-
-      _context.AddOrUpdate(new Guild(1, "Guild 1"));
-      _context.AddOrUpdate(new Guild(2, "Guild 2"));
-      _context.AddOrUpdate(new Guild(3, "Guild 3"));
-      _context.AddOrUpdate(new Guild(4, "Guild 4"));
-
-      _context.Channels.Add(new Channel(_context.GetGuild(1), 1, "Channel 1"));
-      _context.Channels.Add(new Channel(_context.GetGuild(1), 2, "Channel 2"));
-      _context.Channels.Add(new Channel(_context.GetGuild(2), 3, "Channel 3"));
-      _context.Channels.Add(new Channel(_context.GetGuild(3), 4, "Channel 4"));
-
-      _context.Games.Add(new Game("g1", "Game 1", 1));
-      _context.Games.Add(new Game("g2", "Game 2", 2));
-      _context.Games.Add(new Game("g3", "Game 3", 3));
-      _context.Games.Add(new Game("g4", "Game 4", 4));
-      _context.SaveChanges();
-
-      ResetContext();
-    }
-
-    public void ResetContext()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetContext(ref _context);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.LoadRemote();
-      });
-    }
-
-    public void ResetDatabase()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetDatabase(_context);
-      });
-
-      Assert.AreEqual(0
-        , _context.Guilds.Count());
     }
 
     [Test]
-    public void AddOrUpdate_Add_One()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
     {
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"));
-
-      Assert.IsNotNull(tracker.Channel);
-      Assert.IsNotNull(tracker.Game);
-
-      Assert.AreEqual(TrackerState.Created
-        , tracker.State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker);
-      });
-
-      Assert.AreEqual(1
-        , _context.Trackers.Local.Count);
-
-      Assert.AreSame(tracker
-        , _context.Trackers.Local.First());
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(tracker).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Trackers.Local.Count);
-
-      Assert.AreNotSame(tracker
-        , _context.Trackers.Local.First());
-
-      Assert.AreEqual(_context.GetChannel(1)?.Snowflake
-        , tracker.Channel.Snowflake);
-
-      Assert.AreEqual(_context.GetGame("g1")?.Abbreviation
-        , tracker.Game.Abbreviation);
-
-      Assert.AreEqual(TrackerState.Created
-        , tracker.State);
-    }
-
-    [Test]
-    public void AddOrUpdate_Add_Two()
-    {
-      Tracker tracker1 =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"));
-
-      Tracker tracker2 =
-        new Tracker(
-          _context.GetChannel(2)
-          , _context.GetGame("g1"));
-
-      _context.AddOrUpdate(tracker1);
-      _context.AddOrUpdate(tracker2);
-
-      Assert.AreEqual(2
-        , _context.Trackers.Local.Count);
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(tracker1).State);
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(tracker2).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-    }
-
-    [Test]
-    public void AddOrUpdate_Add_Duplicate()
-    {
-      Tracker tracker1 =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"));
-
-      Tracker tracker2 =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"));
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker1);
-      });
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker2);
-      });
-
-      Assert.AreEqual(1
-        , _context.Trackers.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-    }
-
-    [Test]
-    public void AssignAttributes()
-    {
-      Tracker tracker1 =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"));
-
-      Tracker tracker2 =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g2"));
-
-      Assert.DoesNotThrow(delegate
-      {
-        tracker1.AssignAttributes(tracker2);
-      });
-
-      Assert.AreEqual(tracker2.Game.Abbreviation
-        , tracker1.Game.Abbreviation);
-
-      Assert.AreEqual(tracker2.Channel.Snowflake
-        , tracker1.Channel.Snowflake);
-    }
-
-    [Test]
-    public void GetTracker()
-    {
-      Assert.IsNull(_context.GetTracker(
-        _context.GetGame("g1")
-        , _context.GetChannel(1)));
-
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"));
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker);
-      });
-
-      Assert.IsNotNull(_context.GetTracker(
-        _context.GetGame("g1")
-        , _context.GetChannel(1)));
-    }
-
-    [Test]
-    public void GetActiveTrackers_By_Game()
-    {
-      Assert.AreEqual(0
-        , _context.GetActiveTrackers(_context
-          .GetGame("g1"))
-          .Count());
-
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"))
-        {
-          State = TrackerState.Active
-        };
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker);
-      });
-
-      Assert.AreEqual(1
-        , _context.GetActiveTrackers(_context
-          .GetGame("g1"))
-          .Count());
-
-      Assert.AreEqual(1
-        , _context.GetActiveTrackers(
-          _context.GetGame("g1"))
-          .First()
-          .Channel
-          .Snowflake);
-
-      tracker.State = TrackerState.Dead;
-
-      Assert.DoesNotThrow(delegate { _context.AddOrUpdate(tracker); });
-      Assert.AreEqual(0
-        , _context.GetActiveTrackers(
-          _context
-          .GetGame("g1"))
-        .Count());
-    }
-
-    [Test]
-    public void GetActiveTracker()
-    {
-      Assert.AreEqual(0
-        , _context
-          .GetActiveTrackers()
-          .Count());
-
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"))
-        {
-          State = TrackerState.Active
-        };
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker);
-      });
-
-      Assert.AreEqual(1
-        , _context.GetActiveTrackers().Count());
-
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Channel
-          .Snowflake);
-
-      Assert.AreEqual("g1"
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Game
-          .Abbreviation);
-
-      tracker.State = TrackerState.Dead;
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker);
-      });
-
-      Assert.AreEqual(0
-        , _context.GetActiveTrackers().Count());
-    }
-
-    [Test]
-    public void DisableTrackersByChannel_Channel()
-    {
-      Assert.AreEqual(0
-        , _context.GetActiveTrackers().Count());
-
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"))
-        {
-          State = TrackerState.Active
-        };
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(tracker);
-      });
-
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .Count());
-
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Channel
-          .Snowflake);
-
-      Assert.AreEqual("g1"
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Game
-          .Abbreviation);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.DisableTrackersByChannel(
-          _context.GetChannel(1));
-      }
-      );
-
-      Assert.AreEqual(0
-        , _context
-          .GetActiveTrackers()
-          .Count());
-    }
-
-    [Test]
-    public void DisableTrackersByChannel_Snowflake()
-    {
-      Assert.AreEqual(0
-        , _context
-          .GetActiveTrackers()
-          .Count());
-
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"))
-        {
-          State = TrackerState.Active
-        };
+      int trackerCount = _context.Trackers.Local.Count;
+      Tracker tracker = RandomLocalTracker;
 
       _context.AddOrUpdate(tracker);
+      SaveChanges();
 
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .Count());
-
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Channel
-          .Snowflake);
-
-      Assert.AreEqual("g1"
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Game
-          .Abbreviation);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.DisableTrackersByChannel(
-          _context
-            .GetChannel(1)
-            .Snowflake);
-      });
-
-      Assert.AreEqual(0
-        , _context
-          .GetActiveTrackers()
-          .Count());
+      Assert.AreEqual(trackerCount, _context.Trackers.Local.Count);
     }
 
     [Test]
-    public void DisableTrackersByGuild_Snowflake()
+    public override void AddOrUpdate_Add_Increases_Count()
     {
-      Assert.AreEqual(0
-        , _context
-          .GetActiveTrackers()
-          .Count());
+      int trackerCount = _context.Trackers.Local.Count;
+      Channel channel = RandomLocalChannel;
+      Game game = _context.AddOrUpdate(GenerateGame());
 
-      Tracker tracker =
-        new Tracker(
-          _context.GetChannel(1)
-          , _context.GetGame("g1"))
-        {
-          State = TrackerState.Active
-        };
-
+      Tracker tracker = new Tracker(channel, game);
       _context.AddOrUpdate(tracker);
 
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .Count());
+      SaveChanges();
 
-      Assert.AreEqual(1
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Channel
-          .Snowflake);
+      Assert.AreEqual(trackerCount + 1, _context.Trackers.Local.Count);
+    }
 
-      Assert.AreEqual("g1"
-        , _context
-          .GetActiveTrackers()
-          .First()
-          .Game
-          .Abbreviation);
+    [Test]
+    public override void AddOrUpdate_Add_Stored_Correctly()
+    {
+      Channel channel = RandomLocalChannel;
+      Game game = _context.AddOrUpdate(GenerateGame());
 
-      Assert.DoesNotThrow(delegate
-      {
-        _context.DisableTrackersByGuild(
-          _context
-            .GetChannel(1)
-            .Guild
-            .Snowflake);
-      });
+      Assert.IsNull(_context.GetTracker(game, channel));
 
-      Assert.AreEqual(0
-        , _context
-          .GetActiveTrackers()
-          .Count());
+      _context.AddOrUpdate(new Tracker(channel, game));
+      SaveChanges();
+
+      game = _context.GetGame(game.Abbreviation);
+      channel = _context.GetChannel(channel.Snowflake);
+
+      Assert.IsNotNull(_context.GetTracker(game, channel));
+    }
+
+    [Test]
+    public override void AssignAttributes_Assigns_All_Attributes()
+    {
+      Tracker t1 = RandomLocalTracker;
+      Tracker t2 = RandomLocalTracker;
+
+      t1.AssignAttributes(t2);
+
+      Assert.AreSame(t2.Channel, t1.Channel);
+      Assert.AreSame(t2.Game, t1.Game);
+    }
+
+    [Test]
+    public void GetActiveTrackers_All_Active()
+    {
+      Assert.True(_context.GetActiveTrackers().All(t => t.State == TrackerState.Active));
+    }
+
+    [Test]
+    public void GetActiveTrackers_By_Game_All_Active()
+    {
+      Tracker tracker = RandomLocalTracker;
+      Assert.True(
+        _context
+        .GetActiveTrackers(tracker.Game)
+        .All(t => t.State == TrackerState.Active));
+    }
+
+    [Test]
+    public void GetActiveTrackers_By_Game_Contains_Tracker()
+    {
+      Tracker tracker = RandomLocalActiveTracker;
+      IEnumerable<Tracker> gameTrackers = _context.GetActiveTrackers(tracker.Game);
+      Assert.Contains(tracker, gameTrackers.ToList());
+    }
+
+    [Test]
+    public void GetActiveTrackers_Contains_Tracker()
+    {
+      Tracker tracker = RandomLocalActiveTracker;
+      List<Tracker> trackers = _context.GetActiveTrackers().ToList();
+      Assert.Contains(tracker, trackers);
+    }
+
+    [Test]
+    public void GetTracker_Returns_NULL()
+    {
+      Assert.IsNull(_context.GetTracker(GenerateGame(), RandomLocalChannel));
+    }
+
+    [Test]
+    public void GetTracker_Returns_Tracker()
+    {
+      Tracker tracker = RandomLocalTracker;
+      Assert.AreSame(tracker, _context.GetTracker(tracker.Game, tracker.Channel));
     }
   }
 }

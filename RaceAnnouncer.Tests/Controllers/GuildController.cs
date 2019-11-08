@@ -1,145 +1,70 @@
 ﻿using NUnit.Framework;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using RaceAnnouncer.Tests.TestHelpers;
-using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Schema;
 using RaceAnnouncer.Bot.Data.Controllers;
+using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.Tests.Controllers
 {
-  public class GuildController
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8604:Possible null reference argument for parameter.", Justification = "Assertion")]
+  public class GuildController : BaseControllerTest
   {
-    private DatabaseContext _context = ContextHelper.GetContext();
-
     [SetUp]
-    public void Setup()
+    public override void _Setup()
     {
       ResetContext();
-      ResetDatabase();
-      ResetContext();
-    }
-
-    public void ResetContext()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetContext(ref _context);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.LoadRemote();
-      });
-    }
-
-    public void ResetDatabase()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetDatabase(_context);
-      });
-
-      Assert.AreEqual(0
-        , _context.Guilds.Count());
     }
 
     [Test]
-    public void AddOrUpdate_Add_One()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
     {
-      Guild guild = new Guild(1, "foo");
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(guild);
-      });
-
-      Assert.AreEqual(1
-        , _context.Guilds.Local.Count);
-
-      Assert.AreSame(guild
-        , _context.Guilds.Local.First());
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(guild).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.Guilds.Local.Count);
-
-      Assert.AreNotSame(guild
-        , _context.Guilds.Local.First());
-
-      Assert.AreEqual(guild.DisplayName
-        , _context.Guilds.First().DisplayName);
-
-      Assert.AreEqual(guild.Snowflake
-        , _context.Guilds.First().Snowflake);
+      int guildCount = _context.Guilds.Local.Count;
+      _context.AddOrUpdate(RandomLocalGuild);
+      SaveChanges();
+      Assert.AreEqual(guildCount, _context.Guilds.Local.Count);
     }
 
     [Test]
-    public void AddOrUpdate_Add_Two()
+    public override void AddOrUpdate_Add_Increases_Count()
     {
-      Guild guild1 = new Guild(1, "bar");
-      _context.AddOrUpdate(guild1);
-
-      Guild guild2 = new Guild(2, "bar");
-      _context.AddOrUpdate(guild2);
-
-      Assert.AreEqual(2
-        , _context.Guilds.Local.Count);
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(guild1).State);
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(guild2).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(2
-        , _context.Guilds.Local.Count);
+      int guildCount = _context.Guilds.Local.Count;
+      _context.AddOrUpdate(GenerateGuild());
+      SaveChanges();
+      Assert.AreEqual(guildCount + 1, _context.Guilds.Local.Count);
     }
 
     [Test]
-    public void GetGuild()
+    public override void AddOrUpdate_Add_Stored_Correctly()
     {
-      Assert.DoesNotThrow(delegate
-      {
-        _context.Add(new Guild(1, "foo"));
-      });
+      Guild g1 = _context.AddOrUpdate(GenerateGuild());
+      SaveChanges();
 
-      Assert.AreSame(_context.Guilds.Local.First()
-        , _context.GetGuild(1));
+      Guild g2 = _context.GetGuild(g1.Snowflake);
+      Assert.AreEqual(g1.Snowflake, g2.Snowflake);
+      Assert.AreEqual(g1.DisplayName, g2.DisplayName);
     }
 
     [Test]
-    public void AssignAttributes()
+    public override void AssignAttributes_Assigns_All_Attributes()
     {
-      Guild guild1 = new Guild(1, "foo");
-      Guild guild2 = new Guild(2, "bar");
+      Guild g1 = GenerateGuild();
+      Guild g2 = RandomLocalGuild;
 
-      Assert.DoesNotThrow(delegate
-      {
-        guild1.AssignAttributes(guild2);
-      });
+      g2.AssignAttributes(g1);
+      Assert.AreEqual(g1.DisplayName, g2.DisplayName);
+      Assert.AreEqual(g1.Snowflake, g2.Snowflake);
+    }
 
-      Assert.AreEqual(guild2.DisplayName
-        , guild1.DisplayName);
+    [Test]
+    public void GetGuild_Returns_Guild()
+    {
+      Assert.IsNotNull(_context.GetGuild(RandomLocalGuild.Snowflake));
+    }
 
-      Assert.AreEqual(guild2.Snowflake
-        , guild1.Snowflake);
+    [Test]
+    public void GetGuild_Returns_NULL()
+    {
+      Assert.IsNull(_context.GetGuild(GenerateGuild().Snowflake));
     }
   }
 }

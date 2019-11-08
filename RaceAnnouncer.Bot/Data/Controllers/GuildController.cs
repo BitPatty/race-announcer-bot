@@ -34,6 +34,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Guilds
           .Local
-          .FirstOrDefault(g => g.Snowflake.Equals(snowflake));
+          .SingleOrDefault(g => g.Snowflake.Equals(snowflake));
   }
 }

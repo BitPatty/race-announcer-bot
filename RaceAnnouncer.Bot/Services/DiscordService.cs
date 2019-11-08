@@ -72,7 +72,7 @@ namespace RaceAnnouncer.Bot.Services
     /// <param name="guildId">The guilds snowflake</param>
     /// <returns>Returns the guild</returns>
     public SocketGuild? GetGuild(ulong guildId)
-      => _discordClient.Guilds.FirstOrDefault(g => g.Id.Equals(guildId));
+      => _discordClient.Guilds.SingleOrDefault(g => g.Id.Equals(guildId));
 
     /// <summary>
     /// Checks whether a channel is available
@@ -81,7 +81,7 @@ namespace RaceAnnouncer.Bot.Services
     /// <returns>Returns the channel with the specified <paramref name="channelId"/></returns>
     public bool IsChannelAvailable(ulong channelId)
       => _discordClient.Guilds
-          .Select(g => g.Channels.FirstOrDefault(c => c.Id.Equals(channelId))).Count() == 1;
+          .Select(g => g.Channels.SingleOrDefault(c => c.Id.Equals(channelId))).Count() == 1;
 
     #region Messages
 

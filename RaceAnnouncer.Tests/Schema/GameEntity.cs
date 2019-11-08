@@ -235,34 +235,6 @@ namespace RaceAnnouncer.Tests.Schema
     }
 
     [Test]
-    public void Abbreviation_Duplicate_CI_With_Metadata()
-    {
-      Game game1 = new Game("foo", "1", 1);
-      Game game2 = new Game("FOO", "2", 2);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.Games.Add(game1);
-      });
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(game1).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.Games.Add(game2);
-      });
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(game2).State);
-
-      Assert.Throws<DbUpdateException>(delegate
-      {
-        _context.SaveChanges();
-      });
-    }
-
-    [Test]
     public void Abbreviation_Duplicate_Without_Metadata()
     {
       ResetDatabase();

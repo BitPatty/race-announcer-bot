@@ -116,6 +116,7 @@ namespace RaceAnnouncer.Tests.Controllers
       });
 
       Channel channel = new Channel(guild, 1, "foo");
+
       _context.AddOrUpdate(channel);
       _context.SaveChanges();
 

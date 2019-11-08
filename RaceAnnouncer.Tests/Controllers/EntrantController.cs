@@ -1,394 +1,95 @@
 ﻿using NUnit.Framework;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using RaceAnnouncer.Tests.TestHelpers;
-using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Schema;
 using RaceAnnouncer.Bot.Data.Controllers;
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8604 // Possible null reference argument.
+using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.Tests.Controllers
 {
-  public class EntrantController
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8604:Possible null reference argument for parameter.", Justification = "Assertion")]
+  public class EntrantController : BaseControllerTest
   {
-    private DatabaseContext _context = ContextHelper.GetContext();
-
     [SetUp]
-    public void Setup()
+    public override void _Setup()
     {
       ResetContext();
-      ResetDatabase();
-      ResetContext();
-
-      _context.AddOrUpdate(new Guild(1, "Guild 1"));
-      _context.AddOrUpdate(new Guild(2, "Guild 2"));
-      _context.AddOrUpdate(new Guild(3, "Guild 3"));
-      _context.AddOrUpdate(new Guild(4, "Guild 4"));
-
-      _context.Channels.Add(new Channel(_context.GetGuild(1), 1, "Channel 1"));
-      _context.Channels.Add(new Channel(_context.GetGuild(1), 2, "Channel 2"));
-      _context.Channels.Add(new Channel(_context.GetGuild(2), 3, "Channel 3"));
-      _context.Channels.Add(new Channel(_context.GetGuild(3), 4, "Channel 4"));
-
-      _context.Games.Add(new Game("g1", "Game 1", 1));
-      _context.Games.Add(new Game("g2", "Game 2", 2));
-      _context.Games.Add(new Game("g3", "Game 3", 3));
-      _context.Games.Add(new Game("g4", "Game 4", 4));
-
-      _context.Races.Add(new Race(_context.GetGame("g1"), "Goal 1", "r1", 1, true, SRLApiClient.Endpoints.RaceState.EntryOpen));
-      _context.Races.Add(new Race(_context.GetGame("g1"), "Goal 2", "r2", 2, true, SRLApiClient.Endpoints.RaceState.EntryClosed));
-      _context.Races.Add(new Race(_context.GetGame("g2"), "Goal 3", "r3", 3, true, SRLApiClient.Endpoints.RaceState.Over));
-      _context.Races.Add(new Race(_context.GetGame("g3"), "Goal 4", "r4", 4, true, SRLApiClient.Endpoints.RaceState.Finished));
-
-      _context.SaveChanges();
-
-      ResetContext();
-    }
-
-    public void ResetContext()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetContext(ref _context);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.LoadRemote();
-      });
-    }
-
-    public void ResetDatabase()
-    {
-      Assert.DoesNotThrow(delegate
-      {
-        ContextHelper.ResetDatabase(_context);
-      });
-
-      Assert.AreEqual(0
-        , _context.Guilds.Count());
     }
 
     [Test]
-    public void AddOrUpdate_Add_One()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
     {
-      Assert.AreEqual(0
-        , _context.GetRace("r1").Entrants.Count);
+      int entrantCount = _context.Entrants.Local.Count;
+      _context.AddOrUpdate(RandomLocalEntrant);
+      SaveChanges();
 
-      Assert.AreEqual(0
-        , _context.Entrants.Local.Count);
-
-      Entrant entrant =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Assert.IsNotNull(entrant.Race);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant);
-      });
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(entrant).State);
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.IsNotNull(_context.GetEntrant(_context.GetRace("r1")
-        , entrant.DisplayName));
-
-      Assert.AreEqual(1
-        , _context.Entrants.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(1
-        , _context.Entrants.Local.Count);
-
-      Assert.AreEqual(entrant.DisplayName
-        , _context.Entrants.Local.First().DisplayName);
+      Assert.AreEqual(entrantCount, _context.Entrants.Local.Count);
     }
 
     [Test]
-    public void AddOrUpdate_Add_Two()
+    public override void AddOrUpdate_Add_Increases_Count()
     {
-      Assert.AreEqual(0
-        , _context.GetRace("r1").Entrants.Count);
+      int entrantCount = _context.Entrants.Local.Count;
+      Entrant entrant = GenerateEntrant(RandomLocalRace);
+      _context.AddOrUpdate(entrant);
+      SaveChanges();
 
-      Assert.AreEqual(0
-        , _context.Entrants.Local.Count);
-
-      Entrant entrant1 =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Entrant entrant2 =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Bar"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant2);
-      });
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(entrant1).State);
-
-      Assert.AreEqual(EntityState.Added
-        , _context.Entry(entrant2).State);
-
-      Assert.AreEqual(2
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(2
-        , _context.Entrants.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(2
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(2
-        , _context.Entrants.Local.Count);
+      Assert.AreEqual(entrantCount + 1, _context.Entrants.Local.Count);
     }
 
     [Test]
-    public void AddOrUpdate_Add_Duplicate()
+    public override void AddOrUpdate_Add_Stored_Correctly()
     {
-      Assert.AreEqual(0
-        , _context.GetRace("r1").Entrants.Count);
+      Entrant e1 = GenerateEntrant(RandomLocalRace);
+      _context.AddOrUpdate(e1);
+      SaveChanges();
 
-      Assert.AreEqual(0
-        , _context.Entrants.Local.Count);
+      Entrant e2 = _context.GetEntrant(_context.GetRace(e1.Race.SrlId), e1.DisplayName);
 
-      Entrant entrant1 =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Entrant entrant2 =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant2);
-      });
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(1
-        , _context.Entrants.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(1
-        , _context.Entrants.Local.Count);
+      Assert.AreEqual(e1.DisplayName, e2.DisplayName);
+      Assert.AreEqual(e1.State, e2.State);
+      Assert.AreEqual(e1.Place, e2.Place);
+      Assert.AreEqual(e1.Race.SrlId, e2.Race.SrlId);
+      Assert.AreEqual(e1.Time, e2.Time);
     }
 
     [Test]
-    public void AddOrUpdate_CI_Add_Duplicate()
+    public override void AssignAttributes_Assigns_All_Attributes()
     {
-      Assert.AreEqual(0
-        , _context.GetRace("r1").Entrants.Count);
+      Entrant e1 = GenerateEntrant(RandomLocalRace);
+      Entrant e2 = RandomLocalEntrant;
 
-      Assert.AreEqual(0
-        , _context.Entrants.Local.Count);
+      e2.AssignAttributes(e1);
 
-      Entrant entrant1 =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Entrant entrant2 =
-        new Entrant(
-          _context.GetRace("r1")
-          , "foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant1);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant2);
-      });
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(1
-        , _context.Entrants.Local.Count);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.AreEqual(1
-        , _context.Entrants.Local.Count);
+      Assert.AreEqual(e1.DisplayName, e2.DisplayName);
+      Assert.AreEqual(e1.State, e2.State);
+      Assert.AreEqual(e1.Place, e2.Place);
+      Assert.AreEqual(e1.Race.SrlId, e2.Race.SrlId);
+      Assert.AreEqual(e1.Time, e2.Time);
     }
 
     [Test]
-    public void DeleteEntrant()
+    public void DeleteEntrant_Removes_Entrant()
     {
-      Assert.AreEqual(0
-        , _context.GetRace("r1").Entrants.Count);
+      Entrant entrant = RandomLocalEntrant;
 
-      Entrant entrant =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
+      _context.DeleteEntrant(entrant);
+      SaveChanges();
 
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant);
-      });
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      ResetContext();
-
-      Assert.AreEqual(1
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.IsNotNull(_context.GetEntrant(
-        _context.GetRace("r1")
-        , entrant.DisplayName));
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.DeleteEntrant(_context.GetRace("r1").Entrants.First());
-      });
-
-      Assert.AreEqual(EntityState.Deleted
-        , _context.Entry(_context.GetRace("r1").Entrants.First()).State);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.SaveChanges();
-      });
-
-      Assert.AreEqual(0
-        , _context.GetRace("r1").Entrants.Count);
-
-      Assert.IsNull(_context.GetEntrant(
-        _context.GetRace("r1")
-        , entrant.DisplayName));
+      Assert.IsNotNull(entrant);
+      Assert.IsNull(_context.GetEntrant(_context.GetRace(entrant.Race.SrlId), entrant.DisplayName));
     }
 
     [Test]
-    public void DeleteEntrant_Non_Existing()
+    public void GetEntrant_Returns_Entrant()
     {
-      Entrant entrant =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Assert.DoesNotThrow(delegate { _context.DeleteEntrant(entrant); });
+      Entrant entrant = RandomLocalEntrant;
+      Assert.AreSame(entrant, _context.GetEntrant(entrant.Race, entrant.DisplayName));
     }
 
     [Test]
-    public void GetEntrant()
+    public void GetEntrant_Returns_NULL()
     {
-      Entrant entrant =
-        new Entrant(
-          _context.GetRace("r1")
-          , "Foo"
-          , SRLApiClient.Endpoints.EntrantState.Entered
-          , null
-          , null);
-
-      Assert.DoesNotThrow(delegate
-      {
-        _context.AddOrUpdate(entrant);
-      });
-
-      Assert.IsNotNull(_context.GetEntrant(_context.GetRace("r1")
-        , entrant.DisplayName));
-
-      Assert.IsNotNull(_context.GetEntrant(_context.GetRace("r1")
-        , entrant.DisplayName.ToLower()));
-
-      Assert.IsNotNull(_context.GetEntrant(_context.GetRace("r1")
-        , entrant.DisplayName.ToUpper()));
-
-      Assert.IsNull(_context.GetEntrant(_context.GetRace("r1"), "Bar"));
+      Assert.IsNull(_context.GetEntrant(RandomLocalRace, $"{Ticks}"));
     }
   }
 }

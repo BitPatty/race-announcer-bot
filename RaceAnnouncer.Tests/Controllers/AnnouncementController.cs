@@ -72,13 +72,15 @@ namespace RaceAnnouncer.Tests.Controllers
         ContextHelper.ResetDatabase(_context);
       });
 
-      Assert.AreEqual(0, _context.Guilds.Count());
+      Assert.AreEqual(0
+        , _context.Guilds.Count());
     }
 
     [Test]
     public void AddOrUpdate_Add_One()
     {
-      Assert.AreEqual(0, _context.Announcements.Local.Count);
+      Assert.AreEqual(0
+        , _context.Announcements.Local.Count);
 
       Announcement announcement =
         new Announcement(
@@ -94,7 +96,8 @@ namespace RaceAnnouncer.Tests.Controllers
         _context.AddOrUpdate(announcement);
       });
 
-      Assert.AreEqual(1, _context.Announcements.Local.Count);
+      Assert.AreEqual(1
+        , _context.Announcements.Local.Count);
 
       Assert.DoesNotThrow(delegate
       {
@@ -114,7 +117,8 @@ namespace RaceAnnouncer.Tests.Controllers
         .MessageUpdatedAt = DateTime.UtcNow;
       });
 
-      Assert.AreEqual(EntityState.Added, _context.Entry(announcement).State);
+      Assert.AreEqual(EntityState.Added
+        , _context.Entry(announcement).State);
 
       Assert.DoesNotThrow(delegate
       {
@@ -123,7 +127,8 @@ namespace RaceAnnouncer.Tests.Controllers
 
       ResetContext();
 
-      Assert.AreEqual(1, _context.Announcements.Local.Count);
+      Assert.AreEqual(1
+        , _context.Announcements.Local.Count);
 
       Assert.AreEqual(
         announcement.Channel.Snowflake
@@ -142,7 +147,8 @@ namespace RaceAnnouncer.Tests.Controllers
     [Test]
     public void AddOrUpdate_Add_Two()
     {
-      Assert.AreEqual(0, _context.Announcements.Local.Count);
+      Assert.AreEqual(0
+        , _context.Announcements.Local.Count);
 
       Announcement announcement1 =
         new Announcement(
@@ -173,8 +179,11 @@ namespace RaceAnnouncer.Tests.Controllers
 
       Assert.AreEqual(2, _context.Announcements.Local.Count);
 
-      Assert.AreEqual(EntityState.Added, _context.Entry(announcement1).State);
-      Assert.AreEqual(EntityState.Added, _context.Entry(announcement2).State);
+      Assert.AreEqual(EntityState.Added
+        , _context.Entry(announcement1).State);
+
+      Assert.AreEqual(EntityState.Added
+        , _context.Entry(announcement2).State);
 
       Assert.DoesNotThrow(delegate
       {
@@ -183,13 +192,15 @@ namespace RaceAnnouncer.Tests.Controllers
 
       ResetContext();
 
-      Assert.AreEqual(2, _context.Announcements.Local.Count);
+      Assert.AreEqual(2
+        , _context.Announcements.Local.Count);
     }
 
     [Test]
     public void AddOrUpdate_Add_Duplicate()
     {
-      Assert.AreEqual(0, _context.Announcements.Local.Count);
+      Assert.AreEqual(0
+        , _context.Announcements.Local.Count);
 
       Announcement announcement1 =
         new Announcement(
@@ -217,7 +228,8 @@ namespace RaceAnnouncer.Tests.Controllers
         _context.AddOrUpdate(announcement2);
       });
 
-      Assert.AreEqual(1, _context.Announcements.Local.Count);
+      Assert.AreEqual(1
+        , _context.Announcements.Local.Count);
 
       Assert.DoesNotThrow(delegate
       {
@@ -226,13 +238,15 @@ namespace RaceAnnouncer.Tests.Controllers
 
       ResetContext();
 
-      Assert.AreEqual(1, _context.Announcements.Local.Count);
+      Assert.AreEqual(1
+        , _context.Announcements.Local.Count);
     }
 
     [Test]
     public void GetAnnouncement()
     {
-      Assert.AreEqual(0, _context.Announcements.Local.Count);
+      Assert.AreEqual(0
+        , _context.Announcements.Local.Count);
 
       Announcement announcement =
         new Announcement(
