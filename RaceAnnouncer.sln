@@ -11,7 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		deploy.sh = deploy.sh
-		rebuild_database.ps1 = rebuild_database.ps1
 		run_tests.ps1 = run_tests.ps1
 	EndProjectSection
 EndProject

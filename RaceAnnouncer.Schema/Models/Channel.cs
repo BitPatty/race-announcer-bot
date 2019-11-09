@@ -32,6 +32,13 @@ namespace RaceAnnouncer.Schema.Models
     public string DisplayName { get; set; }
 
     /// <summary>
+    /// True if the channel is available
+    /// </summary>
+    [Required]
+    [Column("is_active")]
+    public bool IsActive { get; set; }
+
+    /// <summary>
     /// The channels guild id
     /// </summary>
     [Required]
