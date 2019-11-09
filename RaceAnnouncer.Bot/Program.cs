@@ -237,6 +237,8 @@ namespace RaceAnnouncer.Bot
     {
       _srlService.IsUpdateTriggerEnabled = false;
       _contextSemaphore.Wait();
+      DateTime startTime = DateTime.UtcNow;
+      bool updateSuccessful = false;
 
       try
       {
@@ -273,6 +275,7 @@ namespace RaceAnnouncer.Bot
         Logger.Info("Saving changes");
         context.SaveChanges();
         Logger.Info("Update completed");
+        updateSuccessful = true;
       }
       catch (Exception ex)
       {
@@ -282,6 +285,19 @@ namespace RaceAnnouncer.Bot
       }
       finally
       {
+        try
+        {
+          using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
+          context.Updates.Add(new Update(startTime, DateTime.UtcNow, updateSuccessful));
+          context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+          Logger.Error($"Exception thrown: {ex.Message}");
+          Logger.Error($"Inner exception: {ex.InnerException?.Message}");
+          Logger.Error($"Stack trace: {ex.StackTrace}");
+        }
+
         _contextSemaphore.Release();
         _srlService.IsUpdateTriggerEnabled = true;
       }

@@ -63,6 +63,7 @@ namespace RaceAnnouncer.Schema
         .ApplyConfiguration(new RaceConfiguration())
         .ApplyConfiguration(new EntrantConfiguration())
         .ApplyConfiguration(new AnnouncementConfiguration())
+        .ApplyConfiguration(new UpdateConfiguration())
         .HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot);
     }
 
@@ -73,5 +74,6 @@ namespace RaceAnnouncer.Schema
     public DbSet<Race> Races { get; set; }
     public DbSet<Entrant> Entrants { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<Update> Updates { get; set; }
   }
 }
