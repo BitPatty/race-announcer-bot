@@ -25,7 +25,7 @@ namespace RaceAnnouncer.Schema.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long>("ChannelId")
-                        .HasColumnName("fk_t_channel")
+                        .HasColumnName("fk_t_disc_channel")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -90,7 +90,7 @@ namespace RaceAnnouncer.Schema.Migrations
                         .HasMaxLength(128);
 
                     b.Property<long>("GuildId")
-                        .HasColumnName("fk_guild")
+                        .HasColumnName("fk_t_disc_guild")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsActive")
@@ -306,7 +306,7 @@ namespace RaceAnnouncer.Schema.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long>("ChannelId")
-                        .HasColumnName("fk_t_channel")
+                        .HasColumnName("fk_t_disc_channel")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")

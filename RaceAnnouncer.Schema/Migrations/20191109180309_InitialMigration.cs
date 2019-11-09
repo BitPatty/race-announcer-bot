@@ -19,7 +19,8 @@ namespace RaceAnnouncer.Schema.Migrations
                     updated_at = table.Column<DateTime>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn),
                     snowflake = table.Column<ulong>(nullable: false),
-                    display_name = table.Column<string>(maxLength: 128, nullable: false)
+                    display_name = table.Column<string>(maxLength: 128, nullable: false),
+                    is_active = table.Column<bool>(nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -60,15 +61,16 @@ namespace RaceAnnouncer.Schema.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn),
                     snowflake = table.Column<ulong>(nullable: false),
                     display_name = table.Column<string>(maxLength: 128, nullable: false),
-                    fk_guild = table.Column<long>(nullable: false)
+                    is_active = table.Column<bool>(nullable: false, defaultValue: true),
+                    fk_t_disc_guild = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_t_disc_channel", x => x.id);
                     table.UniqueConstraint("AK_t_disc_channel_snowflake", x => x.snowflake);
                     table.ForeignKey(
-                        name: "FK_t_disc_channel_t_disc_guild_fk_guild",
-                        column: x => x.fk_guild,
+                        name: "FK_t_disc_channel_t_disc_guild_fk_t_disc_guild",
+                        column: x => x.fk_t_disc_guild,
                         principalTable: "t_disc_guild",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -112,7 +114,7 @@ namespace RaceAnnouncer.Schema.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     updated_at = table.Column<DateTime>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn),
-                    fk_t_channel = table.Column<long>(nullable: false),
+                    fk_t_disc_channel = table.Column<long>(nullable: false),
                     fk_t_game = table.Column<long>(nullable: false),
                     state = table.Column<string>(nullable: false)
                 },
@@ -120,8 +122,8 @@ namespace RaceAnnouncer.Schema.Migrations
                 {
                     table.PrimaryKey("PK_t_tracker", x => x.id);
                     table.ForeignKey(
-                        name: "FK_t_tracker_t_disc_channel_fk_t_channel",
-                        column: x => x.fk_t_channel,
+                        name: "FK_t_tracker_t_disc_channel_fk_t_disc_channel",
+                        column: x => x.fk_t_disc_channel,
                         principalTable: "t_disc_channel",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -171,7 +173,7 @@ namespace RaceAnnouncer.Schema.Migrations
                     updated_at = table.Column<DateTime>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn),
                     snowflake = table.Column<ulong>(nullable: false),
-                    fk_t_channel = table.Column<long>(nullable: false),
+                    fk_t_disc_channel = table.Column<long>(nullable: false),
                     fk_t_tracker = table.Column<long>(nullable: false),
                     fk_t_race = table.Column<long>(nullable: false),
                     msg_created_at = table.Column<DateTime>(nullable: false),
@@ -182,8 +184,8 @@ namespace RaceAnnouncer.Schema.Migrations
                     table.PrimaryKey("PK_t_announcement", x => x.id);
                     table.UniqueConstraint("AK_t_announcement_snowflake", x => x.snowflake);
                     table.ForeignKey(
-                        name: "FK_t_announcement_t_disc_channel_fk_t_channel",
-                        column: x => x.fk_t_channel,
+                        name: "FK_t_announcement_t_disc_channel_fk_t_disc_channel",
+                        column: x => x.fk_t_disc_channel,
                         principalTable: "t_disc_channel",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -202,9 +204,9 @@ namespace RaceAnnouncer.Schema.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_t_announcement_fk_t_channel",
+                name: "IX_t_announcement_fk_t_disc_channel",
                 table: "t_announcement",
-                column: "fk_t_channel");
+                column: "fk_t_disc_channel");
 
             migrationBuilder.CreateIndex(
                 name: "IX_t_announcement_fk_t_race",
@@ -217,9 +219,9 @@ namespace RaceAnnouncer.Schema.Migrations
                 column: "fk_t_tracker");
 
             migrationBuilder.CreateIndex(
-                name: "IX_t_disc_channel_fk_guild",
+                name: "IX_t_disc_channel_fk_t_disc_guild",
                 table: "t_disc_channel",
-                column: "fk_guild");
+                column: "fk_t_disc_guild");
 
             migrationBuilder.CreateIndex(
                 name: "IX_t_entrant_fk_t_race",
@@ -232,9 +234,9 @@ namespace RaceAnnouncer.Schema.Migrations
                 column: "fk_t_game");
 
             migrationBuilder.CreateIndex(
-                name: "IX_t_tracker_fk_t_channel",
+                name: "IX_t_tracker_fk_t_disc_channel",
                 table: "t_tracker",
-                column: "fk_t_channel");
+                column: "fk_t_disc_channel");
 
             migrationBuilder.CreateIndex(
                 name: "IX_t_tracker_fk_t_game",
