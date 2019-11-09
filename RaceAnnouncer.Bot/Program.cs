@@ -85,7 +85,9 @@ namespace RaceAnnouncer.Bot
       catch (Exception ex)
       {
         Logger.Error("Failed to migrate context! Exiting");
-        Logger.Error(ex.Message);
+        Logger.Error($"Exception thrown: {ex.Message}");
+        Logger.Error($"Inner exception: {ex.InnerException?.Message}");
+        Logger.Error($"Stack trace: {ex.StackTrace}");
         Environment.Exit(-1);
       }
       finally
@@ -144,6 +146,8 @@ namespace RaceAnnouncer.Bot
       catch (Exception ex)
       {
         Logger.Error($"Exception thrown: {ex.Message}");
+        Logger.Error($"Inner exception: {ex.InnerException?.Message}");
+        Logger.Error($"Stack trace: {ex.StackTrace}");
       }
       finally
       {
@@ -288,8 +292,9 @@ namespace RaceAnnouncer.Bot
       }
       catch (Exception ex)
       {
-        Logger.Error("Failed to load channels! Exiting.");
-        Logger.Error(ex.Message);
+        Logger.Error($"Exception thrown: {ex.Message}");
+        Logger.Error($"Inner Exception: {ex.InnerException?.Message}");
+        Logger.Error($"Stacktrace: {ex.StackTrace}");
         Environment.Exit(-1);
       }
       finally

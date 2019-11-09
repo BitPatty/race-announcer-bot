@@ -165,6 +165,8 @@ namespace RaceAnnouncer.Bot.Adapters
         catch (Exception ex)
         {
           Logger.Error($"({race.SrlId}) Exception thrown: {ex.Message}");
+          Logger.Error($"({race.SrlId}) Inner exception: {ex.InnerException?.Message}");
+          Logger.Error($"({race.SrlId}) Stack trace: {ex.StackTrace}");
 
           race.IsActive = false;
           if (race.State != SRLApiClient.Endpoints.RaceState.Finished)
