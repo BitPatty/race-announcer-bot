@@ -127,11 +127,12 @@ namespace RaceAnnouncer.Bot
       {
         using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
 
-        ProcessChannelMutations(context);
-
         Logger.Info("Reloading context");
         context.LoadRemote();
         context.ChangeTracker.DetectChanges();
+
+        Logger.Info("Processing channel mutations");
+        ProcessChannelMutations(context);
 
         Logger.Info("Updating races");
         RaceAdapter.SyncRaces(context, _srlService, e);
