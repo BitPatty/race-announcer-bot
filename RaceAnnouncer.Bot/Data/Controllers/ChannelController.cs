@@ -27,12 +27,23 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       destination.Snowflake = source.Snowflake;
       destination.DisplayName = source.DisplayName;
       destination.Guild = source.Guild;
+      destination.IsActive = source.IsActive;
     }
 
-    public static Channel? GetChannel(
+    public static void DisableChannelsByGuild(
       this DatabaseContext context
-      , ulong snowflake)
+      , Guild guild)
       => context
+          .Channels
+          .Local
+          .Where(c => c.Guild.Equals(guild))
+          .ToList()
+          .ForEach(c => c.IsActive = false);
+
+    public static Channel? GetChannel(
+        this DatabaseContext context
+        , ulong snowflake)
+        => context
           .Channels
           .Local
           .SingleOrDefault(g => g.Snowflake.Equals(snowflake));

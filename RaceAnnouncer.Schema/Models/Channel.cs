@@ -56,12 +56,12 @@ namespace RaceAnnouncer.Schema.Models
     /// Trackers associated with this channel
     /// </summary>
     [InverseProperty(nameof(Tracker.Channel))]
-    public ICollection<Tracker> Trackers { get; set; } = null!;
+    public ICollection<Tracker> Trackers { get; set; } = new HashSet<Tracker>();
 
     /// <summary>
     /// Announcements associated with this channel
     /// </summary>
     [InverseProperty(nameof(Announcement.Channel))]
-    public ICollection<Announcement> Announcements { get; set; } = null!;
+    public ICollection<Announcement> Announcements { get; set; } = new HashSet<Announcement>();
   }
 }

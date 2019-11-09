@@ -67,6 +67,13 @@ namespace RaceAnnouncer.Bot.Services
       => _discordClient.Guilds.SelectMany(g => g.TextChannels);
 
     /// <summary>
+    /// Gets the list of guilds
+    /// </summary>
+    /// <returns>Returns the list of guilds</returns>
+    public IEnumerable<SocketGuild> GetGuilds()
+      => _discordClient.Guilds;
+
+    /// <summary>
     /// Gets the the guild with the specified <paramref name="guildId"/>
     /// </summary>
     /// <param name="guildId">The guilds snowflake</param>

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using RaceAnnouncer.Bot.Adapters;
 using RaceAnnouncer.Bot.Common;
 using RaceAnnouncer.Bot.Data;
@@ -19,28 +17,54 @@ namespace RaceAnnouncer.Bot
 {
   internal static class Program
   {
-    private static DiscordService _discordService = null!;
-    private static SRLService _srlService = null!;
-
-    private static readonly ConcurrentQueue<SocketGuild> _deletedGuilds = new ConcurrentQueue<SocketGuild>();
-    private static readonly ConcurrentQueue<SocketTextChannel> _deletedChannels = new ConcurrentQueue<SocketTextChannel>();
-    private static readonly ConcurrentQueue<SocketTextChannel> _addedChannels = new ConcurrentQueue<SocketTextChannel>();
-
+    private static readonly SemaphoreSlim _contextSemaphore = new SemaphoreSlim(1, 1);
     private static bool _isInitialLoad = true;
 
-    private static readonly SemaphoreSlim _contextSemaphore = new SemaphoreSlim(1, 1);
+    #region Queues
 
-#pragma warning disable IDE0060 // Remove unused parameter
-#pragma warning disable RCS1163 // Unused parameter.
+    /// <summary>
+    /// Queue of added channels
+    /// </summary>
+    private static readonly ConcurrentQueue<SocketTextChannel>
+      _queueAddedChannels = new ConcurrentQueue<SocketTextChannel>();
+
+    /// <summary>
+    /// Queue of deleted channels
+    /// </summary>
+    private static readonly ConcurrentQueue<SocketTextChannel>
+      _queueDeletedChannels = new ConcurrentQueue<SocketTextChannel>();
+
+    /// <summary>
+    /// Queue of deleted guilds
+    /// </summary>
+    private static readonly ConcurrentQueue<SocketGuild>
+      _queueDeletedGuilds = new ConcurrentQueue<SocketGuild>();
+
+    #endregion Queues
+
+    #region Services
+
+    /// <summary>
+    /// Discord Service
+    /// </summary>
+    private static DiscordService _discordService = null!;
+
+    /// <summary>
+    /// SpeedRunsLive Service
+    /// </summary>
+    private static SRLService _srlService = null!;
+
+    #endregion Services
+
     /// <summary>
     /// Entry point
     /// </summary>
-    internal static void Main(string[] args)
+    internal static void Main()
     {
-      AppDomain.CurrentDomain.ProcessExit += ProcessShutdown;
+      AppDomain.CurrentDomain.ProcessExit += _Shutdown;
 
       Logger.Debug("Initializing Database");
-      InitDatabase();
+      MigrateDatabase();
 
       Logger.Debug("Initializing SRL Service");
       InitSrlService();
@@ -51,36 +75,70 @@ namespace RaceAnnouncer.Bot
       Logger.Debug("Starting Bot");
       StartBotAsync().GetAwaiter().GetResult();
     }
-#pragma warning restore RCS1163 // Unused parameter.
-#pragma warning restore IDE0060 // Remove unused parameter
 
     /// <summary>
-    /// Starts the bot routine
+    /// Pre-Shutdown Event Handler
     /// </summary>
-    private static async Task StartBotAsync()
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private static void _Shutdown(object? sender, EventArgs e)
     {
-      string? token = Credentials.ParseDiscordToken();
-      if (token == null)
-        throw new Exception("Could not Load the discord token");
+      Logger.Info("Disposing Services");
 
-      _discordService.AuthenticateAsync(token).Wait();
-      await _discordService.StartAsync().ConfigureAwait(false);
-      _srlService.StartTimer();
+      try
+      {
+        _discordService.Stop();
+        _discordService.Dispose();
+      }
+      catch { }
 
-      await Task.Delay(-1).ConfigureAwait(false);
+      try
+      {
+        _srlService.Dispose();
+      }
+      catch { }
+
+      try
+      {
+        _contextSemaphore.Dispose();
+      }
+      catch { }
     }
 
     /// <summary>
-    /// Initializes the database
+    /// Initializes the discord service
     /// </summary>
-    private static void InitDatabase()
+    private static void InitDiscordService()
+    {
+      _discordService = new DiscordService();
+      _discordService.OnDisconnected += OnDiscordDisconnected;
+      _discordService.OnReady += OnDiscordReady;
+      _discordService.OnChannelCreated += OnDiscordChannelCreated;
+      _discordService.OnChannelDestroyed += OnDiscordChannelDeleted;
+      _discordService.OnGuildJoined += OnDiscordGuildJoined;
+      _discordService.OnGuildLeft += OnDiscordGuildLeft;
+    }
+
+    /// <summary>
+    /// Initializes the SRL service
+    /// </summary>
+    private static void InitSrlService()
+    {
+      _srlService = new SRLService();
+      _srlService.OnUpdate += OnSrlUpdate;
+    }
+
+    /// <summary>
+    /// Migrate the database the database
+    /// </summary>
+    private static void MigrateDatabase()
     {
       _contextSemaphore.WaitAsync();
 
       try
       {
         using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
-        context.Database.Migrate();
+        DatabaseAdapter.Migrate(context);
       }
       catch (Exception ex)
       {
@@ -96,28 +154,85 @@ namespace RaceAnnouncer.Bot
       }
     }
 
+    #region events
+
     /// <summary>
-    /// Initializes the discord service
+    /// Enqueue new text channels
     /// </summary>
-    private static void InitDiscordService()
+    private static void OnDiscordChannelCreated(object? sender, SocketTextChannel e)
+          => _queueAddedChannels.Enqueue(e);
+
+    /// <summary>
+    /// Enqueue dropped text channels
+    /// </summary>
+    private static void OnDiscordChannelDeleted(object? sender, SocketTextChannel e)
+          => _queueDeletedChannels.Enqueue(e);
+
+    /// <summary>
+    /// Try reconnecting after 10 seconds on discord disconnect
+    /// </summary>
+    private static void OnDiscordDisconnected(object? sender, Exception? e)
     {
-      _discordService = new DiscordService();
-      _discordService.OnDisconnected += OnDiscordDisconnected;
-      _discordService.OnReady += OnDiscordReady;
-      _discordService.OnChannelCreated += OnDiscordChannelCreated;
-      _discordService.OnChannelDestroyed += OnDiscordChannelDeleted;
-      _discordService.OnGuildLeft += OnDiscordGuildLeft;
+      _srlService.IsUpdateTriggerEnabled = false;
+      _discordService.Stop();
+
+      Thread.Sleep(10000);
+      _discordService.StartAsync().Wait();
     }
 
     /// <summary>
-    /// Initializes the SRL service
+    /// Mark channels for activation when joining a guild
     /// </summary>
-    private static void InitSrlService()
+    private static void OnDiscordGuildJoined(object? sender, SocketGuild e)
     {
-      _srlService = new SRLService();
-      _srlService.OnUpdate += OnSrlUpdate;
+      if (e?.TextChannels != null)
+      {
+        foreach (SocketTextChannel c in e.TextChannels)
+          _queueAddedChannels.Enqueue(c);
+      }
     }
 
+    /// <summary>
+    /// Mark channels for deactivation when leaving a guild
+    /// </summary>
+    private static void OnDiscordGuildLeft(object? sender, SocketGuild e)
+          => _queueDeletedGuilds.Enqueue(e);
+
+    /// <summary>
+    /// Sync channels and guild when discord is ready
+    /// </summary>
+    private static void OnDiscordReady(object? sender, EventArgs? e)
+    {
+      _contextSemaphore.Wait();
+      try
+      {
+        using (DatabaseContext context = new DatabaseContextFactory().CreateDbContext())
+        {
+          context.Channels.Load();
+          context.Guilds.Load();
+          context.ChangeTracker.DetectChanges();
+          ChannelAdapter.SyncAll(context, _discordService);
+          context.SaveChanges();
+        }
+
+        _srlService.IsUpdateTriggerEnabled = true;
+      }
+      catch (Exception ex)
+      {
+        Logger.Error($"Exception thrown: {ex.Message}");
+        Logger.Error($"Inner Exception: {ex.InnerException?.Message}");
+        Logger.Error($"Stacktrace: {ex.StackTrace}");
+        Environment.Exit(-1);
+      }
+      finally
+      {
+        _contextSemaphore.Release();
+      }
+    }
+
+    /// <summary>
+    /// Update races and announcements
+    /// </summary>
     private static void OnSrlUpdate(object? sender, IReadOnlyCollection<SRLApiClient.Endpoints.Races.Race> e)
     {
       _srlService.IsUpdateTriggerEnabled = false;
@@ -138,7 +253,22 @@ namespace RaceAnnouncer.Bot
         RaceAdapter.SyncRaces(context, _srlService, e);
 
         Logger.Info("Updating announcements");
-        AnnouncementAdapter.UpdateAnnouncements(context, _discordService, GetUpdatedRaces(context));
+        if (_isInitialLoad)
+        {
+          AnnouncementAdapter.UpdateAnnouncements(
+           context
+           , _discordService
+           , context.Races.Local);
+
+          _isInitialLoad = false;
+        }
+        else
+        {
+          AnnouncementAdapter.UpdateAnnouncements(
+            context
+            , _discordService
+            , DatabaseAdapter.GetUpdatedRaces(context));
+        }
 
         Logger.Info("Saving changes");
         context.SaveChanges();
@@ -157,6 +287,14 @@ namespace RaceAnnouncer.Bot
       }
     }
 
+    #endregion events
+
+    #region Channel Mutations
+
+    /// <summary>
+    /// Add new channels and remove deleted channels
+    /// </summary>
+    /// <param name="context">The database context</param>
     private static void ProcessChannelMutations(DatabaseContext context)
     {
       RegisterNewChannels(context);
@@ -170,13 +308,12 @@ namespace RaceAnnouncer.Bot
     /// <param name="context">The database context</param>
     private static void RegisterNewChannels(DatabaseContext context)
     {
-      while (_addedChannels.TryDequeue(out SocketTextChannel? c))
+      while (_queueAddedChannels.TryDequeue(out SocketTextChannel? c))
       {
         if (c != null)
         {
           Logger.Info($"Registering channel '{c.Guild.Name}/{c.Name}'");
-          Guild g = context.AddOrUpdate(new Guild(c.Guild.Id, c.Guild.Name));
-          context.AddOrUpdate(new Channel(g, c.Id, c.Name));
+          ChannelAdapter.EnableChannel(context, c);
         }
       }
     }
@@ -187,12 +324,13 @@ namespace RaceAnnouncer.Bot
     /// <param name="context">The database context</param>
     private static void UnregisterDeletedChannels(DatabaseContext context)
     {
-      while (_deletedChannels.TryDequeue(out SocketTextChannel? c))
+      while (_queueDeletedChannels.TryDequeue(out SocketTextChannel? c))
       {
-        if (c != null)
+        if (c != null && context.GetChannel(c.Id) is Channel channel)
         {
-          Logger.Info($"Disabling trackers for '{c.Guild.Name}/{c.Name}'");
-          context.DisableTrackersByChannel(c.Id);
+          Logger.Info($"Disabling trackers for '{channel.Guild.DisplayName}/{channel.DisplayName}'");
+          context.DisableTrackersByChannel(channel);
+          channel.IsActive = false;
         }
       }
     }
@@ -203,127 +341,38 @@ namespace RaceAnnouncer.Bot
     /// <param name="context">The database context</param>
     private static void UnregisterDeletedGuilds(DatabaseContext context)
     {
-      while (_deletedGuilds.TryDequeue(out SocketGuild? g))
+      while (_queueDeletedGuilds.TryDequeue(out SocketGuild? g))
       {
-        if (g != null)
+        if (g != null && context.GetGuild(g.Id) is Guild guild)
         {
-          Logger.Info($"Disabling trackers for '{g.Name}'");
-          context.DisableTrackersByGuild(g.Id);
+          Logger.Info($"Disabling trackers for '{guild.DisplayName}'");
+          context.DisableTrackersByGuild(guild);
+
+          Logger.Info($"Disabling channels for '{guild.DisplayName}'");
+          context.DisableChannelsByGuild(guild);
+
+          Logger.Info($"Disabling guild '{guild.DisplayName}'");
+          guild.IsActive = false;
         }
       }
     }
+
+    #endregion Channel Mutations
 
     /// <summary>
-    /// Gets the the list of races in the specified <paramref name="context"/>
-    /// which don't have an unchanged state
+    /// Starts the bot routine
     /// </summary>
-    /// <param name="context">The database context</param>
-    /// <returns>Returns the list of changed races</returns>
-    private static List<Race> GetUpdatedRaces(DatabaseContext context)
+    private static async Task StartBotAsync()
     {
-      context.ChangeTracker.DetectChanges();
+      string? token = Credentials.ParseDiscordToken();
+      if (token == null)
+        throw new Exception("Could not Load the discord token");
 
-      List<Race> races = new List<Race>();
+      _discordService.AuthenticateAsync(token).Wait();
+      await _discordService.StartAsync().ConfigureAwait(false);
+      _srlService.StartTimer();
 
-      if (_isInitialLoad)
-      {
-        foreach (Race race in context.Races.Local)
-        {
-          if ((DateTime.UtcNow - race.UpdatedAt) < TimeSpan.FromHours(12))
-            races.Add(race);
-        }
-
-        _isInitialLoad = false;
-        return races;
-      }
-
-      foreach (Race race in context.Races.Local)
-      {
-        if (HasEntityChanged(context.Entry(race))) races.Add(race);
-        else if (context.GetEntrants(race).Any(e => HasEntityChanged(context.Entry(e)))) races.Add(race);
-      }
-
-      return races;
-    }
-
-    /// <summary>
-    /// Checks whether an entity state is not <see cref="EntityState.Unchanged"/>
-    /// </summary>
-    /// <param name="entity">The entity</param>
-    /// <returns>Returns true if the entities has changed</returns>
-    private static bool HasEntityChanged(EntityEntry entity)
-      => entity.State != EntityState.Unchanged;
-
-    private static void OnDiscordDisconnected(object? sender, Exception? e)
-    {
-      _srlService.IsUpdateTriggerEnabled = false;
-
-      _discordService.Stop();
-
-      Thread.Sleep(10000);
-
-      _discordService.StartAsync().Wait();
-    }
-
-    private static void OnDiscordGuildLeft(object? sender, SocketGuild e)
-      => _deletedGuilds.Enqueue(e);
-
-    private static void OnDiscordChannelDeleted(object? sender, SocketTextChannel e)
-      => _deletedChannels.Enqueue(e);
-
-    private static void OnDiscordChannelCreated(object? sender, SocketTextChannel e)
-      => _addedChannels.Enqueue(e);
-
-    private static void OnDiscordReady(object? sender, EventArgs? e)
-    {
-      _contextSemaphore.Wait();
-      try
-      {
-        using (DatabaseContext context = new DatabaseContextFactory().CreateDbContext())
-        {
-          context.Channels.Load();
-          context.Guilds.Load();
-          context.ChangeTracker.DetectChanges();
-          ChannelAdapter.SyncChannels(context, _discordService);
-          context.ChangeTracker.DetectChanges();
-          context.SaveChanges();
-        }
-
-        _srlService.IsUpdateTriggerEnabled = true;
-      }
-      catch (Exception ex)
-      {
-        Logger.Error($"Exception thrown: {ex.Message}");
-        Logger.Error($"Inner Exception: {ex.InnerException?.Message}");
-        Logger.Error($"Stacktrace: {ex.StackTrace}");
-        Environment.Exit(-1);
-      }
-      finally
-      {
-        _contextSemaphore.Release();
-      }
-    }
-
-    private static void ProcessShutdown(object? sender, EventArgs e)
-    {
-      try
-      {
-        _discordService.Stop();
-        _discordService.Dispose();
-      }
-      catch { }
-
-      try
-      {
-        _srlService.Dispose();
-      }
-      catch { }
-
-      try
-      {
-        _contextSemaphore.Dispose();
-      }
-      catch { }
+      await Task.Delay(-1).ConfigureAwait(false);
     }
   }
 }

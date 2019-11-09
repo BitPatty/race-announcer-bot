@@ -26,6 +26,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
     {
       destination.DisplayName = source.DisplayName;
       destination.Snowflake = source.Snowflake;
+      destination.IsActive = source.IsActive;
     }
 
     public static Guild? GetGuild(

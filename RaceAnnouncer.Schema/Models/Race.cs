@@ -80,12 +80,12 @@ namespace RaceAnnouncer.Schema.Models
     /// The races entrants
     /// </summary>
     [InverseProperty(nameof(Entrant.Race))]
-    public ICollection<Entrant> Entrants { get; set; } = null!;
+    public ICollection<Entrant> Entrants { get; set; } = new HashSet<Entrant>();
 
     /// <summary>
     /// Announcements associated with this race
     /// </summary>
     [InverseProperty(nameof(Announcement.Race))]
-    public ICollection<Announcement> Announcements { get; set; } = null!;
+    public ICollection<Announcement> Announcements { get; set; } = new HashSet<Announcement>();
   }
 }

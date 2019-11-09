@@ -16,7 +16,29 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save()
+    {
+      Entrant entrant = RandomLocalEntrant;
+      int cntRace = entrant.Race.Entrants.Count;
+      _context.AddOrUpdate(entrant);
+      SaveChanges();
+      Race race = _context.GetRace(entrant.Race.SrlId);
+
+      Assert.AreEqual(cntRace, race.Entrants.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
+    {
+      Entrant entrant = RandomLocalEntrant;
+      int cntRace = entrant.Race.Entrants.Count;
+      _context.AddOrUpdate(entrant);
+
+      Assert.AreEqual(cntRace, entrant.Race.Entrants.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save()
     {
       int entrantCount = _context.Entrants.Local.Count;
       _context.AddOrUpdate(RandomLocalEntrant);
@@ -26,12 +48,53 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Increases_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save()
+    {
+      int entrantCount = _context.Entrants.Local.Count;
+      _context.AddOrUpdate(RandomLocalEntrant);
+
+      Assert.AreEqual(entrantCount, _context.Entrants.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
+    {
+      Race race = RandomLocalRace;
+      int cntRace = race.Entrants.Count;
+      _context.AddOrUpdate(GenerateEntrant(race));
+      SaveChanges();
+      race = _context.GetRace(race.SrlId);
+
+      Assert.AreEqual(cntRace + 1, race.Entrants.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_Before_Save()
+    {
+      Race race = RandomLocalRace;
+      int cntRace = race.Entrants.Count;
+      _context.AddOrUpdate(GenerateEntrant(race));
+
+      Assert.AreEqual(cntRace + 1, race.Entrants.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_After_Save()
     {
       int entrantCount = _context.Entrants.Local.Count;
       Entrant entrant = GenerateEntrant(RandomLocalRace);
       _context.AddOrUpdate(entrant);
       SaveChanges();
+
+      Assert.AreEqual(entrantCount + 1, _context.Entrants.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_Before_Save()
+    {
+      int entrantCount = _context.Entrants.Local.Count;
+      Entrant entrant = GenerateEntrant(RandomLocalRace);
+      _context.AddOrUpdate(entrant);
 
       Assert.AreEqual(entrantCount + 1, _context.Entrants.Local.Count);
     }
@@ -83,6 +146,7 @@ namespace RaceAnnouncer.Tests.Controllers
     public void GetEntrant_Returns_Entrant()
     {
       Entrant entrant = RandomLocalEntrant;
+
       Assert.AreSame(entrant, _context.GetEntrant(entrant.Race, entrant.DisplayName));
     }
 

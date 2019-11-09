@@ -19,11 +19,39 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save()
+    {
+      Tracker tracker = RandomLocalActiveTracker;
+      int cntGame = tracker.Game.Trackers.Count;
+      int cntChannel = tracker.Channel.Trackers.Count;
+      _context.AddOrUpdate(tracker);
+      SaveChanges();
+      Game? game = _context.GetGame(tracker.Game.Abbreviation);
+      Channel? channel = _context.GetChannel(tracker.Channel.Snowflake);
+
+      Assert.IsNotNull(game);
+      Assert.IsNotNull(channel);
+      Assert.AreEqual(cntGame, game.Trackers.Count);
+      Assert.AreEqual(cntChannel, channel.Trackers.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
+    {
+      Tracker tracker = RandomLocalActiveTracker;
+      int cntGame = tracker.Game.Trackers.Count;
+      int cntChannel = tracker.Channel.Trackers.Count;
+      _context.AddOrUpdate(tracker);
+
+      Assert.AreEqual(cntGame, tracker.Game.Trackers.Count);
+      Assert.AreEqual(cntChannel, tracker.Channel.Trackers.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save()
     {
       int trackerCount = _context.Trackers.Local.Count;
       Tracker tracker = RandomLocalTracker;
-
       _context.AddOrUpdate(tracker);
       SaveChanges();
 
@@ -31,16 +59,69 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Increases_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save()
+    {
+      int trackerCount = _context.Trackers.Local.Count;
+      Tracker tracker = RandomLocalTracker;
+      _context.AddOrUpdate(tracker);
+
+      Assert.AreEqual(trackerCount, _context.Trackers.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
+    {
+      Game? game = RandomLocalGame;
+      Channel? channel = RandomLocalChannel;
+      int cntGame = game.Trackers.Count;
+      int cntChannel = channel.Trackers.Count;
+      Tracker tracker = new Tracker(channel, game);
+      _context.AddOrUpdate(tracker);
+      SaveChanges();
+      game = _context.GetGame(game.Abbreviation);
+      channel = _context.GetChannel(channel.Snowflake);
+
+      Assert.IsNotNull(game);
+      Assert.IsNotNull(channel);
+      Assert.AreEqual(cntGame + 1, game.Trackers.Count);
+      Assert.AreEqual(cntChannel + 1, channel.Trackers.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_Before_Save()
+    {
+      Game? game = RandomLocalGame;
+      Channel? channel = RandomLocalChannel;
+      int cntGame = game.Trackers.Count;
+      int cntChannel = channel.Trackers.Count;
+      Tracker tracker = new Tracker(channel, game);
+      _context.AddOrUpdate(tracker);
+
+      Assert.AreEqual(cntGame + 1, game.Trackers.Count);
+      Assert.AreEqual(cntChannel + 1, channel.Trackers.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_After_Save()
     {
       int trackerCount = _context.Trackers.Local.Count;
       Channel channel = RandomLocalChannel;
       Game game = _context.AddOrUpdate(GenerateGame());
-
       Tracker tracker = new Tracker(channel, game);
       _context.AddOrUpdate(tracker);
-
       SaveChanges();
+
+      Assert.AreEqual(trackerCount + 1, _context.Trackers.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_Before_Save()
+    {
+      int trackerCount = _context.Trackers.Local.Count;
+      Channel channel = RandomLocalChannel;
+      Game game = _context.AddOrUpdate(GenerateGame());
+      Tracker tracker = new Tracker(channel, game);
+      _context.AddOrUpdate(tracker);
 
       Assert.AreEqual(trackerCount + 1, _context.Trackers.Local.Count);
     }
@@ -72,6 +153,32 @@ namespace RaceAnnouncer.Tests.Controllers
 
       Assert.AreSame(t2.Channel, t1.Channel);
       Assert.AreSame(t2.Game, t1.Game);
+    }
+
+    [Test]
+    public void DisableTrackersByChannel_Disables_Trackers()
+    {
+      Tracker tracker = RandomLocalActiveTracker;
+      _context.DisableTrackersByChannel(tracker.Channel);
+      Assert.AreEqual(TrackerState.Dead, tracker.State);
+    }
+
+    [Test]
+    public void DisableTrackersByGuild_Disables_Trackers()
+    {
+      Tracker tracker = RandomLocalActiveTracker;
+
+      Assert.IsTrue(!tracker.State.Equals(TrackerState.Dead));
+      Assert.IsTrue(tracker.Channel.Guild.Channels
+        .SelectMany(c => c.Trackers)
+        .Any(t => !t.State.Equals(TrackerState.Dead)));
+
+      _context.DisableTrackersByGuild(tracker.Channel.Guild);
+
+      Assert.AreEqual(TrackerState.Dead, tracker.State);
+      Assert.IsTrue(tracker.Channel.Guild.Channels
+        .SelectMany(c => c.Trackers)
+        .All(t => t.State.Equals(TrackerState.Dead)));
     }
 
     [Test]

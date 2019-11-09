@@ -16,7 +16,19 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save()
     {
       int gameCount = _context.Games.Local.Count;
       Game game = RandomLocalGame;
@@ -28,13 +40,45 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Increases_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save()
+    {
+      int gameCount = _context.Games.Local.Count;
+      Game game = RandomLocalGame;
+      _context.AddOrUpdate(game);
+
+      Assert.AreEqual(gameCount, _context.Games.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_Before_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_After_Save()
     {
       int gameCount = _context.Games.Local.Count;
       Game game = GenerateGame();
 
       _context.AddOrUpdate(game);
       SaveChanges();
+
+      Assert.AreEqual(gameCount + 1, _context.Games.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_Before_Save()
+    {
+      int gameCount = _context.Games.Local.Count;
+      Game game = GenerateGame();
+      _context.AddOrUpdate(game);
 
       Assert.AreEqual(gameCount + 1, _context.Games.Local.Count);
     }
@@ -71,7 +115,9 @@ namespace RaceAnnouncer.Tests.Controllers
     [Test]
     public void GetGame_Returns_Game()
     {
-      Assert.IsNotNull(_context.GetGame(RandomLocalGame.Abbreviation));
+      Game game = RandomLocalGame;
+
+      Assert.AreSame(game, _context.GetGame(game.Abbreviation));
     }
 
     [Test]

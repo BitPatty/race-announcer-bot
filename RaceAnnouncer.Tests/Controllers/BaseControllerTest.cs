@@ -4,9 +4,21 @@
   {
     public abstract void _Setup();
 
-    public abstract void AddOrUpdate_Add_Duplicate_Keeps_Count();
+    public abstract void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save();
 
-    public abstract void AddOrUpdate_Add_Increases_Count();
+    public abstract void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save();
+
+    public abstract void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save();
+
+    public abstract void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save();
+
+    public abstract void AddOrUpdate_Add_Increases_Collection_Count_After_Save();
+
+    public abstract void AddOrUpdate_Add_Increases_Collection_Count_Before_Save();
+
+    public abstract void AddOrUpdate_Add_Increases_Total_Count_After_Save();
+
+    public abstract void AddOrUpdate_Add_Increases_Total_Count_Before_Save();
 
     public abstract void AddOrUpdate_Add_Stored_Correctly();
 

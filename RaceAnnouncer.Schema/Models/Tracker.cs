@@ -63,6 +63,6 @@ namespace RaceAnnouncer.Schema.Models
     /// The announcements associated with this tracker
     /// </summary>
     [InverseProperty(nameof(Announcement.Tracker))]
-    public ICollection<Announcement> Announcements { get; set; } = null!;
+    public ICollection<Announcement> Announcements { get; set; } = new HashSet<Announcement>();
   }
 }

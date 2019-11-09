@@ -43,15 +43,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Local
           .Where(e => e.Race.Equals(race));
 
-    public static Game GetGame(
-          this DatabaseContext context
-      , Race race)
-      => context
-          .Races
-          .Local
-          .First(r => r.Equals(race))
-          .Game;
-
     public static Race? GetRace(
       this DatabaseContext context
       , string srlId)

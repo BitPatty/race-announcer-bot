@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Schema.Models;
 
@@ -16,20 +18,89 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save()
+    {
+      Race race = RandomLocalRace;
+      int cntGame = race.Game.Races.Count;
+      _context.AddOrUpdate(race);
+      SaveChanges();
+      Game? game = _context.GetGame(race.Game.Abbreviation);
+
+      Assert.IsNotNull(game);
+      Assert.AreEqual(cntGame, game.Races.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
+    {
+      Race race = RandomLocalRace;
+      int cntGame = race.Game.Races.Count;
+      _context.AddOrUpdate(race);
+
+      Assert.AreEqual(cntGame, race.Game.Races.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save()
     {
       int raceCount = _context.Races.Local.Count;
       _context.AddOrUpdate(RandomLocalRace);
       SaveChanges();
+
       Assert.AreEqual(raceCount, _context.Races.Local.Count);
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Increases_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save()
+    {
+      int raceCount = _context.Races.Local.Count;
+      _context.AddOrUpdate(RandomLocalRace);
+
+      Assert.AreEqual(raceCount, _context.Races.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
+    {
+      Game? game = RandomLocalGame;
+      int cntGame = game.Races.Count;
+      Race race = GenerateRace(game);
+      _context.AddOrUpdate(race);
+      SaveChanges();
+      game = _context.GetGame(game.Abbreviation);
+
+      Assert.IsNotNull(game);
+      Assert.AreEqual(cntGame + 1, game.Races.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_Before_Save()
+    {
+      Game? game = RandomLocalGame;
+      int cntGame = game.Races.Count;
+      Race race = GenerateRace(game);
+      _context.AddOrUpdate(race);
+
+      Assert.IsNotNull(game);
+      Assert.AreEqual(cntGame + 1, game.Races.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_After_Save()
+    {
+      int raceCount = _context.Races.Local.Count;
+      _context.AddOrUpdate(GenerateRace(RandomLocalGame));
+
+      Assert.AreEqual(raceCount + 1, _context.Races.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_Before_Save()
     {
       int raceCount = _context.Races.Local.Count;
       _context.AddOrUpdate(GenerateRace(RandomLocalGame));
       SaveChanges();
+
       Assert.AreEqual(raceCount + 1, _context.Races.Local.Count);
     }
 
@@ -62,6 +133,19 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
+    public void GetEntrants_Returns_Entrants()
+    {
+      Race race = RandomLocalEntrant.Race;
+      IEnumerable<Entrant> entrants = _context.GetEntrants(race);
+
+      Assert.AreNotSame(race.Entrants, entrants);
+      Assert.AreEqual(race.Entrants.Count, entrants.Count());
+
+      foreach (Entrant e in race.Entrants)
+        Assert.Contains(e, entrants.ToList());
+    }
+
+    [Test]
     public void GetRace_Returns_NULL()
     {
       Assert.IsNull(_context.GetRace(GenerateRace(RandomLocalGame).SrlId));
@@ -70,7 +154,8 @@ namespace RaceAnnouncer.Tests.Controllers
     [Test]
     public void GetRace_Returns_Race()
     {
-      Assert.IsNotNull(_context.GetRace(RandomLocalRace.SrlId));
+      Race race = RandomLocalRace;
+      Assert.AreSame(race, _context.GetRace(race.SrlId));
     }
   }
 }

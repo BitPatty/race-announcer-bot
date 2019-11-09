@@ -38,6 +38,6 @@ namespace RaceAnnouncer.Schema.Models
     /// Channels associated with this Guild
     /// </summary>
     [InverseProperty(nameof(Channel.Guild))]
-    public ICollection<Channel> Channels { get; set; } = null!;
+    public ICollection<Channel> Channels { get; set; } = new HashSet<Channel>();
   }
 }

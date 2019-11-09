@@ -16,20 +16,64 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save()
     {
       int guildCount = _context.Guilds.Local.Count;
       _context.AddOrUpdate(RandomLocalGuild);
       SaveChanges();
+
       Assert.AreEqual(guildCount, _context.Guilds.Local.Count);
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Increases_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save()
+    {
+      int guildCount = _context.Guilds.Local.Count;
+      _context.AddOrUpdate(RandomLocalGuild);
+
+      Assert.AreEqual(guildCount, _context.Guilds.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_Before_Save()
+    {
+      Assert.Pass("Not applicable");
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_After_Save()
+    {
+      int guildCount = _context.Guilds.Local.Count;
+      _context.AddOrUpdate(GenerateGuild());
+
+      Assert.AreEqual(guildCount + 1, _context.Guilds.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_Before_Save()
     {
       int guildCount = _context.Guilds.Local.Count;
       _context.AddOrUpdate(GenerateGuild());
       SaveChanges();
+
       Assert.AreEqual(guildCount + 1, _context.Guilds.Local.Count);
     }
 
@@ -58,7 +102,8 @@ namespace RaceAnnouncer.Tests.Controllers
     [Test]
     public void GetGuild_Returns_Guild()
     {
-      Assert.IsNotNull(_context.GetGuild(RandomLocalGuild.Snowflake));
+      Guild guild = RandomLocalGuild;
+      Assert.AreSame(guild, _context.GetGuild(guild.Snowflake));
     }
 
     [Test]

@@ -16,20 +16,128 @@ namespace RaceAnnouncer.Tests.Controllers
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Duplicate_Keeps_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_After_Save()
+    {
+      Announcement announcement = RandomLocalAnnouncement;
+
+      int cntChannel = announcement.Channel.Announcements.Count;
+      int cntTracker = announcement.Tracker.Announcements.Count;
+      int cntRace = announcement.Race.Announcements.Count;
+
+      _context.AddOrUpdate(announcement);
+
+      SaveChanges();
+      ResetContext();
+
+      Tracker tracker = _context.GetTracker(
+        _context.GetGame(announcement.Tracker.Game.Abbreviation)
+        , _context.GetChannel(announcement.Tracker.Channel.Snowflake));
+
+      Race race = _context.GetRace(announcement.Race.SrlId);
+
+      Announcement? dbAnnouncement = _context.GetAnnouncement(race, tracker);
+
+      Assert.IsNotNull(dbAnnouncement);
+      Assert.AreEqual(cntChannel, dbAnnouncement.Channel.Announcements.Count);
+      Assert.AreEqual(cntRace, race.Announcements.Count);
+      Assert.AreEqual(cntTracker, tracker.Announcements.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
+    {
+      Announcement announcement = RandomLocalAnnouncement;
+
+      int cntChannel = announcement.Channel.Announcements.Count;
+      int cntTracker = announcement.Tracker.Announcements.Count;
+      int cntRace = announcement.Race.Announcements.Count;
+
+      _context.AddOrUpdate(announcement);
+
+      Assert.AreEqual(cntChannel, announcement.Channel.Announcements.Count);
+      Assert.AreEqual(cntRace, announcement.Race.Announcements.Count);
+      Assert.AreEqual(cntTracker, announcement.Tracker.Announcements.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_After_Save()
     {
       int announcementCount = _context.Announcements.Local.Count;
       _context.AddOrUpdate(RandomLocalAnnouncement);
       SaveChanges();
+
       Assert.AreEqual(announcementCount, _context.Announcements.Local.Count);
     }
 
     [Test]
-    public override void AddOrUpdate_Add_Increases_Count()
+    public override void AddOrUpdate_Add_Duplicate_Keeps_Total_Count_Before_Save()
+    {
+      int announcementCount = _context.Announcements.Local.Count;
+      _context.AddOrUpdate(RandomLocalAnnouncement);
+
+      Assert.AreEqual(announcementCount, _context.Announcements.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
+    {
+      Announcement announcement = GenerateAnnouncement(RandomLocalActiveTracker, RandomLocalRace);
+
+      int cntChannel = announcement.Channel.Announcements.Count;
+      int cntTracker = announcement.Tracker.Announcements.Count;
+      int cntRace = announcement.Race.Announcements.Count;
+
+      _context.AddOrUpdate(announcement);
+
+      SaveChanges();
+      ResetContext();
+
+      Tracker tracker = _context.GetTracker(
+        _context.GetGame(announcement.Tracker.Game.Abbreviation)
+        , _context.GetChannel(announcement.Tracker.Channel.Snowflake));
+
+      Race race = _context.GetRace(announcement.Race.SrlId);
+
+      Announcement? dbAnnouncement = _context.GetAnnouncement(race, tracker);
+
+      Assert.IsNotNull(dbAnnouncement);
+      Assert.AreEqual(cntChannel + 1, dbAnnouncement.Channel.Announcements.Count);
+      Assert.AreEqual(cntRace + 1, race.Announcements.Count);
+      Assert.AreEqual(cntTracker + 1, tracker.Announcements.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Collection_Count_Before_Save()
+    {
+      Announcement announcement = GenerateAnnouncement(RandomLocalActiveTracker, RandomLocalRace);
+
+      int cntChannel = announcement.Channel.Announcements.Count;
+      int cntTracker = announcement.Tracker.Announcements.Count;
+      int cntRace = announcement.Race.Announcements.Count;
+
+      _context.AddOrUpdate(announcement);
+
+      Assert.AreEqual(cntChannel + 1, announcement.Channel.Announcements.Count);
+      Assert.AreEqual(cntRace + 1, announcement.Race.Announcements.Count);
+      Assert.AreEqual(cntTracker + 1, announcement.Tracker.Announcements.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_After_Save()
     {
       int announcementCount = _context.Announcements.Local.Count;
       _context.AddOrUpdate(GenerateAnnouncement(RandomLocalTracker, RandomLocalRace));
       SaveChanges();
+
+      Assert.AreEqual(announcementCount + 1, _context.Announcements.Local.Count);
+    }
+
+    [Test]
+    public override void AddOrUpdate_Add_Increases_Total_Count_Before_Save()
+    {
+      int announcementCount = _context.Announcements.Local.Count;
+      _context.AddOrUpdate(GenerateAnnouncement(RandomLocalTracker, RandomLocalRace));
+
       Assert.AreEqual(announcementCount + 1, _context.Announcements.Local.Count);
     }
 

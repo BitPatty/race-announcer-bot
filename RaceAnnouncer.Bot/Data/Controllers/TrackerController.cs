@@ -30,14 +30,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       destination.Game = source.Game;
     }
 
-    public static void DisableTrackersByChannel(this DatabaseContext context, ulong snowflake)
-      => context
-          .Trackers
-          .Local
-          .Where(t => t.Channel.Snowflake.Equals(snowflake))
-          .ToList()
-          .ForEach(t => t.State = TrackerState.Dead);
-
     public static void DisableTrackersByChannel(this DatabaseContext context, Channel channel)
       => context
           .Trackers
@@ -46,16 +38,16 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .ToList()
           .ForEach(t => t.State = TrackerState.Dead);
 
-    public static void DisableTrackersByGuild(this DatabaseContext context, ulong snowflake)
+    public static void DisableTrackersByGuild(this DatabaseContext context, Guild guild)
       => context
           .Trackers
           .Local
-          .Where(t => t.Channel.Guild.Snowflake.Equals(snowflake))
+          .Where(t => t.Channel.Guild.Equals(guild))
           .ToList()
           .ForEach(t => t.State = TrackerState.Dead);
 
     public static IEnumerable<Tracker> GetActiveTrackers(this DatabaseContext context)
-                      => context
+      => context
           .Trackers
           .Local
           .Where(t => t.State.Equals(TrackerState.Active));

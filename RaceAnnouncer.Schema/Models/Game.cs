@@ -76,12 +76,12 @@ namespace RaceAnnouncer.Schema.Models
     /// Trackers associated with this game
     /// </summary>
     [InverseProperty(nameof(Tracker.Game))]
-    public ICollection<Tracker> Trackers { get; set; } = null!;
+    public ICollection<Tracker> Trackers { get; set; } = new HashSet<Tracker>();
 
     /// <summary>
     /// Races associated with this game
     /// </summary>
     [InverseProperty(nameof(Race.Game))]
-    public ICollection<Race> Races { get; set; } = null!;
+    public ICollection<Race> Races { get; set; } = new HashSet<Race>();
   }
 }
