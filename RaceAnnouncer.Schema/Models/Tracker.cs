@@ -28,7 +28,7 @@ namespace RaceAnnouncer.Schema.Models
     /// The channel id associated with this tracker
     /// </summary>
     [Required]
-    [Column("fk_t_channel")]
+    [Column("fk_t_disc_channel")]
     internal long ChannelId { get; set; }
 
     /// <summary>

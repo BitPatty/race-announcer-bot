@@ -30,7 +30,7 @@ namespace RaceAnnouncer.Schema.Models
     /// The channel id in which the announcement was posted
     /// </summary>
     [Required]
-    [Column("fk_t_channel")]
+    [Column("fk_t_disc_channel")]
     internal long ChannelId { get; set; }
 
     /// <summary>

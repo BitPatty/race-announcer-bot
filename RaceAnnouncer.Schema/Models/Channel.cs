@@ -42,7 +42,7 @@ namespace RaceAnnouncer.Schema.Models
     /// The channels guild id
     /// </summary>
     [Required]
-    [Column("fk_guild")]
+    [Column("fk_t_disc_guild")]
     internal long GuildId { get; set; }
 
     /// <summary>
