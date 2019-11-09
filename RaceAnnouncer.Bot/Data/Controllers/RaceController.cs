@@ -7,12 +7,14 @@ namespace RaceAnnouncer.Bot.Data.Controllers
 {
   public static class RaceController
   {
-    public static Race AddOrUpdate(this DatabaseContext context, Race race)
+    public static Race? AddOrUpdate(this DatabaseContext context, Race race)
     {
       Race? r = context.GetRace(race.SrlId);
 
       if (r == null)
       {
+        if (race.State == SRLApiClient.Endpoints.RaceState.Over) return null;
+
         context.Races.Local.Add(race);
         return race;
       }

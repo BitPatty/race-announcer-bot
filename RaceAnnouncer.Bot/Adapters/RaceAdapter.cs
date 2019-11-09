@@ -43,11 +43,13 @@ namespace RaceAnnouncer.Bot.Adapters
       foreach (SRLApiClient.Endpoints.Races.Race srlRace in races)
       {
         Game g = SyncGame(context, srlRace);
-        Race r = SyncRace(context, srlRace, g);
+        Race? r = SyncRace(context, srlRace, g);
 
-        SyncEntrants(context, srlRace, r);
-
-        res.Add(r);
+        if (r != null)
+        {
+          SyncEntrants(context, srlRace, r);
+          res.Add(r);
+        }
       }
 
       return res;
@@ -77,7 +79,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="srlRace">The SRL race</param>
     /// <param name="game">The game entity</param>
     /// <returns>The updated race entity</returns>
-    private static Race SyncRace(DatabaseContext context
+    private static Race? SyncRace(DatabaseContext context
       , SRLApiClient.Endpoints.Races.Race srlRace
       , Game game)
     {

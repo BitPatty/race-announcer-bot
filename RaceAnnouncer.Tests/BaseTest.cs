@@ -69,7 +69,7 @@ namespace RaceAnnouncer.Tests
       => new Guild(Convert.ToUInt64(Ticks), $"{Ticks}");
 
     protected Race GenerateRace(Game game)
-      => new Race(game, $"{Ticks}", $"{Convert.ToInt32(Ticks & 0xFFFF)}", Convert.ToInt32(Ticks & 0xFFFF), true, (SRLApiClient.Endpoints.RaceState)_rand.Next(1, 6));
+      => new Race(game, $"{Ticks}", $"{Convert.ToInt32(Ticks & 0xFFFF)}", Convert.ToInt32(Ticks & 0xFFFF), true, (SRLApiClient.Endpoints.RaceState)_rand.Next(1, 5));
 
     protected Tracker GetRandomActiveTracker()
     {
