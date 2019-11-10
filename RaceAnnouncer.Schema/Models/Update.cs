@@ -5,6 +5,7 @@ using RaceAnnouncer.Schema.Models.BaseModels;
 
 namespace RaceAnnouncer.Schema.Models
 {
+  [Table("t_update")]
   public class Update : BaseEntity
   {
     protected Update() { }
