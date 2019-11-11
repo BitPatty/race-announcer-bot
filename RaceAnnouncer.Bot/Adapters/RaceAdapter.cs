@@ -84,6 +84,10 @@ namespace RaceAnnouncer.Bot.Adapters
       , Game game)
     {
       Logger.Info($"({srlRace.Id}) Updating race");
+      
+      if(srlRace.State >= SRLApiClient.Endpoints.RaceState.Finished
+        && context.GetRace(srlRace.Id) == null) return null;
+
       Race race = srlRace.Convert(game);
       return context.AddOrUpdate(race);
     }
