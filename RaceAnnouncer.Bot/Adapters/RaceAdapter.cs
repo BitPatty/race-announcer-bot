@@ -156,8 +156,11 @@ namespace RaceAnnouncer.Bot.Adapters
 
           race.AssignAttributes(srlRace.Convert(game));
 
+          //Since SRL doesn't implement the
+          //pagination of active races properly
+          //we just ignore finished races for now
           race.IsActive = srlRace.State
-            != SRLApiClient.Endpoints.RaceState.Over;
+            < SRLApiClient.Endpoints.RaceState.Finished;
 
           foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
             context.AddOrUpdate(entrant.Convert(race));
