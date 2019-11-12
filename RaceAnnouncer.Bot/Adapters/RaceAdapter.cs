@@ -145,10 +145,12 @@ namespace RaceAnnouncer.Bot.Adapters
       , SRLService srlService
       , IEnumerable<Race> srlRaces)
     {
-      foreach (Race race in context
+      IEnumerable<Race> activeRaces = context
         .Races
         .Local
-        .Where(r => r.IsActive && !srlRaces.Contains(r)))
+        .Where(r => r.IsActive && !srlRaces.Contains(r));
+
+      foreach (Race race in activeRaces)
       {
         try
         {
