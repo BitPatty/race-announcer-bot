@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RaceAnnouncer.Bot.Common;
@@ -145,10 +145,10 @@ namespace RaceAnnouncer.Bot.Adapters
       , SRLService srlService
       , IEnumerable<Race> srlRaces)
     {
-      IEnumerable<Race> activeRaces = context
+      List<Race> activeRaces = context
         .Races
         .Local
-        .Where(r => r.IsActive && !srlRaces.Contains(r));
+        .Where(r => r.IsActive && !srlRaces.Contains(r)).ToList();
 
       foreach (Race race in activeRaces)
       {
