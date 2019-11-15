@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RaceAnnouncer.Bot.Common;
@@ -22,7 +22,7 @@ namespace RaceAnnouncer.Bot.Adapters
     public static void SyncRaces(
       DatabaseContext context
       , SRLService srlService
-      , IEnumerable<SRLApiClient.Endpoints.Races.Race> races)
+      , List<SRLApiClient.Endpoints.Races.Race> races)
     {
       List<Race> res = UpdateSRLRaces(context, races);
       UpdateDroppedRaces(context, srlService, res);
@@ -36,7 +36,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <returns>Returns the list of updated race entities</returns>
     private static List<Race> UpdateSRLRaces(
       DatabaseContext context
-      , IEnumerable<SRLApiClient.Endpoints.Races.Race> races)
+      , List<SRLApiClient.Endpoints.Races.Race> races)
     {
       List<Race> res = new List<Race>();
 
@@ -84,9 +84,12 @@ namespace RaceAnnouncer.Bot.Adapters
       , Game game)
     {
       Logger.Info($"({srlRace.Id}) Updating race");
-      
-      if(srlRace.State >= SRLApiClient.Endpoints.RaceState.Finished
-        && context.GetRace(srlRace.Id) == null) return null;
+
+      if (srlRace.State >= SRLApiClient.Endpoints.RaceState.Finished
+        && context.GetRace(srlRace.Id) == null)
+      {
+        return null;
+      }
 
       Race race = srlRace.Convert(game);
       return context.AddOrUpdate(race);
@@ -143,7 +146,7 @@ namespace RaceAnnouncer.Bot.Adapters
     public static void UpdateDroppedRaces(
       DatabaseContext context
       , SRLService srlService
-      , IEnumerable<Race> srlRaces)
+      , List<Race> srlRaces)
     {
       List<Race> activeRaces = context
         .Races

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -252,7 +253,7 @@ namespace RaceAnnouncer.Bot
         ProcessChannelMutations(context);
 
         Logger.Info("Updating races");
-        RaceAdapter.SyncRaces(context, _srlService, e);
+        RaceAdapter.SyncRaces(context, _srlService, e.ToList());
 
         Logger.Info("Updating announcements");
         if (_isInitialLoad)
@@ -260,7 +261,7 @@ namespace RaceAnnouncer.Bot
           AnnouncementAdapter.UpdateAnnouncements(
            context
            , _discordService
-           , context.Races.Local);
+           , context.Races.Local.ToList());
 
           _isInitialLoad = false;
         }
@@ -269,7 +270,7 @@ namespace RaceAnnouncer.Bot
           AnnouncementAdapter.UpdateAnnouncements(
             context
             , _discordService
-            , DatabaseAdapter.GetUpdatedRaces(context));
+            , DatabaseAdapter.GetUpdatedRaces(context).ToList());
         }
 
         Logger.Info("Saving changes");

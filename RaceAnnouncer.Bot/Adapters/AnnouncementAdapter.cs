@@ -22,7 +22,7 @@ namespace RaceAnnouncer.Bot.Adapters
     public static void UpdateAnnouncements(
       DatabaseContext context
       , DiscordService discordService
-      , IEnumerable<Race> races)
+      , List<Race> races)
     {
       foreach (Race race in races)
       {
