@@ -17,8 +17,16 @@ namespace RaceAnnouncer.Bot.Services
     private readonly Timer _updateTimer;
 
     private readonly SRLClient _client;
+    
+    private bool _isUpdateTriggerEnabled = false;
 
-    public bool IsUpdateTriggerEnabled = false;
+    public bool IsUpdateTriggerEnabled {
+      get => _isUpdateTriggerEnabled;
+      set {
+        Logger.Info($"Switching update trigger state to {value}");
+        _isUpdateTriggerEnabled = value;
+      }
+    }
 
     public SRLService(double interval = 10000)
     {
