@@ -6,6 +6,7 @@ using System.Timers;
 using SRLApiClient;
 using SRLApiClient.Endpoints.Games;
 using SRLApiClient.Endpoints.Races;
+using RaceAnnouncer.Bot.Common;
 
 namespace RaceAnnouncer.Bot.Services
 {
@@ -43,8 +44,12 @@ namespace RaceAnnouncer.Bot.Services
 
     private void Timer_Elapsed(object sender, ElapsedEventArgs e)
     {
+      Logger.Info("Update timer elapsed");
+      
       if (IsUpdateTriggerEnabled)
       {
+        Logger.Info("Loading SRL races");
+        
         try
         {
           OnUpdate?.Invoke(this, _client.Races
@@ -53,8 +58,14 @@ namespace RaceAnnouncer.Bot.Services
             .ToList()
             .AsReadOnly()
           );
+          
+          Logger.Info("SRL races loaded");
         }
-        catch { }
+        catch (Exception ex) {
+          Logger.Error($"Exception thrown: {ex.Message}");
+          Logger.Error($"Inner Exception: {ex.InnerException?.Message}");
+          Logger.Error($"Stacktrace: {ex.StackTrace}");
+        }
       }
     }
 
