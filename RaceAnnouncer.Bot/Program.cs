@@ -175,15 +175,10 @@ namespace RaceAnnouncer.Bot
     private static void OnDiscordDisconnected(object? sender, Exception? e)
     {
       Logger.Info("Discord disconnected!");
-      _srlService.IsUpdateTriggerEnabled = false;
       Logger.Info("Stopping Discord Service");
       _discordService.Stop();
-      Logger.Info("Discord Service Stopped");
-
-      Thread.Sleep(10000);
-      Logger.Info("Starting Discord Service");
-      _discordService.StartAsync().Wait();
-      Logger.Info("Discord Service Started");
+      Logger.Info("Discord Service Stopped, Exiting");
+      Environment.Exit(-2);
     }
 
     /// <summary>
@@ -397,6 +392,8 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static async Task StartBotAsync()
     {
+      await Task.Delay(5000).ConfigureAwait(false);
+      
       string? token = Credentials.ParseDiscordToken();
       if (token == null)
         throw new Exception("Could not Load the discord token");
