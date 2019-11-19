@@ -237,7 +237,11 @@ namespace RaceAnnouncer.Bot
     private static void OnSrlUpdate(object? sender, IReadOnlyCollection<SRLApiClient.Endpoints.Races.Race> e)
     {
       _srlService.IsUpdateTriggerEnabled = false;
+
+      Logger.Info("Waiting for lock..");
       _contextSemaphore.Wait();
+      Logger.Info("Lock acquired");
+      
       DateTime startTime = DateTime.UtcNow;
       bool updateSuccessful = false;
 
@@ -288,9 +292,11 @@ namespace RaceAnnouncer.Bot
       {
         try
         {
+          Logger.Info("Creating update-table entry.");
           using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
           context.Updates.Add(new Update(startTime, DateTime.UtcNow, updateSuccessful));
           context.SaveChanges();
+          Logger.Info("Entry saved");
         }
         catch (Exception ex)
         {
@@ -301,6 +307,7 @@ namespace RaceAnnouncer.Bot
 
         _contextSemaphore.Release();
         _srlService.IsUpdateTriggerEnabled = true;
+        Logger.Info("Released triggers");
       }
     }
 
