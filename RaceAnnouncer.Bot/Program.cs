@@ -174,11 +174,16 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void OnDiscordDisconnected(object? sender, Exception? e)
     {
+      Logger.Info("Discord disconnected!");
       _srlService.IsUpdateTriggerEnabled = false;
+      Logger.Info("Stopping Discord Service");
       _discordService.Stop();
+      Logger.Info("Discord Service Stopped");
 
       Thread.Sleep(10000);
+      Logger.Info("Starting Discord Service");
       _discordService.StartAsync().Wait();
+      Logger.Info("Discord Service Started");
     }
 
     /// <summary>
@@ -204,9 +209,13 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void OnDiscordReady(object? sender, EventArgs? e)
     {
+      Logger.Info("Discord Ready, waiting for lock");
       _contextSemaphore.Wait();
+      Logger.Info("Lock acquired");
+      
       try
       {
+        Logger.Info("Loading guilds and channels");
         using (DatabaseContext context = new DatabaseContextFactory().CreateDbContext())
         {
           context.Channels.Load();
@@ -215,7 +224,7 @@ namespace RaceAnnouncer.Bot
           ChannelAdapter.SyncAll(context, _discordService);
           context.SaveChanges();
         }
-
+        Logger.Info("Guilds and channels loaded, enablint trigger");
         _srlService.IsUpdateTriggerEnabled = true;
       }
       catch (Exception ex)
