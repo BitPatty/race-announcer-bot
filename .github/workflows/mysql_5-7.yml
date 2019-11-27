@@ -1,0 +1,29 @@
+name: RAB_MySQL-5.7
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet: [ '3.0.101', '3.1.100-preview3-014645' ]
+    steps:
+      - name: Setup MySQL
+        run: |
+          sudo apt-get install -y mysql-client
+          mysql -uroot -proot -e "CREATE USER 'devel'@'%' IDENTIFIED BY 'devel'"
+          mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'devel'@'%'"
+          mysql -uroot -proot -e "FLUSH PRIVILEGES"
+          mysql -uroot -proot -e "CREATE DATABASE rab_t1"
+      - uses: actions/checkout@v1  
+      - name: Setup .NET Core ${{ matrix.dotnet }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+      - name: Restore NuGet packages
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release
+      - name: Run tests
+        run: dotnet test --verbosity normal
