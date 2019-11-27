@@ -19,6 +19,25 @@ namespace RaceAnnouncer.Bot.Common
       => Write(LogLevel.ERR, message);
 
     /// <summary>
+    /// Posts a log message with the <see cref="LogLevel.ERR"/> severity
+    /// </summary>
+    /// <param name="message">The log message</param>
+    public static void Error(string message, Exception exception)
+    {
+      Write(LogLevel.ERR, $"{message}");
+
+      Exception? ex = exception;
+
+      do
+      {
+        Write(LogLevel.ERR, $"{ex.GetType().ToString()}");
+        Write(LogLevel.ERR, $"{ex.Message}");
+        Write(LogLevel.ERR, $"{ex.StackTrace}");
+        ex = ex.InnerException;
+      } while (ex != null);
+    }
+
+    /// <summary>
     /// Posts a log message with the <see cref="LogLevel.WRN"/> severity
     /// </summary>
     /// <param name="message">The log message</param>

@@ -72,9 +72,7 @@ namespace RaceAnnouncer.Bot.Adapters
       }
       catch (Exception ex)
       {
-        Logger.Error($"({race.SrlId}) Exception thrown: {ex.Message}");
-        Logger.Error($"({race.SrlId}) Inner exception: {ex.InnerException?.Message}");
-        Logger.Error($"({race.SrlId}) Stack trace: {ex.StackTrace}");
+        Logger.Error($"({race.SrlId}) Exception thrown", ex);
       }
 
       return null;
@@ -100,9 +98,7 @@ namespace RaceAnnouncer.Bot.Adapters
         }
         catch (Exception ex)
         {
-          Logger.Error($"({announcement.Race.SrlId}) Exception thrown: {ex.Message}");
-          Logger.Error($"({announcement.Race.SrlId}) Inner exception: {ex.InnerException?.Message}");
-          Logger.Error($"({announcement.Race.SrlId}) Stack trace: {ex.StackTrace}");
+          Logger.Error($"({announcement.Race.SrlId}) Exception thrown", ex);
         }
       }
       else

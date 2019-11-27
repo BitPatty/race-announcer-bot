@@ -144,9 +144,7 @@ namespace RaceAnnouncer.Bot
       catch (Exception ex)
       {
         Logger.Error("Failed to migrate context! Exiting");
-        Logger.Error($"Exception thrown: {ex.Message}");
-        Logger.Error($"Inner exception: {ex.InnerException?.Message}");
-        Logger.Error($"Stack trace: {ex.StackTrace}");
+        Logger.Error($"Exception thrown", ex);
         Environment.Exit(-1);
       }
       finally
@@ -207,7 +205,7 @@ namespace RaceAnnouncer.Bot
       Logger.Info("Discord Ready, waiting for lock");
       _contextSemaphore.Wait();
       Logger.Info("Lock acquired");
-      
+
       try
       {
         Logger.Info("Loading guilds and channels");
@@ -224,9 +222,7 @@ namespace RaceAnnouncer.Bot
       }
       catch (Exception ex)
       {
-        Logger.Error($"Exception thrown: {ex.Message}");
-        Logger.Error($"Inner Exception: {ex.InnerException?.Message}");
-        Logger.Error($"Stacktrace: {ex.StackTrace}");
+        Logger.Error($"Exception thrown", ex);
         Environment.Exit(-1);
       }
       finally
@@ -245,7 +241,7 @@ namespace RaceAnnouncer.Bot
       Logger.Info("Waiting for lock..");
       _contextSemaphore.Wait();
       Logger.Info("Lock acquired");
-      
+
       DateTime startTime = DateTime.UtcNow;
       bool updateSuccessful = false;
 
@@ -288,9 +284,7 @@ namespace RaceAnnouncer.Bot
       }
       catch (Exception ex)
       {
-        Logger.Error($"Exception thrown: {ex.Message}");
-        Logger.Error($"Inner exception: {ex.InnerException?.Message}");
-        Logger.Error($"Stack trace: {ex.StackTrace}");
+        Logger.Error($"Exception thrown", ex);
       }
       finally
       {
@@ -304,9 +298,7 @@ namespace RaceAnnouncer.Bot
         }
         catch (Exception ex)
         {
-          Logger.Error($"Exception thrown: {ex.Message}");
-          Logger.Error($"Inner exception: {ex.InnerException?.Message}");
-          Logger.Error($"Stack trace: {ex.StackTrace}");
+          Logger.Error($"Exception thrown", ex);
         }
 
         _contextSemaphore.Release();
@@ -393,7 +385,7 @@ namespace RaceAnnouncer.Bot
     private static async Task StartBotAsync()
     {
       await Task.Delay(5000).ConfigureAwait(false);
-      
+
       string? token = Credentials.ParseDiscordToken();
       if (token == null)
         throw new Exception("Could not Load the discord token");
