@@ -7,6 +7,12 @@ A **work in progress** rewrite of the SRL race announcer bot for Discord, origin
 
 The bot requires a valid MySQL Database connection (tested on 5.7) specified in the config file.
 
+### Preview
+
+<p align="center">
+  <img src="https://github.com/BitPatty/RaceAnnouncerBot/raw/master/preview.png" />
+</p>
+
 ### Dependencies
 
 Dependencies are available via NuGet.
