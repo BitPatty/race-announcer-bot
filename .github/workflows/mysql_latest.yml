@@ -1,4 +1,4 @@
-name: RAB_MySQL-latest
+name: MySQL (latest)
 
 on: [push]
 

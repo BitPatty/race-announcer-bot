@@ -1,4 +1,4 @@
-name: RAB_MySQL-8.0
+name: MySQL 8.0
 
 on: [push]
 

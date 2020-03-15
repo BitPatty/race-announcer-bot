@@ -1,4 +1,4 @@
-name: RAB_MariaDB-latest
+name: MariaDB (latest)
 
 on: [push]
 
