@@ -9,6 +9,8 @@ jobs:
       matrix:
         dotnet: [ '3.1.102' ]
     steps:
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
