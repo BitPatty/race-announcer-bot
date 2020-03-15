@@ -1,4 +1,4 @@
-name: MySQL 5.7
+name: MySQL 8.0
 
 on: [push]
 
@@ -16,7 +16,7 @@ jobs:
         with:
           host port: 3306
           container port: 3306
-          mysql version: "5.7"
+          mysql version: "8.0"
           mysql root password: "root"
       - name: Checkout
         uses: actions/checkout@v1
