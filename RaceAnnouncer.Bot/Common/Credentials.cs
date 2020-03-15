@@ -12,7 +12,12 @@ namespace RaceAnnouncer.Bot.Common
     /// <returns>Returns the connection string</returns>
     public static string BuildConnectionString(string? envPath = null)
     {
-      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".config"));
+      if (envPath == null)
+        return BuildConnectionString(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), ".config")));
+      else if (!File.Exists(envPath))
+        throw new FileNotFoundException("Env File not found!");
+
+      DotNetEnv.Env.Load(envPath);
 
       string database   /**/ = Environment.GetEnvironmentVariable("DB_NAME")     /**/ ?? "";
       string server     /**/ = Environment.GetEnvironmentVariable("DB_SERVER")   /**/ ?? "localhost";
