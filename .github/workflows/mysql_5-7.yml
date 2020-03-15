@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Shutdown Ubuntu MySQL (SUDO)
         run: sudo service mysql stop
-      - name: Setup MySQL
+      - name: Setup MySQL Service
         uses: mirromutth/mysql-action@v1.1
         with:
           # The port of host
@@ -20,9 +20,6 @@ jobs:
           container port: 3306
           mysql version: '5.7'
           mysql root password: 'root'
-          mysql database: 'rab_t1'
-          mysql user: 'devel'
-          mysql password: 'devel'
       - name: Checkout
         uses: actions/checkout@v1  
       - name: Setup .NET Core ${{ matrix.dotnet }}
@@ -33,5 +30,12 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release
+      - name: Setup test database
+        run: |
+          sudo apt-get install -y mysql-client
+          mysql -uroot -proot -e "CREATE USER 'devel'@'%' IDENTIFIED BY 'devel'"
+          mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'devel'@'%'"
+          mysql -uroot -proot -e "FLUSH PRIVILEGES"
+          mysql -uroot -proot -e "CREATE DATABASE rab_t1"
       - name: Run tests
         run: dotnet test --verbosity normal
