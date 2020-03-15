@@ -1,4 +1,4 @@
-name: RAB_MySQL-5.7
+name: RAB_MariaDB-5.7
 
 on: [push]
 
@@ -12,11 +12,11 @@ jobs:
       - name: Shutdown Ubuntu MySQL (SUDO)
         run: sudo service mysql stop
       - name: Setup MySQL Service
-        uses: mirromutth/mysql-action@v1.1
+        uses: getong/mariadb-action@v1.1
         with:
           host port: 3306
           container port: 3306
-          mysql version: "5.7"
+          mariadb version: "5.7"
           mysql root password: "root"
       - name: Checkout
         uses: actions/checkout@v1
