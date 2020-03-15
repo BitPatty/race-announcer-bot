@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Shutdown Ubuntu MySQL (SUDO)
         run: sudo service mysql stop
-      - name: Setup MySQL Service
+      - name: Setup MariaDB Service
         uses: getong/mariadb-action@v1.1
         with:
           host port: 3306
