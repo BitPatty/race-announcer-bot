@@ -7,16 +7,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet: [ '3.0.101', '3.1.100-preview3-014645' ]
+        dotnet: [ '3.1.102' ]
     steps:
       - name: Setup MySQL
-        run: |
-          sudo apt-get install -y mysql-client
-          mysql -uroot -proot -e "CREATE USER 'devel'@'%' IDENTIFIED BY 'devel'"
-          mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'devel'@'%'"
-          mysql -uroot -proot -e "FLUSH PRIVILEGES"
-          mysql -uroot -proot -e "CREATE DATABASE rab_t1"
-      - uses: actions/checkout@v1  
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          # The port of host
+          host port: 3306
+          # The port of container
+          container port: 3306
+          mysql version: '5.7'
+          mysql root password: 'root'
+          mysql database: 'rab_t1'
+          mysql user: 'devel'
+          mysql password: 'devel'
       - name: Setup .NET Core ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v1
         with:
