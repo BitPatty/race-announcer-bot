@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:3.0 AS base
+FROM mcr.microsoft.com/dotnet/core/runtime:3.1 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
 COPY ["RaceAnnouncer.Bot/RaceAnnouncer.Bot.csproj", "RaceAnnouncer.Bot/"]
 COPY ["RaceAnnouncer.Schema/RaceAnnouncer.Schema.csproj", "RaceAnnouncer.Schema/"]
