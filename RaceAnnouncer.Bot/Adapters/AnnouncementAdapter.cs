@@ -27,8 +27,6 @@ namespace RaceAnnouncer.Bot.Adapters
     {
       foreach (Race race in races)
       {
-        Logger.Info($"({race.SrlId}) Updating Announcements");
-
         foreach (Tracker tracker in context.GetActiveTrackers(race.Game))
         {
           Announcement? announcement = context.GetAnnouncement(race, tracker);

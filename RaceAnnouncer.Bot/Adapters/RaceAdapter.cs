@@ -42,6 +42,8 @@ namespace RaceAnnouncer.Bot.Adapters
 
       foreach (SRLApiClient.Endpoints.Races.Race srlRace in races)
       {
+        Logger.Info($"({srlRace.Id}) Updating");
+
         Game g = SyncGame(context, srlRace);
         Race? r = SyncRace(context, srlRace, g);
 
@@ -66,7 +68,6 @@ namespace RaceAnnouncer.Bot.Adapters
       DatabaseContext context
       , SRLApiClient.Endpoints.Races.Race srlRace)
     {
-      Logger.Info($"({srlRace.Id}) Updating game");
       Game game = srlRace.Game.Convert();
       return context.AddOrUpdate(game);
     }
@@ -83,8 +84,6 @@ namespace RaceAnnouncer.Bot.Adapters
       , SRLApiClient.Endpoints.Races.Race srlRace
       , Game game)
     {
-      Logger.Info($"({srlRace.Id}) Updating race");
-
       if (srlRace.State >= SRLApiClient.Endpoints.RaceState.Finished
         && context.GetRace(srlRace.Id) == null)
       {
@@ -107,7 +106,6 @@ namespace RaceAnnouncer.Bot.Adapters
       , SRLApiClient.Endpoints.Races.Race srlRace
       , Race race)
     {
-      Logger.Info($"({srlRace.Id}) Updating entrants");
       foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
         context.AddOrUpdate(entrant.Convert(race));
 
