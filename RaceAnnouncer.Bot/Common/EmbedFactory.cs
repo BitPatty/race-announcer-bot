@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Discord;
 using RaceAnnouncer.Schema.Models;
@@ -12,7 +13,7 @@ namespace RaceAnnouncer.Bot.Common
     /// </summary>
     /// <param name="race">The race entity</param>
     /// <returns>Returns the embed for the specified <paramref name="race"/></returns>
-    public static Embed Build(Race race)
+    public static Embed Build(Race race, List<Entrant> entrants)
     => new EmbedBuilder()
     {
       Title           /**/ = $"Race room: #{race.SrlId}",
@@ -23,9 +24,9 @@ namespace RaceAnnouncer.Bot.Common
                                 {
                                   IsInline = false,
                                   Name = "Entrants",
-                                  Value = race.Entrants.Count == 0
+                                  Value = entrants.Count == 0
                                     ? "-"
-                                    : race.Entrants.Count <= 15
+                                    : entrants.Count <= 15
                                     ? String.Join("\r\n", race
                                       .Entrants
                                       .OrderBy(e => e.Place > 0 ? e.Place : 99)
@@ -39,7 +40,7 @@ namespace RaceAnnouncer.Bot.Common
                                       .ThenBy(e => e.DisplayName)
                                       .Take(15)
                                       .Select(FormatEntrantStatus))
-                                      + $"\r\n *+{race.Entrants.Count - 15} more..*"
+                                      + $"\r\n *+{entrants.Count - 15} more..*"
                                 }
                               },
       Footer          /**/ = new EmbedFooterBuilder() { Text = FormatRaceStatus(race) },

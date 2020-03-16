@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Discord.Rest;
+using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Common;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
@@ -32,14 +33,22 @@ namespace RaceAnnouncer.Bot.Adapters
         {
           Announcement? announcement = context.GetAnnouncement(race, tracker);
 
+          List<Entrant> entrants = new List<Entrant>();
+
+          foreach (Entrant e in context.GetEntrants(race))
+          {
+            if (context.Entry(e).State != EntityState.Deleted)
+              entrants.Add(e);
+          }
+
           if (announcement == null)
           {
-            announcement = PostAnnouncement(discordService, tracker, race);
+            announcement = PostAnnouncement(discordService, tracker, race, entrants);
             if (announcement != null) context.AddOrUpdate(announcement);
           }
           else
           {
-            UpdateAnnouncement(discordService, announcement);
+            UpdateAnnouncement(discordService, announcement, entrants);
           }
 
           Thread.Sleep(1000);
@@ -54,14 +63,15 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="tracker">The tracker</param>
     /// <param name="race">The race</param>
     /// <returns>On Success, returns the announcement</returns>
-    private static Announcement? PostAnnouncement(DiscordService discordService, Tracker tracker, Race race)
+    private static Announcement? PostAnnouncement(DiscordService discordService, Tracker tracker, Race race, List<Entrant> entrants)
     {
       Logger.Info($"({race.SrlId}) Posting announcement in '{tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}'.");
 
       try
       {
+
         RestUserMessage? message = discordService
-            .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race))
+            .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race, entrants))
             .Result;
 
         if (message != null)
@@ -83,7 +93,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// </summary>
     /// <param name="discordService">The discord service</param>
     /// <param name="announcement">The target announcement</param>
-    private static void UpdateAnnouncement(DiscordService discordService, Announcement announcement)
+    private static void UpdateAnnouncement(DiscordService discordService, Announcement announcement, List<Entrant> entrants)
     {
       Logger.Info($"({announcement.Race.SrlId}) Updating announcement {announcement.Snowflake} in '{announcement.Channel.Guild.DisplayName}/{announcement.Channel.DisplayName}'.");
 
@@ -93,7 +103,7 @@ namespace RaceAnnouncer.Bot.Adapters
       {
         try
         {
-          discordService.ModifyMessageAsync(message, EmbedFactory.Build(announcement.Race)).Wait();
+          discordService.ModifyMessageAsync(message, EmbedFactory.Build(announcement.Race, entrants)).Wait();
           announcement.MessageUpdatedAt = DateTime.UtcNow;
         }
         catch (Exception ex)

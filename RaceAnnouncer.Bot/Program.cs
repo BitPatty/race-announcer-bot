@@ -125,7 +125,7 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void InitSrlService()
     {
-      _srlService = new SRLService();
+      _srlService = new SRLService(30000);
       _srlService.OnUpdate += OnSrlUpdate;
     }
 
