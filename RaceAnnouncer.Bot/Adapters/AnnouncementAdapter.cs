@@ -33,6 +33,12 @@ namespace RaceAnnouncer.Bot.Adapters
         {
           Announcement? announcement = context.GetAnnouncement(race, tracker);
 
+          if (discordService.HasWritePermission(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
+          {
+            Logger.Error($"Missing write permissions in channel: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
+            continue;
+          }
+
           List<Entrant> entrants = new List<Entrant>();
 
           foreach (Entrant e in context.GetEntrants(race))

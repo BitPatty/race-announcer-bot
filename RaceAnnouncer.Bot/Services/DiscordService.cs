@@ -82,6 +82,23 @@ namespace RaceAnnouncer.Bot.Services
       => _discordClient.Guilds.SingleOrDefault(g => g.Id.Equals(guildId));
 
     /// <summary>
+    /// Get a single text channel with the specified id
+    /// </summary>
+    /// <param name="channelId">The channel id</param>
+    /// <returns>Returns the channel</returns>
+    public SocketTextChannel GetTextChannel(ulong channelId)
+      => GetTextChannels().First(c => c.Id.Equals(channelId));
+
+    /// <summary>
+    /// Checks whether the bot has write permissions in the specified channel
+    /// </summary>
+    /// <param name="guildId">The guild id</param>
+    /// <param name="channelId">The channel id</param>
+    /// <returns></returns>
+    public Boolean? HasWritePermission(ulong guildId, ulong channelId)
+      => GetGuild(guildId)?.CurrentUser.GetPermissions(GetTextChannel(channelId)).SendMessages;
+
+    /// <summary>
     /// Checks whether a channel is available
     /// </summary>
     /// <param name="channelId">The channels snowflake</param>
