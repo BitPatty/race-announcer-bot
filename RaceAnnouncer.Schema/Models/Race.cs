@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 using SRLApiClient.Endpoints;
 
@@ -38,7 +39,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_game")]
-    internal long GameId { get; set; }
+    public long GameId { get; internal set; }
 
     /// <summary>
     /// The races goal
@@ -74,18 +75,21 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(GameId))]
+    [JsonIgnore]
     public Game Game { get; set; }
 
     /// <summary>
     /// The races entrants
     /// </summary>
     [InverseProperty(nameof(Entrant.Race))]
+    [JsonIgnore]
     public ICollection<Entrant> Entrants { get; set; } = new HashSet<Entrant>();
 
     /// <summary>
     /// Announcements associated with this race
     /// </summary>
     [InverseProperty(nameof(Announcement.Race))]
+    [JsonIgnore]
     public ICollection<Announcement> Announcements { get; set; } = new HashSet<Announcement>();
   }
 }

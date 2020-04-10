@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -43,25 +44,28 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_disc_guild")]
-    internal long GuildId { get; set; }
+    public long GuildId { get; internal set; }
 
     /// <summary>
     /// The channels guild
     /// </summary>
     [Required]
     [ForeignKey(nameof(GuildId))]
+    [JsonIgnore]
     public Guild Guild { get; set; }
 
     /// <summary>
     /// Trackers associated with this channel
     /// </summary>
     [InverseProperty(nameof(Tracker.Channel))]
+    [JsonIgnore]
     public ICollection<Tracker> Trackers { get; set; } = new HashSet<Tracker>();
 
     /// <summary>
     /// Announcements associated with this channel
     /// </summary>
     [InverseProperty(nameof(Announcement.Channel))]
+    [JsonIgnore]
     public ICollection<Announcement> Announcements { get; set; } = new HashSet<Announcement>();
   }
 }

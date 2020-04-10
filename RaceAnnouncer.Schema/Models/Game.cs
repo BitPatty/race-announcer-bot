@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 
 namespace RaceAnnouncer.Schema.Models
@@ -76,12 +77,14 @@ namespace RaceAnnouncer.Schema.Models
     /// Trackers associated with this game
     /// </summary>
     [InverseProperty(nameof(Tracker.Game))]
+    [JsonIgnore]
     public ICollection<Tracker> Trackers { get; set; } = new HashSet<Tracker>();
 
     /// <summary>
     /// Races associated with this game
     /// </summary>
     [InverseProperty(nameof(Race.Game))]
+    [JsonIgnore]
     public ICollection<Race> Races { get; set; } = new HashSet<Race>();
   }
 }

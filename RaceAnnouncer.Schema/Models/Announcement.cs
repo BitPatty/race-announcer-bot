@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 
 namespace RaceAnnouncer.Schema.Models
@@ -31,21 +32,21 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_disc_channel")]
-    internal long ChannelId { get; set; }
+    public long ChannelId { get; internal set; }
 
     /// <summary>
     /// The tracker id associated with this announcement
     /// </summary>
     [Required]
     [Column("fk_t_tracker")]
-    internal long TrackerId { get; set; }
+    public long TrackerId { get; internal set; }
 
     /// <summary>
     /// The race id associated with this announcement
     /// </summary>
     [Required]
     [Column("fk_t_race")]
-    internal long RaceId { get; set; }
+    public long RaceId { get; internal set; }
 
     /// <summary>
     /// Timestamp of when the message was created
@@ -66,6 +67,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(RaceId))]
+    [JsonIgnore]
     public Race Race { get; set; }
 
     /// <summary>
@@ -73,6 +75,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(TrackerId))]
+    [JsonIgnore]
     public Tracker Tracker { get; set; }
 
     /// <summary>
@@ -80,6 +83,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(ChannelId))]
+    [JsonIgnore]
     public Channel Channel { get; set; }
   }
 }

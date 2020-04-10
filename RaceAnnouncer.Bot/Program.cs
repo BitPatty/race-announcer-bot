@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Adapters;
-using RaceAnnouncer.Bot.Common;
+using RaceAnnouncer.Bot.Util;
 using RaceAnnouncer.Bot.Data;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
+using RaceAnnouncer.Common;
 
 namespace RaceAnnouncer.Bot
 {
@@ -138,7 +139,7 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
+        using DatabaseContext context = new ContextBuilder().CreateDbContext();
         DatabaseAdapter.Migrate(context);
       }
       catch (Exception ex)
@@ -209,7 +210,7 @@ namespace RaceAnnouncer.Bot
       try
       {
         Logger.Info("Loading guilds and channels");
-        using (DatabaseContext context = new DatabaseContextFactory().CreateDbContext())
+        using (DatabaseContext context = new ContextBuilder().CreateDbContext())
         {
           context.Channels.Load();
           context.Guilds.Load();
@@ -247,7 +248,7 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
+        using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
         Logger.Info("Reloading context");
         context.LoadRemote();
@@ -291,7 +292,7 @@ namespace RaceAnnouncer.Bot
         try
         {
           Logger.Info("Creating update-table entry.");
-          using DatabaseContext context = new DatabaseContextFactory().CreateDbContext();
+          using DatabaseContext context = new ContextBuilder().CreateDbContext();
           context.Updates.Add(new Update(startTime, DateTime.UtcNow, updateSuccessful));
           context.SaveChanges();
           Logger.Info("Entry saved");

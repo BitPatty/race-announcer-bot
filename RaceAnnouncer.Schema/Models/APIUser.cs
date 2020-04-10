@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 
 namespace RaceAnnouncer.Schema.Models
 {
+  [Table("t_api_user")]
   public class APIUser : BaseEntity
   {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -29,6 +31,7 @@ namespace RaceAnnouncer.Schema.Models
     [Required]
     [MaxLength(520)]
     [Column("api_key")]
+    [JsonIgnore]
     public string APIKey { get; set; }
 
     [Column("expires_at")]

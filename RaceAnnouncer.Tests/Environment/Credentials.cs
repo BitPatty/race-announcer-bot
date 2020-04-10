@@ -80,8 +80,7 @@ namespace RaceAnnouncer.Tests.Environment
       Assert.DoesNotThrow(delegate
       {
         connectionString =
-          Bot
-          .Common
+          Common
           .Credentials
           .BuildConnectionString(TestFiles.EnvFile);
       });
@@ -97,8 +96,7 @@ namespace RaceAnnouncer.Tests.Environment
     {
       Assert.Throws<IOException>(delegate
       {
-        Bot
-        .Common
+        Common
         .Credentials
         .BuildConnectionString(TestFiles.EnvFile_Not);
       });
@@ -133,8 +131,7 @@ namespace RaceAnnouncer.Tests.Environment
       Assert.DoesNotThrow(delegate
       {
         envToken =
-          Bot
-          .Common
+          Common
           .Credentials
           .ParseDiscordToken(TestFiles.EnvFile);
       });
@@ -147,8 +144,7 @@ namespace RaceAnnouncer.Tests.Environment
     {
       Assert.Throws<IOException>(delegate
       {
-        Bot
-        .Common
+        Common
         .Credentials
         .BuildConnectionString(TestFiles.EnvFile_Not);
       });
@@ -158,8 +154,7 @@ namespace RaceAnnouncer.Tests.Environment
     public void DiscordToken_Missing()
     {
       Assert.IsNull(
-        Bot
-        .Common
+        Common
         .Credentials
         .ParseDiscordToken(TestFiles.EnvFile_Alt));
     }
