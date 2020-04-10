@@ -95,7 +95,7 @@ namespace RaceAnnouncer.Tests.Environment
     [Test]
     public void ConnectionString_Invalid_File()
     {
-      Assert.Throws<FileNotFoundException>(delegate
+      Assert.Throws<IOException>(delegate
       {
         Bot
         .Common
@@ -145,7 +145,7 @@ namespace RaceAnnouncer.Tests.Environment
     [Test]
     public void DiscordToken_Invalid_File()
     {
-      Assert.Throws<FileNotFoundException>(delegate
+      Assert.Throws<IOException>(delegate
       {
         Bot
         .Common

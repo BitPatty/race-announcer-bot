@@ -1,6 +1,0 @@
-﻿DB_NAME=rab_t1
-DB_SERVER=localhost
-DB_PORT=3306
-DB_USER=devel
-DB_PASS=devel
-DISCORD_TOKEN=foo

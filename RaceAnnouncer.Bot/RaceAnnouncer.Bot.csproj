@@ -28,10 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update=".config">
+    <None Update=".env">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update=".config.example">
+    <None Update=".env.example">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

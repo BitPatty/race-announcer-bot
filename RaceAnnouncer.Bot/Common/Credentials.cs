@@ -6,16 +6,17 @@ namespace RaceAnnouncer.Bot.Common
   public static class Credentials
   {
     /// <summary>
-    /// Builds the connection string based on the environment file
+    /// Builds the connection string based on the environment variables
     /// </summary>
     /// <param name="envPath">The path to the environment file</param>
     /// <returns>Returns the connection string</returns>
     public static string BuildConnectionString(string? envPath = null)
     {
+
       if (envPath == null)
-        return BuildConnectionString(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), ".config")));
-      else if (!File.Exists(envPath))
-        throw new FileNotFoundException("Env File not found!");
+        return BuildConnectionString(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), ".env")));
+      else if (!File.Exists(envPath) && String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DB_NAME")))
+        throw new IOException("Environment not set!");
 
       DotNetEnv.Env.Load(envPath);
 
@@ -35,7 +36,7 @@ namespace RaceAnnouncer.Bot.Common
     /// <returns>Returns the discord bot token</returns>
     public static string? ParseDiscordToken(string? envPath = null)
     {
-      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".config"));
+      DotNetEnv.Env.Load(envPath ?? Path.Combine(Directory.GetCurrentDirectory(), ".env"));
       return Environment.GetEnvironmentVariable("DISCORD_TOKEN");
     }
   }

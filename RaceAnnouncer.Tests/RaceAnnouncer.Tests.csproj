@@ -22,10 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update=".config.test">
+    <None Update="test.env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update=".config.test.alt">
+    <None Update="test.alt.env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
