@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 using SRLApiClient.Endpoints;
 
@@ -36,7 +37,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_race")]
-    internal long RaceId { get; set; }
+    public long RaceId { get; internal set; }
 
     /// <summary>
     /// The entrants current state
@@ -62,6 +63,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(RaceId))]
+    [JsonIgnore]
     public Race Race { get; set; }
   }
 }

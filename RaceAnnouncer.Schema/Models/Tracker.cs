@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 using RaceAnnouncer.Schema.Models.Enumerations;
 
@@ -29,14 +30,14 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [Column("fk_t_disc_channel")]
-    internal long ChannelId { get; set; }
+    public long ChannelId { get; internal set; }
 
     /// <summary>
     /// The game id associated with this tracker
     /// </summary>
     [Required]
     [Column("fk_t_game")]
-    internal long GameId { get; set; }
+    public long GameId { get; internal set; }
 
     /// <summary>
     /// The trackers state
@@ -50,6 +51,7 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(ChannelId))]
+    [JsonIgnore]
     public Channel Channel { get; set; }
 
     /// <summary>
@@ -57,12 +59,14 @@ namespace RaceAnnouncer.Schema.Models
     /// </summary>
     [Required]
     [ForeignKey(nameof(GameId))]
+    [JsonIgnore]
     public Game Game { get; set; }
 
     /// <summary>
     /// The announcements associated with this tracker
     /// </summary>
     [InverseProperty(nameof(Announcement.Tracker))]
+    [JsonIgnore]
     public ICollection<Announcement> Announcements { get; set; } = new HashSet<Announcement>();
   }
 }

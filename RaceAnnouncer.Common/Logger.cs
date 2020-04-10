@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RaceAnnouncer.Bot.Common
+namespace RaceAnnouncer.Common
 {
   public static class Logger
   {
