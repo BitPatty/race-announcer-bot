@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RaceAnnouncer.WebAPI.Services;
 
 namespace RaceAnnouncer.WebAPI
 {
@@ -17,6 +19,10 @@ namespace RaceAnnouncer.WebAPI
 
     public void ConfigureServices(IServiceCollection services)
     {
+      services.AddAuthentication("BasicAuthentication")
+        .AddScheme<AuthenticationSchemeOptions, APIAuthService>("BasicAuthentication", null);
+
+
       services.AddCloudscribePagination();
       services.AddControllers();
     }
@@ -30,6 +36,7 @@ namespace RaceAnnouncer.WebAPI
 
       app.UseHttpsRedirection();
       app.UseRouting();
+      app.UseAuthentication();
       app.UseAuthorization();
 
       app.UseEndpoints(endpoints => endpoints.MapControllers());

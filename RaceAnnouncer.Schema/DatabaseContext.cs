@@ -76,5 +76,6 @@ namespace RaceAnnouncer.Schema
     public DbSet<Entrant> Entrants { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
     public DbSet<Update> Updates { get; set; }
+    public DbSet<APIUser> APIUsers { get; set; }
   }
 }
