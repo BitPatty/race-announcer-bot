@@ -17,8 +17,8 @@ services:
         DB_PASS: $BOT_DB_PASS
         DISCORD_TOKEN: $DISCORD_TOKEN
 
-  raceannouncer_web:
-    container_name: raceannouncer_web
+  raceannouncer_api:
+    container_name: raceannouncer_api
     network_mode: "bridge"
     env_file: ./.env
     ports:
