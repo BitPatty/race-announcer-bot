@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 
-namespace RaceAnnouncer.Bot.Common
+namespace RaceAnnouncer.Common
 {
   public static class Credentials
   {
@@ -14,8 +15,12 @@ namespace RaceAnnouncer.Bot.Common
     {
 
       if (envPath == null)
-        return BuildConnectionString(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), ".env")));
-      else if (!File.Exists(envPath) && String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DB_NAME")))
+      {
+        string fallbackPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ".env");
+        return BuildConnectionString(fallbackPath);
+      }
+
+      if (!File.Exists(envPath) && String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DB_NAME")))
         throw new IOException("Environment not set!");
 
       DotNetEnv.Env.Load(envPath);

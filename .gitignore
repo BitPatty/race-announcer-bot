@@ -12,6 +12,9 @@
 *.config
 *.env
 
+# Test environment files
+!RaceAnnouncer.Tests/*.env
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

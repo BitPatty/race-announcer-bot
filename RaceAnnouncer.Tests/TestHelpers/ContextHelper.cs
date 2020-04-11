@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Data;
+using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 
@@ -11,7 +12,7 @@ namespace RaceAnnouncer.Tests.TestHelpers
   {
 
     public static DatabaseContext GetContext()
-      => new DatabaseContextFactory().CreateDbContext(TestFiles.EnvFile);
+      => new ContextBuilder().CreateDbContext(TestFiles.EnvFile);
 
     public static void ResetDatabase(DatabaseContext context)
     {

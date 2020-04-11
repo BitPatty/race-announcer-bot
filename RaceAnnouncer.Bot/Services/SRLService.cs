@@ -6,8 +6,9 @@ using System.Timers;
 using SRLApiClient;
 using SRLApiClient.Endpoints.Games;
 using SRLApiClient.Endpoints.Races;
-using RaceAnnouncer.Bot.Common;
+using RaceAnnouncer.Bot.Util;
 using SRLApiClient.Exceptions;
+using RaceAnnouncer.Common;
 
 namespace RaceAnnouncer.Bot.Services
 {

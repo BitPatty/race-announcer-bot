@@ -4,7 +4,7 @@ using System.Linq;
 using Discord;
 using RaceAnnouncer.Schema.Models;
 
-namespace RaceAnnouncer.Bot.Common
+namespace RaceAnnouncer.Bot.Util
 {
   public static class EmbedFactory
   {

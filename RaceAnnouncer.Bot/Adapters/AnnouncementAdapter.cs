@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using Discord.Rest;
 using Microsoft.EntityFrameworkCore;
-using RaceAnnouncer.Bot.Common;
+using RaceAnnouncer.Bot.Util;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
+using RaceAnnouncer.Common;
 
 namespace RaceAnnouncer.Bot.Adapters
 {

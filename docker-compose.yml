@@ -1,0 +1,35 @@
+
+version: "3.7"
+
+services:
+  raceannouncer_bot:
+    container_name: raceannouncer_bot
+    network_mode: "bridge"
+    env_file: ./.env
+    build:
+      context: .
+      dockerfile: ./RaceAnnouncer.Bot/Dockerfile
+      args:
+        DB_NAME: $DB_NAME
+        DB_SERVER: $DB_SERVER
+        DB_PORT: $DB_PORT
+        DB_USER: $BOT_DB_USER
+        DB_PASS: $BOT_DB_PASS
+        DISCORD_TOKEN: $DISCORD_TOKEN
+
+  raceannouncer_web:
+    container_name: raceannouncer_web
+    network_mode: "bridge"
+    env_file: ./.env
+    ports:
+      - "5000:80"
+      - "5001:443"
+    build:
+      context: .
+      dockerfile: ./RaceAnnouncer.WebAPI/Dockerfile
+      args:
+        DB_NAME: $DB_NAME
+        DB_SERVER: $DB_SERVER
+        DB_PORT: $DB_PORT
+        DB_USER: $API_DB_USER
+        DB_PASS: $API_DB_PASS

@@ -3,7 +3,6 @@
 ![MySQL (latest)](<https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%20(latest)/badge.svg>)
 ![MySQL 5.7](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%205.7/badge.svg)
 ![MySQL 8.0](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%208.0/badge.svg)
-![MariaDB (latest)](<https://github.com/BitPatty/RaceAnnouncerBot/workflows/MariaDB%20(latest)/badge.svg>)
 
 A **work in progress** rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
 

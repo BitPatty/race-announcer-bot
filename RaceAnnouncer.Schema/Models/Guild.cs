@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using RaceAnnouncer.Schema.Models.BaseModels;
 
 namespace RaceAnnouncer.Schema.Models
@@ -38,6 +39,7 @@ namespace RaceAnnouncer.Schema.Models
     /// Channels associated with this Guild
     /// </summary>
     [InverseProperty(nameof(Channel.Guild))]
+    [JsonIgnore]
     public ICollection<Channel> Channels { get; set; } = new HashSet<Channel>();
   }
 }

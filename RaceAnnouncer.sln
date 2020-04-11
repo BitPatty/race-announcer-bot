@@ -8,9 +8,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3F03D8E-BBA3-4AEF-81F2-C03982003919}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.env = .env
+		.env.example = .env.example
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		deploy.sh = deploy.sh
+		docker-compose.yml = docker-compose.yml
 		preview.png = preview.png
 		README.md = README.md
 		run_tests.ps1 = run_tests.ps1
@@ -19,6 +21,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Schema", "RaceAnnouncer.Schema\RaceAnnouncer.Schema.csproj", "{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Tests", "RaceAnnouncer.Tests\RaceAnnouncer.Tests.csproj", "{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaceAnnouncer.WebAPI", "RaceAnnouncer.WebAPI\RaceAnnouncer.WebAPI.csproj", "{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaceAnnouncer.Common", "RaceAnnouncer.Common\RaceAnnouncer.Common.csproj", "{49884905-1600-44A1-BBA5-E3B8A7D10998}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +44,14 @@ Global
 		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49884905-1600-44A1-BBA5-E3B8A7D10998}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49884905-1600-44A1-BBA5-E3B8A7D10998}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49884905-1600-44A1-BBA5-E3B8A7D10998}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49884905-1600-44A1-BBA5-E3B8A7D10998}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

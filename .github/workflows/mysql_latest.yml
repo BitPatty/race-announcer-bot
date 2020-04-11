@@ -34,6 +34,6 @@ jobs:
           mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "CREATE USER 'devel'@'%' IDENTIFIED BY 'devel'"
           mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'devel'@'%'"
           mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "FLUSH PRIVILEGES"
-          mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "CREATE DATABASE rab_t1"
+          mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "CREATE DATABASE test"
       - name: Run tests
         run: dotnet test --verbosity normal

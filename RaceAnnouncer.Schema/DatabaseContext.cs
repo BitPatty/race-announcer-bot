@@ -64,6 +64,7 @@ namespace RaceAnnouncer.Schema
         .ApplyConfiguration(new EntrantConfiguration())
         .ApplyConfiguration(new AnnouncementConfiguration())
         .ApplyConfiguration(new UpdateConfiguration())
+        .ApplyConfiguration(new APIUserConfiguration())
         .HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot);
     }
 
