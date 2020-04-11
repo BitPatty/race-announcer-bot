@@ -9,7 +9,11 @@ A **work in progress** rewrite of the SRL race announcer bot for Discord, origin
 
 ## Requirements
 
-The bot requires a valid MySQL Database connection (tested on 5.7) specified in the config file.
+The bot requires a valid MySQL Database connection supplied via environment variables as well as a discord bot token.
+
+## Using docker-compose
+
+Create an `.env` file in the root of the project based on the `.env.example` file and run `docker-compose up` to spin up the bot and api containers.
 
 ### Preview
 
@@ -25,6 +29,7 @@ Dependencies are available via NuGet.
 - [SRLApiClient](https://github.com/BitPatty/SRLApiClient) (AGPL)
 - [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql) (MIT)
 - [dotnet-env](https://github.com/tonerdo/dotnet-env) (MIT)
+- [EntityFrameworkCore](https://github.com/dotnet/efcore) (Apache-2.0)
 
 ---
 
@@ -32,7 +37,7 @@ Dependencies are available via NuGet.
 
 ```
 RaceAnnouncerBot - A Discord race announcer for SpeedRunsLive races
-Copyright (C) 2019  Matteias Collet
+Copyright (C) 2019-2020  Matteias Collet
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
