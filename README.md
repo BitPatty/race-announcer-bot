@@ -4,15 +4,15 @@
 ![MySQL 5.7](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%205.7/badge.svg)
 ![MySQL 8.0](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%208.0/badge.svg)
 
-A **work in progress** rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
+A **WIP** cross-platform rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
 
 ## Requirements
 
-The bot requires a valid MySQL Database connection supplied via environment variables as well as a discord bot token.
+The project requires a valid MySQL Database connection specified through environment variables (see `.env.example`) as well as a discord bot token.
 
 ## Using docker-compose
 
-Create an `.env` file in the root of the project based on the `.env.example` file and run `docker-compose up` to spin up the bot and api containers.
+Create an `.env` file in the root of the project based on the `.env.example` file and run `docker-compose up` to spin up the bot and api container.
 
 ### Preview
 
@@ -24,11 +24,12 @@ Create an `.env` file in the root of the project based on the `.env.example` fil
 
 Dependencies are available via NuGet.
 
-- [Discord.NET](https://github.com/discord-net/Discord.Net) (MIT)
 - [SRLApiClient](https://github.com/BitPatty/SRLApiClient) (AGPL)
+- [Discord.NET](https://github.com/discord-net/Discord.Net) (MIT)
 - [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql) (MIT)
-- [dotnet-env](https://github.com/tonerdo/dotnet-env) (MIT)
+- [DotNetEnv](https://github.com/tonerdo/dotnet-env) (MIT)
 - [EntityFrameworkCore](https://github.com/dotnet/efcore) (Apache-2.0)
+- [cloudscribe.Web.Pagination](https://github.com/cloudscribe/cloudscribe.Web.Pagination) (Apache-2.0)
 
 ---
 
