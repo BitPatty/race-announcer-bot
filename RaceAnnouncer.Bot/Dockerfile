@@ -1,10 +1,16 @@
+ARG DB_NAME
+ARG DB_SERVER
+ARG DB_PORT
+ARG DB_USER
+ARG DB_PASS
+ARG DISCORD_TOKEN
+
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1 AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
-COPY ["RaceAnnouncer.Bot/RaceAnnouncer.Bot.csproj", "RaceAnnouncer.Bot/"]
-COPY ["RaceAnnouncer.Schema/RaceAnnouncer.Schema.csproj", "RaceAnnouncer.Schema/"]
+COPY . .
 RUN dotnet restore "RaceAnnouncer.Bot/RaceAnnouncer.Bot.csproj"
 COPY . .
 WORKDIR "/src/RaceAnnouncer.Bot"
@@ -16,4 +22,17 @@ RUN dotnet publish "RaceAnnouncer.Bot.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ARG DB_NAME
+ARG DB_SERVER
+ARG DB_PORT
+ARG DB_USER
+ARG DB_PASS
+ARG DISCORD_TOKEN
+ENV DB_NAME $DB_NAME
+ENV DB_SERVER $DB_SERVER
+ENV DB_PORT $DB_PORT
+ENV DB_USER $DB_USER
+ENV DB_PASS $DB_PASS
+ENV DISCORD_TOKEN $DISCORD_TOKEN
+
 ENTRYPOINT ["dotnet", "RaceAnnouncer.Bot.dll"]

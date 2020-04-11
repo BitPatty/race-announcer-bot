@@ -8,9 +8,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3F03D8E-BBA3-4AEF-81F2-C03982003919}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.env = .env
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		deploy.sh = deploy.sh
+		docker-compose.yml = docker-compose.yml
 		preview.png = preview.png
 		README.md = README.md
 		run_tests.ps1 = run_tests.ps1
