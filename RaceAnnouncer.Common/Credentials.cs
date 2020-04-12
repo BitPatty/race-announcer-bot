@@ -13,11 +13,15 @@ namespace RaceAnnouncer.Common
     /// <returns>Returns the connection string</returns>
     public static string BuildConnectionString(string? envPath = null)
     {
-
       if (envPath == null)
       {
-        string fallbackPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ".env");
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8604 // Possible null reference argument.
+        string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string fallbackPath = Path.Combine(assemblyPath, ".env");
         return BuildConnectionString(fallbackPath);
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
       }
 
       if (!File.Exists(envPath) && String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DB_NAME")))

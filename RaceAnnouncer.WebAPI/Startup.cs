@@ -22,7 +22,6 @@ namespace RaceAnnouncer.WebAPI
       services.AddAuthentication("BasicAuthentication")
         .AddScheme<AuthenticationSchemeOptions, APIAuthService>("BasicAuthentication", null);
 
-
       services.AddCloudscribePagination();
       services.AddControllers();
     }

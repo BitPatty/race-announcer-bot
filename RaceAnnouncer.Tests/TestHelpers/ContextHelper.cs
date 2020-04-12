@@ -1,16 +1,11 @@
-﻿using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using RaceAnnouncer.Bot.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
-using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.Tests.TestHelpers
 {
   public static class ContextHelper
   {
-
     public static DatabaseContext GetContext()
       => new ContextBuilder().CreateDbContext(TestFiles.EnvFile);
 
@@ -25,7 +20,6 @@ namespace RaceAnnouncer.Tests.TestHelpers
       context?.Dispose();
       context = GetContext();
     }
-
 
   }
 }

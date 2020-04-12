@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using cloudscribe.Pagination.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RaceAnnouncer.Schema.Models;
+using RaceAnnouncer.WebAPI.Payloads;
 using RaceAnnouncer.WebAPI.Services;
 
 namespace RaceAnnouncer.WebAPI.Controllers
@@ -26,6 +28,15 @@ namespace RaceAnnouncer.WebAPI.Controllers
       Tracker tracker = await LookupService<Tracker>.Find(id).ConfigureAwait(false);
       if (tracker == null) return NotFound();
       return Ok(tracker);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult<Tracker?>> Create(CreateTrackerRequest request)
+    {
+      return await TrackerService
+        .CreateTracker(request.ChannelId, request.GameId)
+        .ConfigureAwait(false);
     }
   }
 }

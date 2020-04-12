@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Adapters;
-using RaceAnnouncer.Bot.Util;
-using RaceAnnouncer.Bot.Data;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
 using RaceAnnouncer.Schema;

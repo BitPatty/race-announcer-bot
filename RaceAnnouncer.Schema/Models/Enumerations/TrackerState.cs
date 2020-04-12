@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RaceAnnouncer.Schema.Models.Enumerations
+﻿namespace RaceAnnouncer.Schema.Models.Enumerations
 {
   public enum TrackerState : uint
   {

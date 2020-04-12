@@ -24,7 +24,6 @@ namespace RaceAnnouncer.WebAPI.Services
     )
     : base(options, logger, encoder, clock) { }
 
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
       if (!Request.Headers.ContainsKey("Authorization"))
@@ -35,7 +34,11 @@ namespace RaceAnnouncer.WebAPI.Services
         AuthenticationHeaderValue authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
 
         ParseCredentials(authHeader, out string username, out string secret);
-        APIUser user = await Authenticate(username, secret).ConfigureAwait(false);
+
+        if (username == null || secret == null)
+          return AuthenticateResult.Fail("Invalid Credentials");
+
+        APIUser? user = await Authenticate(username, secret).ConfigureAwait(false);
 
         if (user == null) return AuthenticateResult.Fail("Invalid Credentials");
 
@@ -82,7 +85,7 @@ namespace RaceAnnouncer.WebAPI.Services
       if (String.IsNullOrWhiteSpace(user.APIKey)) return null;
       if (user.ExpiresAt < DateTime.Now) return null;
       if (!BCrypt.Net.BCrypt.Verify(secret, user.APIKey)) return null;
-      
+
       return user;
     }
   }

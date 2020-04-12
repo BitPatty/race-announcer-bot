@@ -74,7 +74,6 @@ namespace RaceAnnouncer.Bot.Adapters
 
       try
       {
-
         RestUserMessage? message = discordService
             .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race, entrants))
             .Result;
