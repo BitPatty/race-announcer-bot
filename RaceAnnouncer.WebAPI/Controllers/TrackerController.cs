@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using cloudscribe.Pagination.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -34,9 +36,22 @@ namespace RaceAnnouncer.WebAPI.Controllers
     [Authorize]
     public async Task<ActionResult<Tracker?>> Create(CreateTrackerRequest request)
     {
-      return await TrackerService
-        .CreateTracker(request.ChannelId, request.GameId)
-        .ConfigureAwait(false);
+      try
+      {
+        Tracker tracker = await TrackerService
+          .CreateTracker(request.ChannelId, request.GameId)
+          .ConfigureAwait(false);
+
+        return Created($"api/trackers/{tracker.Id}", tracker);
+      }
+      catch (InvalidOperationException ex)
+      {
+        return Problem(ex.Message, statusCode: (int)HttpStatusCode.Conflict);
+      }
+      catch (ArgumentException ex)
+      {
+        return Problem(ex.Message, statusCode: (int)HttpStatusCode.BadRequest);
+      }
     }
   }
 }

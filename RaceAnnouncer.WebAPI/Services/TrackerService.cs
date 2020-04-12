@@ -10,7 +10,7 @@ namespace RaceAnnouncer.WebAPI.Services
 {
   public static class TrackerService
   {
-    public static async Task<Tracker?> CreateTracker(long channelId, long gameId)
+    public static async Task<Tracker> CreateTracker(long channelId, long gameId)
     {
       using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
