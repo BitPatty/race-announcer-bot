@@ -1,2 +1,11 @@
 *.cs text eol=crlf
+*.sln text eol=crlf
+*.json text eol=crlf
+*csproj text eol=crlf
+
+LICENSE text eol=lf
+Dockerfile text eol=lf
+*.*.env text eol=lf
+*.dockerignore text eol=lf
 *.sh text eol=lf
+*.yml text eol=lf
