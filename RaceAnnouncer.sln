@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.env.example = .env.example
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		create_migration.ps1 = create_migration.ps1
 		docker-compose.yml = docker-compose.yml
 		preview.png = preview.png
 		README.md = README.md
@@ -22,9 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Schema", "Rac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Tests", "RaceAnnouncer.Tests\RaceAnnouncer.Tests.csproj", "{1B618537-3D66-4E57-A5FD-D1D3C40E26A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaceAnnouncer.WebAPI", "RaceAnnouncer.WebAPI\RaceAnnouncer.WebAPI.csproj", "{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.WebAPI", "RaceAnnouncer.WebAPI\RaceAnnouncer.WebAPI.csproj", "{EE1D212D-6DAC-4F8D-8E8A-2ABCCFA61D74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaceAnnouncer.Common", "RaceAnnouncer.Common\RaceAnnouncer.Common.csproj", "{49884905-1600-44A1-BBA5-E3B8A7D10998}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Common", "RaceAnnouncer.Common\RaceAnnouncer.Common.csproj", "{49884905-1600-44A1-BBA5-E3B8A7D10998}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
