@@ -38,7 +38,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     /// </summary>
     /// <remarks>
     /// Sample request:
-    ///     GET /api/guilds/:id
+    ///     GET /api/guilds/1
     /// </remarks>
     ///  /// <param name="id">The guilds id</param>
     /// <returns>The guild</returns>

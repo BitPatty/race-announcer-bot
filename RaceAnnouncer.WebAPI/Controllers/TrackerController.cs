@@ -42,7 +42,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     /// </summary>
     /// <remarks>
     /// Sample request:
-    ///     GET /api/trackers/:id
+    ///     GET /api/trackers/1
     /// </remarks>
     ///  /// <param name="id">The trackers id</param>
     /// <returns>The tracker</returns>
@@ -59,7 +59,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     /// </summary>
     /// <remarks>
     /// Sample request:
-    ///     POST /api/trackers
+    ///     POST /api/trackers/1
     ///     {
     ///         "gameId": 1,
     ///         "channelId": 3
@@ -94,7 +94,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     /// </summary>
     /// <remarks>
     /// Sample request:
-    ///     POST /api/trackers
+    ///     PUT /api/trackers/1
     ///     {
     ///         "gameId": 1,
     ///         "channelId": 3
