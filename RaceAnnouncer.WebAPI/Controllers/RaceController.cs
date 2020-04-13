@@ -40,7 +40,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     /// Sample request:
     ///     GET /api/races/1
     /// </remarks>
-    ///  /// <param name="id">The races id</param>
+    /// <param name="id">The races id</param>
     /// <returns>The race</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<Race>> Find(long id)
