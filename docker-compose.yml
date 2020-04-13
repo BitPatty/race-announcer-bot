@@ -5,6 +5,7 @@ services:
   raceannouncer_bot:
     container_name: raceannouncer_bot
     network_mode: "bridge"
+    restart: "always"
     env_file: ./.env
     build:
       context: .
@@ -20,6 +21,7 @@ services:
   raceannouncer_api:
     container_name: raceannouncer_api
     network_mode: "bridge"
+    restart: "always"
     env_file: ./.env
     ports:
       - "5000:80"
