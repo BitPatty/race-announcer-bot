@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using RaceAnnouncer.WebAPI.Validators;
 using System.Text.Json.Serialization;
 using RaceAnnouncer.WebAPI.Converters;
+using RaceAnnouncer.WebAPI.Validators;
 
 namespace RaceAnnouncer.WebAPI.Payloads
 {

@@ -48,7 +48,7 @@ namespace RaceAnnouncer.Schema.Models
       get => _abbreviation;
       set
       {
-        if (String.IsNullOrWhiteSpace(value)) throw new ArgumentException($"({nameof(Abbreviation)}) Invalid game abbreviation: '{Abbreviation}' given.");
+        if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException($"({nameof(Abbreviation)}) Invalid game abbreviation: '{Abbreviation}' given.");
         else _abbreviation = value.ToLower();
       }
     }
@@ -66,7 +66,7 @@ namespace RaceAnnouncer.Schema.Models
       get => _name;
       set
       {
-        if (String.IsNullOrWhiteSpace(value)) throw new ArgumentException($"({nameof(Name)}) Invalid game name: '{Name}' given.");
+        if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException($"({nameof(Name)}) Invalid game name: '{Name}' given.");
         else _name = value;
       }
     }

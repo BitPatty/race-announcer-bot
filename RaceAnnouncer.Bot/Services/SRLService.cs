@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using RaceAnnouncer.Common;
 using SRLApiClient;
 using SRLApiClient.Endpoints.Games;
 using SRLApiClient.Endpoints.Races;
-using RaceAnnouncer.Common;
 
 namespace RaceAnnouncer.Bot.Services
 {

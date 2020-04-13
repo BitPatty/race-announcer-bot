@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using RaceAnnouncer.Schema;
-using RaceAnnouncer.Tests.TestHelpers;
 using RaceAnnouncer.Schema.Models;
-using System.Linq;
 using RaceAnnouncer.Schema.Models.Enumerations;
+using RaceAnnouncer.Tests.TestHelpers;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "RCS1110:Declare type inside namespace.", Justification = "NUnit 3 Spec")]
 

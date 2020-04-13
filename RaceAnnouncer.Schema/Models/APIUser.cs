@@ -15,8 +15,8 @@ namespace RaceAnnouncer.Schema.Models
 
     public APIUser(string username, string apiKey)
     {
-      if (String.IsNullOrWhiteSpace(username)) throw new ArgumentException("The username may not be null or whitespace");
-      if (String.IsNullOrWhiteSpace(apiKey)) throw new ArgumentException("The password may not be null or whitespace");
+      if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("The username may not be null or whitespace");
+      if (string.IsNullOrWhiteSpace(apiKey)) throw new ArgumentException("The password may not be null or whitespace");
 
       Username = username;
       APIKey = apiKey;

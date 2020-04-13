@@ -27,13 +27,13 @@ namespace RaceAnnouncer.Bot.Util
                                   Value = entrants.Count == 0
                                     ? "-"
                                     : entrants.Count <= 15
-                                    ? String.Join("\r\n", race
+                                    ? string.Join("\r\n", race
                                       .Entrants
                                       .OrderBy(e => e.Place > 0 ? e.Place : 99)
                                       .ThenBy(e => e.State)
                                       .ThenBy(e => e.DisplayName)
                                       .Select(FormatEntrantStatus))
-                                    : String.Join("\r\n", race
+                                    : string.Join("\r\n", race
                                       .Entrants
                                       .OrderBy(e => e.Place > 0 ? e.Place : 99)
                                       .ThenBy(e => e.State)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace RaceAnnouncer.WebAPI.Validators
 {
@@ -21,7 +20,7 @@ namespace RaceAnnouncer.WebAPI.Validators
       if (value == null)
         return new ValidationResult($"Missing parameter: {validationContext.DisplayName}");
 
-      if (Int32.TryParse(value?.ToString(), out int res) && res > 0)
+      if (int.TryParse(value?.ToString(), out int res) && res > 0)
         return ValidationResult.Success;
 
       return new ValidationResult($"{validationContext.DisplayName} must be an integer greater than 0");

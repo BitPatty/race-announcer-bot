@@ -24,7 +24,7 @@ namespace RaceAnnouncer.Common
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
       }
 
-      if (!File.Exists(envPath) && String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DB_NAME")))
+      if (!File.Exists(envPath) && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DB_NAME")))
         throw new IOException("Environment not set!");
 
       DotNetEnv.Env.Load(envPath);

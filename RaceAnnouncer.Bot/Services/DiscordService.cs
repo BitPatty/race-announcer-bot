@@ -95,7 +95,7 @@ namespace RaceAnnouncer.Bot.Services
     /// <param name="guildId">The guild id</param>
     /// <param name="channelId">The channel id</param>
     /// <returns></returns>
-    public Boolean? HasWritePermission(ulong guildId, ulong channelId)
+    public bool? HasWritePermission(ulong guildId, ulong channelId)
       => GetGuild(guildId)?.CurrentUser.GetPermissions(GetTextChannel(channelId)).SendMessages;
 
     /// <summary>

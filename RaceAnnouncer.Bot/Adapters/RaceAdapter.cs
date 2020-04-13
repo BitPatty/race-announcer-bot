@@ -4,9 +4,9 @@ using System.Linq;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Data.Converters;
 using RaceAnnouncer.Bot.Services;
+using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Common;
 using SRLApiClient.Exceptions;
 
 namespace RaceAnnouncer.Bot.Adapters

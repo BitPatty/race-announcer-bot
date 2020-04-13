@@ -32,7 +32,7 @@ namespace RaceAnnouncer.WebAPI.Converters
 
       if (
         reader.TokenType == JsonTokenType.String
-        && Int64.TryParse(reader.GetString(), out long longFromString)
+        && long.TryParse(reader.GetString(), out long longFromString)
       )
       {
         return longFromString;

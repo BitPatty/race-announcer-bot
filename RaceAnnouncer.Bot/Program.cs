@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Adapters;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
+using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
-using RaceAnnouncer.Common;
 
 namespace RaceAnnouncer.Bot
 {

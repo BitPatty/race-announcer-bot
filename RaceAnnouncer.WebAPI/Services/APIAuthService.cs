@@ -113,7 +113,7 @@ namespace RaceAnnouncer.WebAPI.Services
         .ConfigureAwait(false);
 
       if (user == null) return null;
-      if (String.IsNullOrWhiteSpace(user.APIKey)) return null;
+      if (string.IsNullOrWhiteSpace(user.APIKey)) return null;
       if (user.ExpiresAt < DateTime.Now) return null;
       if (!BCrypt.Net.BCrypt.Verify(secret, user.APIKey)) return null;
 
