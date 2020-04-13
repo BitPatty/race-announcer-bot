@@ -21,7 +21,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Announcement>> Find(int id)
+    public async Task<ActionResult<Announcement>> Find(long id)
     {
       Announcement announcement = await LookupService<Announcement>.Find(id).ConfigureAwait(false);
       if (announcement == null) return NotFound();

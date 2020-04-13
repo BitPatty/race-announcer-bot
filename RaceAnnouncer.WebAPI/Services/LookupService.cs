@@ -39,7 +39,7 @@ namespace RaceAnnouncer.WebAPI.Services
       };
     }
 
-    public static async Task<T> Find(int id, CancellationToken cancellationToken = default)
+    public static async Task<T> Find(long id, CancellationToken cancellationToken = default)
     {
       cancellationToken.ThrowIfCancellationRequested();
       using DatabaseContext context = new ContextBuilder().CreateDbContext();

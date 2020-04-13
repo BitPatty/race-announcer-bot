@@ -25,7 +25,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Tracker>> Find(int id)
+    public async Task<ActionResult<Tracker>> Find(long id)
     {
       Tracker tracker = await LookupService<Tracker>.Find(id).ConfigureAwait(false);
       if (tracker == null) return NotFound();
@@ -43,6 +43,28 @@ namespace RaceAnnouncer.WebAPI.Controllers
           .ConfigureAwait(false);
 
         return Created($"api/trackers/{tracker.Id}", tracker);
+      }
+      catch (InvalidOperationException ex)
+      {
+        return Problem(ex.Message, statusCode: (int)HttpStatusCode.Conflict);
+      }
+      catch (ArgumentException ex)
+      {
+        return Problem(ex.Message, statusCode: (int)HttpStatusCode.BadRequest);
+      }
+    }
+
+    [HttpPut("{id}")]
+    [Authorize]
+    public async Task<ActionResult<Tracker?>> UpdateTracker(UpdateTrackerRequest request, long id)
+    {
+      try
+      {
+        Tracker tracker = await TrackerService
+          .UpdateTracker(id, request.GameId, request.ChannelId)
+          .ConfigureAwait(false);
+
+        return Ok(tracker);
       }
       catch (InvalidOperationException ex)
       {

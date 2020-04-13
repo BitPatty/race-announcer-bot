@@ -55,5 +55,55 @@ namespace RaceAnnouncer.WebAPI.Services
         throw new ArgumentException($"Invalid gameId: {gameId}");
       }
     }
+
+    public static async Task<Tracker> UpdateTracker(long trackerId, long gameId, long channelId)
+    {
+      using DatabaseContext context = new ContextBuilder().CreateDbContext();
+
+      Tracker tracker = await context
+        .Trackers
+        .Where(t => t.Id.Equals(trackerId))
+        .Include(c => c.Channel)
+        .SingleOrDefaultAsync()
+        .ConfigureAwait(false);
+
+      if (tracker == null)
+        throw new ArgumentException("Invalid trackerId");
+
+      Channel channel = await context
+        .Channels
+        .Where(c => c.Id.Equals(channelId) && c.IsActive)
+        .SingleOrDefaultAsync()
+        .ConfigureAwait(false);
+
+      if (channel == null)
+        throw new ArgumentException("Invalid channelId");
+
+      if (channel.GuildId != tracker.Channel.GuildId)
+        throw new InvalidOperationException($"Cannot move tracker to a different guild ({tracker.Channel.GuildId} => {channel.GuildId})");
+
+      Game game = await context
+        .Games
+        .Where(c => c.Id.Equals(gameId))
+        .SingleOrDefaultAsync()
+        .ConfigureAwait(false);
+
+#pragma warning disable IDE0016 // Use 'throw' expression
+      if (game == null)
+        throw new ArgumentException("Invalid gameId");
+#pragma warning restore IDE0016 // Use 'throw' expression
+
+      tracker.Channel = channel;
+      tracker.Game = game;
+
+      await context.SaveChangesAsync().ConfigureAwait(false);
+
+      return await context
+        .Trackers
+        .Where(t => t.Id.Equals(trackerId))
+        .Include(c => c.Channel)
+        .SingleOrDefaultAsync()
+        .ConfigureAwait(false);
+    }
   }
 }

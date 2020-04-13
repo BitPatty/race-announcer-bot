@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.env.example = .env.example
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		compose.ps1 = compose.ps1
 		create_migration.ps1 = create_migration.ps1
 		docker-compose.yml = docker-compose.yml
 		preview.png = preview.png

@@ -21,7 +21,7 @@ namespace RaceAnnouncer.WebAPI.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Channel>> Find(int id)
+    public async Task<ActionResult<Channel>> Find(long id)
     {
       Channel channel = await LookupService<Channel>.Find(id).ConfigureAwait(false);
       if (channel == null) return NotFound();
