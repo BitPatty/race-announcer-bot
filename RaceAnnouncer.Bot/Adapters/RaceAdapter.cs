@@ -181,13 +181,14 @@ namespace RaceAnnouncer.Bot.Adapters
           if (
             ex is SRLParseException
             || ex.InnerException is SRLParseException
+            || race.State >= SRLApiClient.Endpoints.RaceState.Finished
             || DateTime.UtcNow.Subtract(race.CreatedAt).TotalHours >= 12
           )
           {
             Logger.Info($"({race.SrlId}) Deactivating race...");
 
             race.IsActive = false;
-            if (race.State != SRLApiClient.Endpoints.RaceState.Finished)
+            if (race.State < SRLApiClient.Endpoints.RaceState.Finished)
               race.State = SRLApiClient.Endpoints.RaceState.Unknown;
           }
         }
