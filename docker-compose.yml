@@ -7,6 +7,11 @@ services:
     network_mode: "bridge"
     restart: "always"
     env_file: ./.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
     build:
       context: .
       dockerfile: ./RaceAnnouncer.Bot/Dockerfile
@@ -23,6 +28,11 @@ services:
     network_mode: "bridge"
     restart: "always"
     env_file: ./.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
     ports:
       - "5000:80"
       - "5001:443"
