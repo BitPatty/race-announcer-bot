@@ -40,7 +40,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Announcements
           .Local
           .SingleOrDefault(a
-            => a.Tracker.Equals(tracker)
+            => a.TrackerId.Equals(tracker.Id)
             && a.Race.Equals(race));
   }
 }

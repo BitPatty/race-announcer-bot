@@ -22,4 +22,10 @@
     <ProjectReference Include="..\RaceAnnouncer.Schema\RaceAnnouncer.Schema.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update=".env">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

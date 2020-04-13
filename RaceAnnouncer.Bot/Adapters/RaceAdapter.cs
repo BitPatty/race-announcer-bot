@@ -146,10 +146,10 @@ namespace RaceAnnouncer.Bot.Adapters
       , SRLService srlService
       , List<Race> srlRaces)
     {
-      List<Race> activeRaces = context
+      IEnumerable<Race> activeRaces = context
         .Races
         .Local
-        .Where(r => r.IsActive && !srlRaces.Contains(r)).ToList();
+        .Where(r => r.IsActive && !srlRaces.Contains(r));
 
       foreach (Race race in activeRaces)
       {
