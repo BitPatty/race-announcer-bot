@@ -7,10 +7,23 @@ using RaceAnnouncer.WebAPI.Services;
 
 namespace RaceAnnouncer.WebAPI.Controllers
 {
+  /// <summary>
+  /// Handles requests on the /api/entrants endpoint
+  /// </summary>
   [Route("api/entrants")]
   [ApiController]
   public class EntrantController : ControllerBase
   {
+    /// <summary>
+    /// List entrants
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///     GET /api/entrants
+    /// </remarks>
+    /// <param name="pageNumber">The page number</param>
+    /// <param name="pageSize">The page size (1-10)</param>
+    /// <returns>The paginated entrant list</returns>
     [HttpGet]
     public async Task<ActionResult<PagedResult<Entrant>>> Get(
       [FromQuery(Name = "pageNumber"), Range(1, int.MaxValue)] int pageNumber = 1
@@ -20,6 +33,15 @@ namespace RaceAnnouncer.WebAPI.Controllers
       return await LookupService<Entrant>.Paginate(pageNumber, pageSize).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Find a specific entrant
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///     GET /api/entrants/:id
+    /// </remarks>
+    /// <param name="id">The entrants id</param>
+    /// <returns>The entrant</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<Entrant>> Find(long id)
     {

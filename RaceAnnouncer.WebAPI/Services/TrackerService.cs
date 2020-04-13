@@ -8,8 +8,17 @@ using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.WebAPI.Services
 {
+  /// <summary>
+  /// Handles interactions with the tracker entities
+  /// </summary>
   public static class TrackerService
   {
+    /// <summary>
+    /// Create a new tracker
+    /// </summary>
+    /// <param name="channelId">The channel id</param>
+    /// <param name="gameId">The game id</param>
+    /// <returns>Returns the created tracker</returns>
     public static async Task<Tracker> CreateTracker(long channelId, long gameId)
     {
       using DatabaseContext context = new ContextBuilder().CreateDbContext();
@@ -56,6 +65,13 @@ namespace RaceAnnouncer.WebAPI.Services
       }
     }
 
+    /// <summary>
+    /// Updates a single tracker
+    /// </summary>
+    /// <param name="trackerId">The tracker id</param>
+    /// <param name="gameId">The (new) game id</param>
+    /// <param name="channelId">The (new) channel id</param>
+    /// <returns>Returns the updated tracker</returns>
     public static async Task<Tracker> UpdateTracker(long trackerId, long gameId, long channelId)
     {
       using DatabaseContext context = new ContextBuilder().CreateDbContext();

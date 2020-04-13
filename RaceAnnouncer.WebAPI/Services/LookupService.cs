@@ -9,8 +9,19 @@ using RaceAnnouncer.Schema.Models.BaseModels;
 
 namespace RaceAnnouncer.WebAPI.Services
 {
+  /// <summary>
+  /// Allows for basic paginated requests on any <see cref="BaseEntity"/>
+  /// </summary>
+  /// <typeparam name="T"></typeparam>
   public static class LookupService<T> where T : BaseEntity
   {
+    /// <summary>
+    /// Paginates the entries
+    /// </summary>
+    /// <param name="pageNumber">The page number</param>
+    /// <param name="pageSize">The page size</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>Returns the paginated result</returns>
     public static async Task<PagedResult<T>> Paginate(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
       cancellationToken.ThrowIfCancellationRequested();
@@ -39,6 +50,12 @@ namespace RaceAnnouncer.WebAPI.Services
       };
     }
 
+    /// <summary>
+    /// Finds a single entry in the specified table
+    /// </summary>
+    /// <param name="id">The entries id</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>Returns the entry if a match is found</returns>
     public static async Task<T> Find(long id, CancellationToken cancellationToken = default)
     {
       cancellationToken.ThrowIfCancellationRequested();

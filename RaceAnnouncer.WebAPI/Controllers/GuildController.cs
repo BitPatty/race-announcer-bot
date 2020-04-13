@@ -7,10 +7,23 @@ using RaceAnnouncer.WebAPI.Services;
 
 namespace RaceAnnouncer.WebAPI.Controllers
 {
+  /// <summary>
+  /// Handles requests on the /api/guilds endpoint
+  /// </summary>
   [Route("api/guilds")]
   [ApiController]
   public class GuildController : ControllerBase
   {
+    /// <summary>
+    /// List guilds
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///     GET /api/guilds
+    /// </remarks>
+    /// <param name="pageNumber">The page number</param>
+    /// <param name="pageSize">The page size (1-10)</param>
+    /// <returns>The paginated guild list</returns>
     [HttpGet]
     public async Task<ActionResult<PagedResult<Guild>>> Get(
      [FromQuery(Name = "pageNumber"), Range(1, int.MaxValue)] int pageNumber = 1
@@ -20,6 +33,15 @@ namespace RaceAnnouncer.WebAPI.Controllers
       return await LookupService<Guild>.Paginate(pageNumber, pageSize).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Find a specific guild
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///     GET /api/guilds/:id
+    /// </remarks>
+    ///  /// <param name="id">The guilds id</param>
+    /// <returns>The guild</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<Guild>> Find(long id)
     {

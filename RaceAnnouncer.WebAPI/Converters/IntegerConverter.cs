@@ -4,8 +4,18 @@ using System.Text.Json.Serialization;
 
 namespace RaceAnnouncer.WebAPI.Converters
 {
+  /// <summary>
+  /// Conversion between numbers/strings and integers
+  /// </summary>
   public class IntegerConverter : JsonConverter<int>
   {
+    /// <summary>
+    /// Converts strings and numbers to integers
+    /// </summary>
+    /// <param name="reader">The JSON reader</param>
+    /// <param name="typeToConvert">The type to convert</param>
+    /// <param name="options">The serializer options</param>
+    /// <returns>Returns the converted integer</returns>
     public override int Read(
         ref Utf8JsonReader reader
         , Type typeToConvert
@@ -38,12 +48,18 @@ namespace RaceAnnouncer.WebAPI.Converters
       throw new JsonException("Either the JSON value is not in a supported format, or is out of bounds for an Int32.");
     }
 
+    /// <summary>
+    /// Converts an integer value to a number
+    /// </summary>
+    /// <param name="writer">The JSON writer</param>
+    /// <param name="value">The value</param>
+    /// <param name="options">The serializer options</param>
     public override void Write(
         Utf8JsonWriter writer
-        , int dateTimeValue
+        , int value
         , JsonSerializerOptions options)
     {
-      writer.WriteNumberValue((decimal)dateTimeValue);
+      writer.WriteNumberValue((decimal)value);
     }
   }
 }

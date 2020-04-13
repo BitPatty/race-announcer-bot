@@ -3,8 +3,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RaceAnnouncer.WebAPI.Validators
 {
+  /// <summary>
+  /// Validates that a value is an integer and greater than 1
+  /// </summary>
   public class PositiveInteger : ValidationAttribute
   {
+    /// <summary>
+    /// Checks whether the value is a valid positive integer
+    /// </summary>
+    /// <param name="value">The value</param>
+    /// <param name="validationContext">The validation context</param>
+    /// <returns>Returns the validation result</returns>
     protected override ValidationResult IsValid(
       object value
       , ValidationContext validationContext)

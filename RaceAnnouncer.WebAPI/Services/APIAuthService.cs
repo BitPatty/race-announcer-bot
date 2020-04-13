@@ -14,8 +14,18 @@ using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.WebAPI.Services
 {
+  /// <summary>
+  /// Enables BASIC authentication against the API
+  /// </summary>
   public class APIAuthService : AuthenticationHandler<AuthenticationSchemeOptions>
   {
+    /// <summary>
+    /// Creates a new instance of the <see cref="APIAuthService"/>
+    /// </summary>
+    /// <param name="options">The authentication options</param>
+    /// <param name="logger">The logger factory</param>
+    /// <param name="encoder">The url encoder</param>
+    /// <param name="clock">The system clock</param>
     public APIAuthService(
       IOptionsMonitor<AuthenticationSchemeOptions> options
       , ILoggerFactory logger
@@ -24,6 +34,10 @@ namespace RaceAnnouncer.WebAPI.Services
     )
     : base(options, logger, encoder, clock) { }
 
+    /// <summary>
+    /// Handles an authentication request
+    /// </summary>
+    /// <returns>Returns the AuthenticateResult</returns>
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
       if (!Request.Headers.ContainsKey("Authorization"))
@@ -51,6 +65,12 @@ namespace RaceAnnouncer.WebAPI.Services
       }
     }
 
+    /// <summary>
+    /// Parse the base64 encoded credentials
+    /// </summary>
+    /// <param name="authHeader">The authorization header containing the credentials</param>
+    /// <param name="username">The username</param>
+    /// <param name="secret">The secret</param>
     private void ParseCredentials(AuthenticationHeaderValue authHeader, out string username, out string secret)
     {
       byte[] credentialBytes = Convert.FromBase64String(authHeader.Parameter);
@@ -59,6 +79,11 @@ namespace RaceAnnouncer.WebAPI.Services
       secret = credentials[1];
     }
 
+    /// <summary>
+    /// Creates a new authentication ticket
+    /// </summary>
+    /// <param name="user">The user to create a ticket for</param>
+    /// <returns>Returns a new AuthenticationTicket for the provided user</returns>
     private AuthenticationTicket CreateTicket(APIUser user)
     {
       Claim[] claims = new[] {
@@ -70,6 +95,12 @@ namespace RaceAnnouncer.WebAPI.Services
       return new AuthenticationTicket(principal, Scheme.Name);
     }
 
+    /// <summary>
+    /// Authenticates a user against the credentials stored in the database
+    /// </summary>
+    /// <param name="username">The username</param>
+    /// <param name="secret">The secret</param>
+    /// <returns>Returns the user if a match is found</returns>
     private async Task<APIUser?> Authenticate(string username, string secret)
     {
       using DatabaseContext context = new ContextBuilder().CreateDbContext();
