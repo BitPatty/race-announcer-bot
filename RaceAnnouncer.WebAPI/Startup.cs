@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
@@ -64,6 +65,28 @@ namespace RaceAnnouncer.WebAPI
           {
             Name = "Use under AGPL-v3",
             Url = new Uri("https://github.com/BitPatty/RaceAnnouncerBot/blob/master/LICENSE"),
+          }
+        });
+
+        c.AddSecurityDefinition("basicAuth", new OpenApiSecurityScheme
+        {
+          Type = SecuritySchemeType.Http,
+          Scheme = "basic",
+          Description = "Input your username and password to perform data manipulations",
+          In = ParameterLocation.Header,
+        });
+
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+          {
+            new OpenApiSecurityScheme
+            {
+              Reference = new OpenApiReference
+              {
+                  Type = ReferenceType.SecurityScheme,
+                  Id = "basicAuth"
+              }
+            }, new List<string>()
           }
         });
 
