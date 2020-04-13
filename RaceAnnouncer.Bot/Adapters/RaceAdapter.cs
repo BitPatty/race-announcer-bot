@@ -7,6 +7,7 @@ using RaceAnnouncer.Bot.Services;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 using RaceAnnouncer.Common;
+using SRLApiClient.Exceptions;
 
 namespace RaceAnnouncer.Bot.Adapters
 {
@@ -73,7 +74,7 @@ namespace RaceAnnouncer.Bot.Adapters
     }
 
     /// <summary>
-    /// Updates the existing or adds a new race entity based on the 
+    /// Updates the existing or adds a new race entity based on the
     /// <paramref name="srlRace"/>
     /// </summary>
     /// <param name="context">The database context</param>
@@ -95,7 +96,7 @@ namespace RaceAnnouncer.Bot.Adapters
     }
 
     /// <summary>
-    /// Updates existing, adds new and deletes removed entrants  from 
+    /// Updates existing, adds new and deletes removed entrants  from
     /// the <paramref name="race"/> entity
     /// </summary>
     /// <param name="context">The database context</param>
@@ -135,7 +136,7 @@ namespace RaceAnnouncer.Bot.Adapters
     }
 
     /// <summary>
-    /// Attempts to fetch and update race details of race entities 
+    /// Attempts to fetch and update race details of race entities
     /// which are no longer in the SRL race list.
     /// </summary>
     /// <param name="context">The database context</param>
@@ -176,9 +177,19 @@ namespace RaceAnnouncer.Bot.Adapters
         {
           Logger.Error($"({race.SrlId}) Exception thrown", ex);
 
-          race.IsActive = false;
-          if (race.State != SRLApiClient.Endpoints.RaceState.Finished)
-            race.State = SRLApiClient.Endpoints.RaceState.Unknown;
+          // Avoid catching HttpExceptions
+          if (
+            ex is SRLParseException
+            || ex.InnerException is SRLParseException
+            || DateTime.UtcNow.Subtract(race.CreatedAt).TotalHours >= 12
+          )
+          {
+            Logger.Info($"({race.SrlId}) Deactivating race");
+
+            race.IsActive = false;
+            if (race.State != SRLApiClient.Endpoints.RaceState.Finished)
+              race.State = SRLApiClient.Endpoints.RaceState.Unknown;
+          }
         }
       }
     }
