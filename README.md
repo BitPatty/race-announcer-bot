@@ -1,18 +1,31 @@
 ﻿# RaceAnnouncerBot
 
-![MySQL (latest)](<https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%20(latest)/badge.svg>)
-![MySQL 5.7](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%205.7/badge.svg)
-![MySQL 8.0](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%208.0/badge.svg)
+[![MySQL (latest)](<https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%20(latest)/badge.svg>)](https://github.com/BitPatty/RaceAnnouncerBot/actions)
+[![MySQL 5.7](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%205.7/badge.svg)](https://github.com/BitPatty/RaceAnnouncerBot/actions)
+[![MySQL 8.0](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%208.0/badge.svg)](https://github.com/BitPatty/RaceAnnouncerBot/actions)
 
-A **WIP** cross-platform rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
+A cross-platform rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
+
+
+## Components
+
+* RaceAnnouncer.Bot: The bot excutable (.NET Core 3.1)
+* RaceAnnouncer.Common: Shared logic (Multitarget: .NET Core 3.1, .NET Standard 2.1)
+* RaceAnnouncer.Schema: The database models and migrations (.NET Standard 2.1)
+* RaceAnnouncer.Tests: NUnit Tests, mostly entity manipulation tests (.NET Core 3.1)
+* RaceAnnouncer.WebAPI: A REST API to manipulate the entities (ASP.NET Core 3.1)
 
 ## Requirements
 
-The project requires a valid MySQL Database connection specified through environment variables (see `.env.example`) as well as a discord bot token.
+To run the project you need the [.NET Core 3.1 runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1) or [Docker](https://www.docker.com/).
 
-## Using docker-compose
+### Environment variables
 
-Create an `.env` file in the root of the project based on the `.env.example` file and run `docker-compose up` to spin up the bot and api container.
+The project requires a valid MySQL Database connection specified through environment variables (see `.env.example`) as well as a discord bot token which you can get from the [Discord Developer Portal](https://discordapp.com/developers).
+
+### Using docker-compose
+
+Create an `.env` file in the root of the project based on the `.env.example` file and run `docker-compose up` or the `compose.ps1` script to spin up the bot and api container. For more information on docker compose visit [https://docs.docker.com/compose/](https://docs.docker.com/compose/).
 
 ### Preview
 
@@ -22,14 +35,21 @@ Create an `.env` file in the root of the project based on the `.env.example` fil
 
 ### Dependencies
 
-Dependencies are available via NuGet.
+All Dependencies are available via NuGet.
 
+#### Common Dependencies
+- [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql) (MIT)
+- [EntityFrameworkCore](https://github.com/dotnet/efcore) (Apache-2.0)
+- [DotNetEnv](https://github.com/tonerdo/dotnet-env) (MIT)
+
+#### Bot Dependencies
 - [SRLApiClient](https://github.com/BitPatty/SRLApiClient) (AGPL)
 - [Discord.NET](https://github.com/discord-net/Discord.Net) (MIT)
-- [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql) (MIT)
-- [DotNetEnv](https://github.com/tonerdo/dotnet-env) (MIT)
-- [EntityFrameworkCore](https://github.com/dotnet/efcore) (Apache-2.0)
+
+#### WebAPI Dependencies
 - [cloudscribe.Web.Pagination](https://github.com/cloudscribe/cloudscribe.Web.Pagination) (Apache-2.0)
+- [Swashbuckle.AspNetCore](https://github.com/domaindrivendev/Swashbuckle.AspNetCore) (MIT)
+- [Bcrypt.NET](https://github.com/BcryptNet/bcrypt.net) (MIT)
 
 ---
 
