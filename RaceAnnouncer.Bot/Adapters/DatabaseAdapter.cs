@@ -26,7 +26,7 @@ namespace RaceAnnouncer.Bot.Adapters
       => context.Database.Migrate();
 
     /// <summary>
-    /// Gets the the list of races in the specified <paramref name="context"/>
+    /// Gets the list of races in the specified <paramref name="context"/>
     /// which don't have an unchanged state
     /// </summary>
     /// <param name="context">The database context</param>

@@ -124,8 +124,36 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void InitSrlService()
     {
-      _srlService = new SRLService(30000);
+      double updateInterval = LoadUpdateInterval();
+      _srlService = new SRLService(updateInterval);
       _srlService.OnUpdate += OnSrlUpdate;
+    }
+
+    /// <summary>
+    /// Parse the update interval from the environment variables
+    /// </summary>
+    /// <returns>Returns the update interval (Fallback 30 seconds)</returns>
+    private static double LoadUpdateInterval()
+    {
+      try
+      {
+        string? updateInterval = Environment.GetEnvironmentVariable("UPDATE_INTERVAL");
+
+        if (
+          updateInterval != null
+          && double.TryParse(updateInterval, out double res)
+          && res >= 9999
+        )
+        {
+          return res;
+        }
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Failed to load update interval", ex);
+      }
+
+      return 30000;
     }
 
     /// <summary>
