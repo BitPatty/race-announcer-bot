@@ -125,6 +125,9 @@ namespace RaceAnnouncer.Bot
     private static void InitSrlService()
     {
       double updateInterval = LoadUpdateInterval();
+
+      Logger.Info($"Update Interval set to {updateInterval}ms");
+
       _srlService = new SRLService(updateInterval);
       _srlService.OnUpdate += OnSrlUpdate;
     }
@@ -171,7 +174,7 @@ namespace RaceAnnouncer.Bot
       catch (Exception ex)
       {
         Logger.Error("Failed to migrate context! Exiting");
-        Logger.Error($"Exception thrown", ex);
+        Logger.Error("Exception thrown", ex);
         Environment.Exit(-1);
       }
       finally
@@ -415,7 +418,7 @@ namespace RaceAnnouncer.Bot
 
       string? token = Credentials.ParseDiscordToken();
       if (token == null)
-        throw new Exception("Could not Load the discord token");
+        throw new Exception("Failed to load the Discord token");
 
       _discordService.AuthenticateAsync(token).Wait();
       await _discordService.StartAsync().ConfigureAwait(false);

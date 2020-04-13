@@ -43,7 +43,7 @@ namespace RaceAnnouncer.Bot.Adapters
 
       foreach (SRLApiClient.Endpoints.Races.Race srlRace in races)
       {
-        Logger.Info($"({srlRace.Id}) Updating");
+        Logger.Info($"({srlRace.Id}) Synchronizing...");
 
         Game g = SyncGame(context, srlRace);
         Race? r = SyncRace(context, srlRace, g);
@@ -184,7 +184,7 @@ namespace RaceAnnouncer.Bot.Adapters
             || DateTime.UtcNow.Subtract(race.CreatedAt).TotalHours >= 12
           )
           {
-            Logger.Info($"({race.SrlId}) Deactivating race");
+            Logger.Info($"({race.SrlId}) Deactivating race...");
 
             race.IsActive = false;
             if (race.State != SRLApiClient.Endpoints.RaceState.Finished)

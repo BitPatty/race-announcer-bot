@@ -34,7 +34,7 @@ namespace RaceAnnouncer.Bot.Adapters
 
           if (discordService.HasWritePermission(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
           {
-            Logger.Error($"Missing write permissions in channel: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
+            Logger.Error($"Missing write permissions in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
             continue;
           }
 
@@ -70,7 +70,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <returns>On Success, returns the announcement</returns>
     private static Announcement? PostAnnouncement(DiscordService discordService, Tracker tracker, Race race, List<Entrant> entrants)
     {
-      Logger.Info($"({race.SrlId}) Posting announcement in '{tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}'.");
+      Logger.Info($"({race.SrlId}) Posting announcement in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
 
       try
       {
@@ -99,7 +99,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="announcement">The target announcement</param>
     private static void UpdateAnnouncement(DiscordService discordService, Announcement announcement, List<Entrant> entrants)
     {
-      Logger.Info($"({announcement.Race.SrlId}) Updating announcement {announcement.Snowflake} in '{announcement.Channel.Guild.DisplayName}/{announcement.Channel.DisplayName}'.");
+      Logger.Info($"({announcement.Race.SrlId}) Updating announcement {announcement.Snowflake} in channel {announcement.ChannelId}: {announcement.Channel.Guild.DisplayName}/{announcement.Channel.DisplayName}.");
 
       RestUserMessage? message = discordService.FindMessageAsync(announcement.Channel, announcement.Snowflake).Result;
 
@@ -117,7 +117,7 @@ namespace RaceAnnouncer.Bot.Adapters
       }
       else
       {
-        Logger.Info($"({announcement.Race.SrlId}) Failed to fetch message {announcement.Snowflake} in '{announcement.Channel.Guild.DisplayName}/{announcement.Channel.DisplayName}'.");
+        Logger.Info($"({announcement.Race.SrlId}) Failed to fetch message {announcement.Snowflake} in channel {announcement.ChannelId}: {announcement.Channel.Guild.DisplayName}/{announcement.Channel.DisplayName}.");
       }
     }
   }

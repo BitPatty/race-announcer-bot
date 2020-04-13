@@ -25,14 +25,14 @@ namespace RaceAnnouncer.Bot.Services
       get => _isUpdateTriggerEnabled;
       set
       {
-        Logger.Info($"Switching update trigger state to {value}");
+        Logger.Info($"Switching update trigger state: {value}");
         _isUpdateTriggerEnabled = value;
       }
     }
 
     public SRLService(double interval = 10000)
     {
-      if (interval < 5000) throw new ArgumentException($"{nameof(interval)}: Value must be greater than 5000: '{interval}' given.");
+      if (interval <= 9999) throw new ArgumentException($"{nameof(interval)}: Value must be greater than 9999: '{interval}' given.");
 
       _client = new SRLClient(poolSize: 5);
 
@@ -58,7 +58,7 @@ namespace RaceAnnouncer.Bot.Services
 
       if (IsUpdateTriggerEnabled)
       {
-        Logger.Info("Loading SRL races");
+        Logger.Info("Loading SRL races...");
 
         try
         {
@@ -69,11 +69,11 @@ namespace RaceAnnouncer.Bot.Services
             .AsReadOnly()
           );
 
-          Logger.Info("SRL races loaded");
+          Logger.Info("Finished loading SRL races.");
         }
         catch (Exception ex)
         {
-          Logger.Error($"Exception thrown", ex);
+          Logger.Error("Exception thrown", ex);
         }
       }
     }

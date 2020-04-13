@@ -74,7 +74,7 @@ namespace RaceAnnouncer.Bot.Services
       => _discordClient.Guilds;
 
     /// <summary>
-    /// Gets the the guild with the specified <paramref name="guildId"/>
+    /// Gets the guild with the specified <paramref name="guildId"/>
     /// </summary>
     /// <param name="guildId">The guilds snowflake</param>
     /// <returns>Returns the guild</returns>
