@@ -58,7 +58,7 @@ namespace RaceAnnouncer.Bot.Util
       {
         SRLApiClient.Endpoints.EntrantState.Disqualified    /**/ => $"**{entrant.DisplayName}**: *DQ*",
         SRLApiClient.Endpoints.EntrantState.Forfeit         /**/ => $"**{entrant.DisplayName}**: *Forfeit*",
-        SRLApiClient.Endpoints.EntrantState.Done            /**/ => $"**{entrant.DisplayName}**: {FormatSeconds(entrant.Time)}",
+        SRLApiClient.Endpoints.EntrantState.Done            /**/ => $"**{entrant.DisplayName}**: Finished ({FormatSeconds(entrant.Time)})",
         _                                                   /**/ => $"**{entrant.DisplayName}**: {entrant.State}"
       };
 
