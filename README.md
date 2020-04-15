@@ -6,6 +6,11 @@
 
 A cross-platform rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
 
+## Adding the bot to your server
+
+If you want the bot to join your Discord server send me a direct message on Discord (psy#1363). This process is currently not automized.
+
+If you prefer to host your own instance you can find more information on the requirements in the following sections.
 
 ## Components
 
