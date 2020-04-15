@@ -54,12 +54,12 @@ namespace RaceAnnouncer.Bot.Adapters
               entrants.Add(e);
           }
 
-          if (announcement == null)
+          if (announcement == null && race.State < SRLApiClient.Endpoints.RaceState.Finished)
           {
             announcement = PostAnnouncement(discordService, tracker, race, entrants);
             if (announcement != null) context.AddOrUpdate(announcement);
           }
-          else
+          else if (announcement != null)
           {
             UpdateAnnouncement(discordService, announcement, entrants);
           }
