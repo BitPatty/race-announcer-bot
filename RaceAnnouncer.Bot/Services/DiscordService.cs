@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema.Models;
 
 namespace RaceAnnouncer.Bot.Services
@@ -20,6 +21,7 @@ namespace RaceAnnouncer.Bot.Services
     public event EventHandler<SocketGuild>?           /**/ OnGuildJoined;
     public event EventHandler<SocketGuild>?           /**/ OnGuildLeft;
     public event EventHandler<SocketTextChannel>?     /**/ OnChannelDestroyed;
+    public event EventHandler<SocketMessage>?         /**/ OnCommandReceived;
 
     #endregion EventHandlers
 
@@ -38,6 +40,7 @@ namespace RaceAnnouncer.Bot.Services
       _discordClient.JoinedGuild        /**/ += OnClientJoinedGuild;
       _discordClient.ChannelDestroyed   /**/ += OnClientChannelDestroyed;
       _discordClient.LeftGuild          /**/ += OnClientLeftGuild;
+      _discordClient.MessageReceived    /**/ += OnClientMessageReceived;
     }
 
     /// <summary>
@@ -185,6 +188,38 @@ namespace RaceAnnouncer.Bot.Services
     private Task OnClientChannelCreated(SocketChannel arg)
     {
       if (arg is SocketTextChannel c) OnChannelCreated?.Invoke(this, c);
+      return Task.CompletedTask;
+    }
+
+    private Task OnClientMessageReceived(SocketMessage arg)
+    {
+      Logger.Info("Message received: " + arg.Content);
+
+      if (arg != null && OnCommandReceived != null)
+      {
+        bool isMention = arg
+          .MentionedUsers
+          .Any(u => u.IsBot && u.Id.Equals(_discordClient.CurrentUser.Id));
+
+        if (isMention)
+        {
+          SocketGuild guild = _discordClient
+            .Guilds
+            .FirstOrDefault(g => g
+              .Channels
+              .FirstOrDefault(c => c.Id.Equals(arg.Channel.Id))
+            != null);
+
+          bool userHasManageGuildPermission = guild.GetUser(arg.Author.Id).GuildPermissions.ManageGuild;
+
+          if (userHasManageGuildPermission)
+          {
+            Logger.Debug($"Bot was mentioned by {arg.Author.Username}{arg.Author.Discriminator}: {arg.Content}");
+            OnCommandReceived?.Invoke(this, arg);
+          }
+        }
+      }
+
       return Task.CompletedTask;
     }
 

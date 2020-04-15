@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Adapters;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
+using RaceAnnouncer.Bot.Util;
 using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
@@ -39,6 +40,12 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static readonly ConcurrentQueue<SocketGuild>
       _queueDeletedGuilds = new ConcurrentQueue<SocketGuild>();
+
+    /// <summary>
+    /// Queue of received commands
+    /// </summary>
+    private static readonly ConcurrentQueue<SocketMessage>
+      _queueReceivedCommands = new ConcurrentQueue<SocketMessage>();
 
     #endregion Queues
 
@@ -117,6 +124,7 @@ namespace RaceAnnouncer.Bot
       _discordService.OnChannelDestroyed += OnDiscordChannelDeleted;
       _discordService.OnGuildJoined += OnDiscordGuildJoined;
       _discordService.OnGuildLeft += OnDiscordGuildLeft;
+      _discordService.OnCommandReceived += OnDiscordCommandReceived;
     }
 
     /// <summary>
@@ -196,6 +204,12 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void OnDiscordChannelDeleted(object? sender, SocketTextChannel e)
           => _queueDeletedChannels.Enqueue(e);
+
+    /// <summary>
+    /// Enqueue received commands
+    /// </summary>
+    private static void OnDiscordCommandReceived(object? sender, SocketMessage e)
+          => _queueReceivedCommands.Enqueue(e);
 
     /// <summary>
     /// Try reconnecting after 10 seconds on discord disconnect
@@ -310,6 +324,25 @@ namespace RaceAnnouncer.Bot
         Logger.Info("Saving changes");
         context.SaveChanges();
         Logger.Info("Update completed");
+
+        Logger.Info("Processing received commands");
+        while (_queueReceivedCommands.TryDequeue(out SocketMessage? m))
+        {
+          if (m != null)
+          {
+            try
+            {
+              Logger.Info($"Running command: {m.Author.Username}{m.Author.Discriminator}: {m.Content}");
+              CommandRunner.Run(m, _discordService, context);
+            }
+            catch (Exception ex)
+            {
+              Logger.Error($"Exception thrown: ", ex);
+            }
+          }
+        }
+        Logger.Info("Finished processing received commands");
+
         updateSuccessful = true;
       }
       catch (Exception ex)
