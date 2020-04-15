@@ -28,6 +28,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
     {
       destination.Channel = source.Channel;
       destination.Game = source.Game;
+      destination.State = source.State;
     }
 
     public static void DisableTrackersByChannel(this DatabaseContext context, Channel channel)
@@ -57,6 +58,15 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Trackers
           .Local
           .Where(t => t.Game.Equals(game) && t.State.Equals(TrackerState.Active));
+
+    public static Tracker GetActiveTracker(this DatabaseContext context, Game game, Guild guild)
+      => context
+          .Trackers
+          .Local
+          .SingleOrDefault(t
+            => t.Channel.GuildId.Equals(guild.Id)
+            && t.State.Equals(TrackerState.Active)
+            && t.GameId.Equals(game.Id));
 
     public static Tracker? GetTracker(this DatabaseContext context, Game game, Channel channel)
       => context
