@@ -70,8 +70,11 @@ namespace RaceAnnouncer.Bot.Util
     private static string FormatGoal(Race race)
     {
       if (race.Goal == null) return "-";
-      if (race.Goal.Length > 2000) return race.Goal.Substring(0, 1800) + "...";
-      return race.Goal;
+
+      string goal = race.Goal.Replace("&amp;", "&");
+
+      if (goal.Length > 2000) return goal.Substring(0, 1800) + "...";
+      return goal;
     }
 
     /// <summary>
