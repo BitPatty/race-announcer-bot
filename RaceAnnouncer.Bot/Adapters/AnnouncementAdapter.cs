@@ -32,9 +32,17 @@ namespace RaceAnnouncer.Bot.Adapters
         {
           Announcement? announcement = context.GetAnnouncement(race, tracker);
 
-          if (discordService.HasWritePermission(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
+          try
           {
-            Logger.Error($"Missing write permissions in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
+            if (discordService.HasWritePermission(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
+            {
+              Logger.Error($"Missing write permissions in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
+              continue;
+            }
+          }
+          catch (Exception ex)
+          {
+            Logger.Error($"({announcement?.Race?.SrlId}) Exception thrown:", ex);
             continue;
           }
 
