@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace RaceAnnouncer.Common
 {
@@ -57,7 +58,14 @@ namespace RaceAnnouncer.Common
     /// <param name="level">The severity level</param>
     /// <param name="message">The log message</param>
     private static void Write(LogLevel level, string message)
-      => Console.WriteLine($"[{DateTime.Now}] {level}: {message}");
+      => Console.WriteLine($"[{DateTime.Now}] {level}: {GetCallerName() ?? "N/A"} | {message}");
+
+    /// <summary>
+    /// Get name of method that called the logger
+    /// </summary>
+    /// <returns>Returns the name of the method</returns>
+    private static string? GetCallerName()
+      => new StackFrame(3, true)?.GetMethod()?.Name;
 
     /// <summary>
     /// The severity level of a log message
