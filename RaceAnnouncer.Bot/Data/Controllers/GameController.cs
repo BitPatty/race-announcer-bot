@@ -8,17 +8,26 @@ namespace RaceAnnouncer.Bot.Data.Controllers
   {
     public static Game AddOrUpdate(this DatabaseContext context, Game game)
     {
-      Game? g = context.GetGame(game.Abbreviation);
+      Game? gameByAbbreviation = context.GetGame(game.Abbreviation);
+      Game? gameById = context.GetGame(game.SrlId);
 
-      if (g == null)
+      if (
+        (gameByAbbreviation != null || gameById != null)
+        && gameByAbbreviation?.Equals(gameById) == false
+      )
+      {
+        throw new System.Exception($"SRL id and abbreviation mismatch for game: {game.Id}/{game.SrlId}");
+      }
+
+      if (gameByAbbreviation == null)
       {
         context.Games.Local.Add(game);
         return game;
       }
       else
       {
-        g.AssignAttributes(game);
-        return g;
+        gameByAbbreviation.AssignAttributes(game);
+        return gameByAbbreviation;
       }
     }
 
@@ -36,5 +45,13 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Games
           .Local
           .SingleOrDefault(g => g.Abbreviation.Equals(abbreviation, System.StringComparison.CurrentCultureIgnoreCase));
+
+    private static Game? GetGame(
+      this DatabaseContext context
+      , int srlId)
+      => context
+          .Games
+          .Local
+          .SingleOrDefault(g => g.SrlId.Equals(srlId));
   }
 }

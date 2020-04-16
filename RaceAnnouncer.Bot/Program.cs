@@ -277,7 +277,7 @@ namespace RaceAnnouncer.Bot
           ChannelAdapter.SyncAll(context, _discordService);
           context.SaveChanges();
         }
-        Logger.Info("Guilds and channels loaded, enablint trigger");
+
         _srlService.IsUpdateTriggerEnabled = true;
       }
       catch (Exception ex)
@@ -300,7 +300,6 @@ namespace RaceAnnouncer.Bot
 
       Logger.Info("Waiting for lock..");
       _contextSemaphore.Wait();
-      Logger.Info("Lock acquired");
 
       DateTime startTime = DateTime.UtcNow;
       bool updateSuccessful = false;
@@ -309,17 +308,17 @@ namespace RaceAnnouncer.Bot
       {
         using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
-        Logger.Info("Reloading context");
+        Logger.Info($"{nameof(OnSrlUpdate)}: Reloading context");
         context.LoadRemote();
         context.ChangeTracker.DetectChanges();
 
-        Logger.Info("Processing channel mutations");
+        Logger.Info($"{nameof(OnSrlUpdate)}: Processing channel mutations");
         ProcessChannelMutations(context);
 
-        Logger.Info("Updating races");
+        Logger.Info($"{nameof(OnSrlUpdate)}: Updating races");
         RaceAdapter.SyncRaces(context, _srlService, e.ToList());
 
-        Logger.Info("Updating announcements");
+        Logger.Info($"{nameof(OnSrlUpdate)}: Updating announcements");
         if (_isInitialLoad)
         {
           AnnouncementAdapter.UpdateAnnouncements(
@@ -337,14 +336,14 @@ namespace RaceAnnouncer.Bot
             , DatabaseAdapter.GetUpdatedRaces(context).ToList());
         }
 
-        Logger.Info("Saving changes");
+        Logger.Info($"{nameof(OnSrlUpdate)}: Saving changes");
         context.SaveChanges();
-        Logger.Info("Update completed");
+        Logger.Info($"{nameof(OnSrlUpdate)}: Update completed");
         updateSuccessful = true;
       }
       catch (Exception ex)
       {
-        Logger.Error($"Exception thrown", ex);
+        Logger.Error("Exception thrown", ex);
       }
       finally
       {
@@ -358,7 +357,8 @@ namespace RaceAnnouncer.Bot
         }
         catch (Exception ex)
         {
-          Logger.Error($"Exception thrown", ex);
+          Logger.Error("Exception thrown", ex);
+          throw;
         }
 
         _contextSemaphore.Release();
