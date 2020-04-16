@@ -22,4 +22,8 @@
     <ProjectReference Include="..\RaceAnnouncer.Schema\RaceAnnouncer.Schema.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Util\Commands\" />
+  </ItemGroup>
+
 </Project>

@@ -27,30 +27,69 @@ namespace RaceAnnouncer.Bot.Util
     {
       CommandType commandType = ParseCommandType(message.Content, out string[]? args);
 
-      if (commandType == CommandType.INVALID || args == null) return;
+      if (commandType == CommandType.INVALID || args == null)
+      {
+        if (args != null && args.Length >= 2)
+        {
+          discordService.Reply(message, $"Failed to parse command {args[2]}").Wait();
+        }
+        else
+        {
+          discordService.Reply(message, "Failed to parse command").Wait();
+        }
+
+        return;
+      }
 
       switch (commandType)
       {
-        case CommandType.ADD_TRACKER: AddTracker(message, discordService, context, args); break;
-        case CommandType.REMOVE_TRACKER: RemoveTracker(message, discordService, context, args); break;
+        case CommandType.ADD_TRACKER: AddTracker(message, discordService, context, args); return;
+        case CommandType.REMOVE_TRACKER: RemoveTracker(message, discordService, context, args); return;
       }
     }
 
     private static void AddTracker(SocketMessage message, DiscordService discordService, DatabaseContext context, string[] args)
     {
-      if (args.Length < 3) return;
-      if (message.MentionedChannels.Count != 1) return;
+      if (args.Length < 3)
+      {
+        discordService.Reply(message, $"Invalid argument length: {args.Length}").Wait();
+        return;
+      }
 
-      Game? game = context.GetGame(args[3]);
+      if (message.MentionedChannels.Count != 1)
+      {
+        discordService.Reply(message, "No channel specified!").Wait();
+        return;
+      }
 
-      if (game == null) return;
+      Game? game = context.GetGame(args[2]);
+
+      if (game == null)
+      {
+        discordService.Reply(message, $"Game abbreviation '{args[2]}' not found").Wait();
+        return;
+      }
 
       SocketGuildChannel mentionedChannel = message.MentionedChannels.First();
       Channel? channel = context.GetChannel(mentionedChannel.Id);
 
-      if (channel == null) return;
-      if (!channel.GuildId.Equals(mentionedChannel.Guild.Id)) return;
-      if (discordService.HasWritePermission(mentionedChannel.Id, mentionedChannel.Guild.Id) != true) return;
+      if (channel == null)
+      {
+        discordService.Reply(message, "Channel not found").Wait();
+        return;
+      }
+
+      if (!channel.Guild.Snowflake.Equals(mentionedChannel.Guild.Id))
+      {
+        discordService.Reply(message, "Invalid channel").Wait();
+        return;
+      }
+
+      if (discordService.HasWritePermission(channel.Guild.Snowflake, channel.Snowflake) != true)
+      {
+        discordService.Reply(message, $"Missing write permission in channel {mentionedChannel.Name}").Wait();
+        return;
+      }
 
       Tracker tracker = new Tracker(channel, game)
       {
@@ -58,15 +97,25 @@ namespace RaceAnnouncer.Bot.Util
       };
 
       context.AddOrUpdate(tracker);
+
+      discordService.Reply(message, "Tracker added/udpated!").Wait();
     }
 
     private static void RemoveTracker(SocketMessage message, DiscordService discordService, DatabaseContext context, string[] args)
     {
-      if (args.Length < 3) return;
+      if (args.Length < 3)
+      {
+        discordService.Reply(message, $"Invalid argument length: {args.Length}").Wait();
+        return;
+      }
 
-      Game? game = context.GetGame(args[3]);
+      Game? game = context.GetGame(args[2]);
 
-      if (game == null) return;
+      if (game == null)
+      {
+        discordService.Reply(message, $"Unknown game abbreviation: {args[2]}").Wait();
+        return;
+      }
 
       Channel? channel = context.GetChannel(message.Channel.Id);
 
@@ -74,9 +123,15 @@ namespace RaceAnnouncer.Bot.Util
 
       Tracker? tracker = context.GetActiveTracker(game, channel.Guild);
 
-      if (tracker == null) return;
+      if (tracker == null)
+      {
+        discordService.Reply(message, $"No tracker for '{game.Abbreviation}' registered in guild").Wait();
+        return;
+      }
 
       tracker.State = TrackerState.Paused;
+
+      discordService.Reply(message, "Tracker paused").Wait();
     }
 
     private static CommandType ParseCommandType(string command, out string[]? args)
@@ -92,7 +147,7 @@ namespace RaceAnnouncer.Bot.Util
 
       if (args.Length < 3) return CommandType.INVALID;
 
-      return MapCommand(args[2]);
+      return MapCommand(args[1]);
     }
 
     private static CommandType MapCommand(string key)
