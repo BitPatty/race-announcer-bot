@@ -110,7 +110,8 @@ namespace RaceAnnouncer.Bot.Services
 
       return channelPermissions.ViewChannel
         && channelPermissions.ReadMessageHistory
-        && channelPermissions.SendMessages;
+        && channelPermissions.SendMessages
+        && channelPermissions.EmbedLinks;
     }
 
     /// <summary>
