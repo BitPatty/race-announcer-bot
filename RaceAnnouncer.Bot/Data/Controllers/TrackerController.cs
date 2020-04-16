@@ -59,7 +59,13 @@ namespace RaceAnnouncer.Bot.Data.Controllers
           .Local
           .Where(t => t.Game.Equals(game) && t.State.Equals(TrackerState.Active));
 
-    public static Tracker GetActiveTracker(this DatabaseContext context, Game game, Guild guild)
+    public static IEnumerable<Tracker> GetActiveTrackers(this DatabaseContext context, Guild guild)
+      => context
+          .Trackers
+          .Local
+          .Where(t => t.Channel.Guild.Id.Equals(guild.Id) && t.State.Equals(TrackerState.Active));
+
+    public static Tracker? GetActiveTracker(this DatabaseContext context, Game game, Guild guild)
       => context
           .Trackers
           .Local

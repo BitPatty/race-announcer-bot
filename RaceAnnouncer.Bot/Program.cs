@@ -208,18 +208,11 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        using DatabaseContext context = new ContextBuilder().CreateDbContext();
-
-        context.LoadRemote();
-        context.ChangeTracker.DetectChanges();
-
         if (e != null)
         {
           Logger.Info($"Running command: {e.Author.Username}{e.Author.Discriminator}: {e.Content}");
-          CommandRunner.Run(e, _discordService, context);
+          CommandRunner.Run(e, _discordService);
         }
-
-        context.SaveChanges();
 
         Logger.Info("Finished processing received commands");
       }
