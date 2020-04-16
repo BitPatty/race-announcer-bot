@@ -41,12 +41,6 @@ namespace RaceAnnouncer.Bot
     private static readonly ConcurrentQueue<SocketGuild>
       _queueDeletedGuilds = new ConcurrentQueue<SocketGuild>();
 
-    /// <summary>
-    /// Queue of received commands
-    /// </summary>
-    private static readonly ConcurrentQueue<SocketMessage>
-      _queueReceivedCommands = new ConcurrentQueue<SocketMessage>();
-
     #endregion Queues
 
     #region Services
@@ -209,7 +203,36 @@ namespace RaceAnnouncer.Bot
     /// Enqueue received commands
     /// </summary>
     private static void OnDiscordCommandReceived(object? sender, SocketMessage e)
-          => _queueReceivedCommands.Enqueue(e);
+    {
+      _contextSemaphore.Wait();
+
+      try
+      {
+        using DatabaseContext context = new ContextBuilder().CreateDbContext();
+
+        context.LoadRemote();
+        context.ChangeTracker.DetectChanges();
+
+        if (e != null)
+        {
+          Logger.Info($"Running command: {e.Author.Username}{e.Author.Discriminator}: {e.Content}");
+          CommandRunner.Run(e, _discordService, context);
+        }
+
+        context.SaveChanges();
+
+        Logger.Info("Finished processing received commands");
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Exception thrown", ex);
+      }
+      finally
+      {
+        _contextSemaphore.Release();
+      }
+    }
+
 
     /// <summary>
     /// Try reconnecting after 10 seconds on discord disconnect
@@ -324,25 +347,6 @@ namespace RaceAnnouncer.Bot
         Logger.Info("Saving changes");
         context.SaveChanges();
         Logger.Info("Update completed");
-
-        Logger.Info("Processing received commands");
-        while (_queueReceivedCommands.TryDequeue(out SocketMessage? m))
-        {
-          if (m != null)
-          {
-            try
-            {
-              Logger.Info($"Running command: {m.Author.Username}{m.Author.Discriminator}: {m.Content}");
-              CommandRunner.Run(m, _discordService, context);
-            }
-            catch (Exception ex)
-            {
-              Logger.Error($"Exception thrown: ", ex);
-            }
-          }
-        }
-        Logger.Info("Finished processing received commands");
-
         updateSuccessful = true;
       }
       catch (Exception ex)

@@ -112,6 +112,9 @@ namespace RaceAnnouncer.Bot.Services
 
     #region Messages
 
+    public async Task<RestUserMessage> Reply(SocketMessage message, string content)
+      => await message.Channel.SendMessageAsync($"{message.Author.Mention} {content}");
+
     /// <summary>
     /// Sends an embed to the specified <paramref name="channelId"/>
     /// </summary>
