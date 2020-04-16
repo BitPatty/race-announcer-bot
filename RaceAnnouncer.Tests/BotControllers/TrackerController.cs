@@ -72,7 +72,7 @@ namespace RaceAnnouncer.Tests.BotControllers
     public override void AddOrUpdate_Add_Increases_Collection_Count_After_Save()
     {
       Game? game = RandomLocalGame;
-      Channel? channel = RandomLocalChannel;
+      Channel? channel = _context.Channels.Local.First(c => !c.Trackers.Any(t => t.GameId.Equals(game.Id)));
       int cntGame = game.Trackers.Count;
       int cntChannel = channel.Trackers.Count;
       Tracker tracker = new Tracker(channel, game);
