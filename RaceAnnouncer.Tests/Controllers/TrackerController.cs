@@ -153,7 +153,7 @@ namespace RaceAnnouncer.Tests.Controllers
 
       Assert.AreSame(t2.Channel, t1.Channel);
       Assert.AreSame(t2.Game, t1.Game);
-      Assert.AreSame(t2.State, t1.State);
+      Assert.AreEqual(t2.State, t1.State);
     }
 
     [Test]
