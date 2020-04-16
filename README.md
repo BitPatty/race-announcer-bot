@@ -8,17 +8,27 @@ A cross-platform rewrite of the SRL race announcer bot for Discord, originally w
 
 ## Adding the bot to your server
 
-If you want the bot to join your Discord server send me a direct message on Discord (psy#1363). This process is currently not automized.
+You can visit [https://discordapp.com/oauth2/authorize?client_id=445640978557304834&permissions=67193856&scope=bot](https://discordapp.com/oauth2/authorize?client_id=445640978557304834&permissions=67193856&scope=bot) to let the bot join your server. The requested permissions are mandatory for the bot to work properly.
 
 If you prefer to host your own instance you can find more information on the requirements in the following sections.
 
+### Commands
+
+Only members with the `Manage Guild` permission can use bot commands.
+
+| Command   | Pattern                                                    | Description                                            |
+| --------- | ---------------------------------------------------------- | ------------------------------------------------------ |
+| `list`    | `<bot mention> list`                                       | Lists all active trackers in the current guild         |
+| `track`   | `<bot mention> track <srl abbreviation> <channel mention>` | Tracks the specified SRL game in the mentioned channel |
+| `untrack` | `<bot mention> untrack <srl abbreviation>`                 | Disables the tracker for the specified SRL game        |
+
 ## Components
 
-* RaceAnnouncer.Bot: The bot excutable (.NET Core 3.1)
-* RaceAnnouncer.Common: Shared logic (Multitarget: .NET Core 3.1, .NET Standard 2.1)
-* RaceAnnouncer.Schema: The database models and migrations (.NET Standard 2.1)
-* RaceAnnouncer.Tests: NUnit Tests, mostly entity manipulation tests (.NET Core 3.1)
-* RaceAnnouncer.WebAPI: A REST API to manipulate the entities (ASP.NET Core 3.1)
+- RaceAnnouncer.Bot: The bot excutable (.NET Core 3.1)
+- RaceAnnouncer.Common: Shared logic (Multitarget: .NET Core 3.1, .NET Standard 2.1)
+- RaceAnnouncer.Schema: The database models and migrations (.NET Standard 2.1)
+- RaceAnnouncer.Tests: NUnit Tests, mostly entity manipulation tests (.NET Core 3.1)
+- RaceAnnouncer.WebAPI: A REST API to manipulate the entities (ASP.NET Core 3.1)
 
 ## Requirements
 
@@ -43,15 +53,18 @@ Create an `.env` file in the root of the project based on the `.env.example` fil
 All Dependencies are available via NuGet.
 
 #### Common Dependencies
+
 - [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql) (MIT)
 - [EntityFrameworkCore](https://github.com/dotnet/efcore) (Apache-2.0)
 - [DotNetEnv](https://github.com/tonerdo/dotnet-env) (MIT)
 
 #### Bot Dependencies
+
 - [SRLApiClient](https://github.com/BitPatty/SRLApiClient) (AGPL)
 - [Discord.NET](https://github.com/discord-net/Discord.Net) (MIT)
 
 #### WebAPI Dependencies
+
 - [cloudscribe.Web.Pagination](https://github.com/cloudscribe/cloudscribe.Web.Pagination) (Apache-2.0)
 - [Swashbuckle.AspNetCore](https://github.com/domaindrivendev/Swashbuckle.AspNetCore) (MIT)
 - [Bcrypt.NET](https://github.com/BcryptNet/bcrypt.net) (MIT)
