@@ -1,8 +1,9 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Schema.Models;
 
-namespace RaceAnnouncer.Tests.Controllers
+namespace RaceAnnouncer.Tests.BotControllers
 {
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
@@ -25,6 +26,19 @@ namespace RaceAnnouncer.Tests.Controllers
     public override void AddOrUpdate_Add_Duplicate_Keeps_Collection_Count_Before_Save()
     {
       Assert.Pass("Not applicable");
+    }
+
+    public void AddOrUpdate_Add_Mismatch_Throws()
+    {
+      Game game1 = RandomLocalGame;
+      Game game2 = RandomLocalGame;
+
+      Game newGame = new Game(game1.Abbreviation, game1.Name, game2.SrlId);
+
+      Assert.Throws<Exception>(delegate
+      {
+        _context.AddOrUpdate(newGame);
+      });
     }
 
     [Test]

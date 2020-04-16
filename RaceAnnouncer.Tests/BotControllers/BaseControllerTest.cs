@@ -1,4 +1,4 @@
-﻿namespace RaceAnnouncer.Tests.Controllers
+﻿namespace RaceAnnouncer.Tests.BotControllers
 {
   public abstract class BaseControllerTest : BaseTest
   {

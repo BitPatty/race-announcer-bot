@@ -2,7 +2,7 @@
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Schema.Models;
 
-namespace RaceAnnouncer.Tests.Controllers
+namespace RaceAnnouncer.Tests.BotControllers
 {
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8600:Converting null literal or possible null value to non-nullable type.", Justification = "Assertion")]
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Nullable", "CS8602:Dereference of a possibly null reference.", Justification = "Assertion")]
