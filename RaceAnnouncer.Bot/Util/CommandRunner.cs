@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Discord.WebSocket;
 using RaceAnnouncer.Bot.Data.Controllers;
@@ -30,7 +29,10 @@ namespace RaceAnnouncer.Bot.Util
     /// </summary>
     /// <param name="message">The request message</param>
     /// <param name="discordService">The discord service</param>
-    public static void Run(SocketMessage message, DiscordService discordService)
+    public static void Run(
+      SocketMessage message
+      , DiscordService discordService
+    )
     {
       using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
@@ -47,9 +49,15 @@ namespace RaceAnnouncer.Bot.Util
 
       switch (commandType)
       {
-        case CommandType.ADD_TRACKER: AddTracker(message, discordService, context, args); return;
-        case CommandType.REMOVE_TRACKER: RemoveTracker(message, discordService, context, args); return;
-        case CommandType.LIST: ListTrackers(message, discordService, context); return;
+        case CommandType.ADD_TRACKER:
+          AddTracker(message, discordService, context, args);
+          return;
+        case CommandType.REMOVE_TRACKER:
+          RemoveTracker(message, discordService, context, args);
+          return;
+        case CommandType.LIST:
+          ListTrackers(message, discordService, context);
+          return;
       }
     }
 
@@ -59,7 +67,11 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="message">The request message</param>
     /// <param name="discordService">The discord service</param>
     /// <param name="context">The database context</param>
-    private static void ListTrackers(SocketMessage message, DiscordService discordService, DatabaseContext context)
+    private static void ListTrackers(
+      SocketMessage message
+      , DiscordService discordService
+      , DatabaseContext context
+    )
     {
       Channel? channel = context.GetChannel(message.Channel.Id);
 
@@ -69,12 +81,27 @@ namespace RaceAnnouncer.Bot.Util
 
       if (!trackers.Any())
       {
-        discordService.Reply(message, "No active trackers found!").Wait();
+        discordService
+          .Reply(message, "No active trackers found!")
+          .Wait();
+
         return;
       }
 
-      int gameAbbreviationLength = Math.Max(trackers.OrderByDescending(t => t.Game.Abbreviation.Length).Select(t => t.Game).First().Abbreviation.Length + 2, "Abbreviation".Length + 2);
-      int gameNameLength = trackers.OrderByDescending(t => t.Game.Name.Length).Select(t => t.Game).First().Name.Length + 2;
+      int gameAbbreviationLength = Math
+        .Max(trackers
+          .OrderByDescending(t => t.Game.Abbreviation.Length)
+          .Select(t => t.Game)
+          .First()
+          .Abbreviation.Length + 2
+        , "Abbreviation".Length + 2);
+
+      int gameNameLength = trackers
+        .OrderByDescending(t => t.Game.Name.Length)
+        .Select(t => t.Game)
+        .First()
+        .Name
+        .Length + 2;
 
       string reply = "```\r\n";
       reply += "Abbreviation".PadRight(gameAbbreviationLength);
@@ -99,7 +126,12 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="discordService">The discord service</param>
     /// <param name="context">The database context</param>
     /// <param name="args">The command arguments</param>
-    private static void AddTracker(SocketMessage message, DiscordService discordService, DatabaseContext context, string[] args)
+    private static void AddTracker(
+      SocketMessage message,
+      DiscordService discordService,
+      DatabaseContext context,
+      string[] args
+    )
     {
       if (args.Length != 4)
       {
@@ -171,7 +203,12 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="discordService">The discord service</param>
     /// <param name="context">The database context</param>
     /// <param name="args">The command arguments</param>
-    private static void RemoveTracker(SocketMessage message, DiscordService discordService, DatabaseContext context, string[] args)
+    private static void RemoveTracker(
+      SocketMessage message
+      , DiscordService discordService
+      , DatabaseContext context
+      , string[] args
+    )
     {
       if (args.Length != 3)
       {
@@ -211,7 +248,9 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="command">The command</param>
     /// <param name="args">The command arguments</param>
     /// <returns>Returns the command type and arguments</returns>
-    private static CommandType ParseCommandType(string command, out string[]? args)
+    private static CommandType ParseCommandType(
+      string command
+      , out string[]? args)
     {
       if (command == null)
       {

@@ -30,6 +30,11 @@ namespace RaceAnnouncer.Bot.Services
     /// </summary>
     private readonly DiscordSocketClient _discordClient;
 
+    /// <summary>
+    /// User IDs of bot administrators
+    /// </summary>
+    private readonly string[] _admins = Environment.GetEnvironmentVariable("ADMINS")?.Split(",") ?? new string[0];
+
     public DiscordService()
     {
       _discordClient                    /**/ = new DiscordSocketClient();
@@ -209,7 +214,9 @@ namespace RaceAnnouncer.Bot.Services
 
     private Task OnClientMessageReceived(SocketMessage arg)
     {
-      if (arg == null || OnCommandReceived == null) return Task.CompletedTask;
+      if (arg == null
+        || OnCommandReceived == null
+        || arg.Author == null) return Task.CompletedTask;
 
       bool isMention = arg
         .MentionedUsers
@@ -224,11 +231,21 @@ namespace RaceAnnouncer.Bot.Services
           .FirstOrDefault(c => c.Id.Equals(arg.Channel.Id))
         != null);
 
-      bool userHasManageGuildPermission = guild.GetUser(arg.Author.Id).GuildPermissions.ManageGuild;
+      bool userIsAdmin =
+        !arg.Author.IsBot
+        && !arg.Author.IsWebhook
+        && !string.IsNullOrWhiteSpace(arg.Author.Id.ToString())
+        && _admins.SingleOrDefault(a => a.Equals(arg.Author.Id.ToString())) != null;
 
-      if (!userHasManageGuildPermission) return Task.CompletedTask;
+      bool userHasManageGuildPermission = guild
+        .GetUser(arg.Author.Id)
+        .GuildPermissions
+        .ManageGuild;
+
+      if (!userHasManageGuildPermission && !userIsAdmin) return Task.CompletedTask;
 
       Logger.Debug($"Bot was mentioned by {arg.Author.Username}{arg.Author.Discriminator}: {arg.Content}");
+
       OnCommandReceived?.Invoke(this, arg);
 
       return Task.CompletedTask;

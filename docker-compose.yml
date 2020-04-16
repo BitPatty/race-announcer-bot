@@ -23,6 +23,7 @@ services:
         DB_PASS: $BOT_DB_PASS
         DISCORD_TOKEN: $DISCORD_TOKEN
         UPDATE_INTERVAL: $UPDATE_INTERVAL
+        ADMINS: $ADMINS
 
   raceannouncer_api:
     container_name: raceannouncer_api
