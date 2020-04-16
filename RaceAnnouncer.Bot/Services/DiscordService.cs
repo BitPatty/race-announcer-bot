@@ -93,13 +93,25 @@ namespace RaceAnnouncer.Bot.Services
       => GetTextChannels().First(c => c.Id.Equals(channelId));
 
     /// <summary>
-    /// Checks whether the bot has write permissions in the specified channel
+    /// Checks whether the bot has the necessary permissions in the specified channel
     /// </summary>
     /// <param name="guildId">The guild id</param>
     /// <param name="channelId">The channel id</param>
-    /// <returns></returns>
-    public bool? HasWritePermission(ulong guildId, ulong channelId)
-      => GetGuild(guildId)?.CurrentUser.GetPermissions(GetTextChannel(channelId)).SendMessages;
+    /// <returns>Returns true if the permissions are set correctly</returns>
+    public bool? HasRequiredPermissions(ulong guildId, ulong channelId)
+    {
+      SocketTextChannel channel = GetTextChannel(channelId);
+      if (channel == null) return null;
+
+      ChannelPermissions? permissions = GetGuild(guildId)?.CurrentUser?.GetPermissions(GetTextChannel(channelId));
+      if (permissions == null) return null;
+
+      ChannelPermissions channelPermissions = (ChannelPermissions)permissions;
+
+      return channelPermissions.ViewChannel
+        && channelPermissions.ReadMessageHistory
+        && channelPermissions.SendMessages;
+    }
 
     /// <summary>
     /// Checks whether a channel is available
@@ -196,32 +208,27 @@ namespace RaceAnnouncer.Bot.Services
 
     private Task OnClientMessageReceived(SocketMessage arg)
     {
-      Logger.Info("Message received: " + arg.Content);
+      if (arg == null || OnCommandReceived == null) return Task.CompletedTask;
 
-      if (arg != null && OnCommandReceived != null)
-      {
-        bool isMention = arg
-          .MentionedUsers
-          .Any(u => u.IsBot && u.Id.Equals(_discordClient.CurrentUser.Id));
+      bool isMention = arg
+        .MentionedUsers
+        .Any(u => u.IsBot && u.Id.Equals(_discordClient.CurrentUser.Id));
 
-        if (isMention)
-        {
-          SocketGuild guild = _discordClient
-            .Guilds
-            .FirstOrDefault(g => g
-              .Channels
-              .FirstOrDefault(c => c.Id.Equals(arg.Channel.Id))
-            != null);
+      if (!isMention) return Task.CompletedTask;
 
-          bool userHasManageGuildPermission = guild.GetUser(arg.Author.Id).GuildPermissions.ManageGuild;
+      SocketGuild guild = _discordClient
+        .Guilds
+        .FirstOrDefault(g => g
+          .Channels
+          .FirstOrDefault(c => c.Id.Equals(arg.Channel.Id))
+        != null);
 
-          if (userHasManageGuildPermission)
-          {
-            Logger.Debug($"Bot was mentioned by {arg.Author.Username}{arg.Author.Discriminator}: {arg.Content}");
-            OnCommandReceived?.Invoke(this, arg);
-          }
-        }
-      }
+      bool userHasManageGuildPermission = guild.GetUser(arg.Author.Id).GuildPermissions.ManageGuild;
+
+      if (!userHasManageGuildPermission) return Task.CompletedTask;
+
+      Logger.Debug($"Bot was mentioned by {arg.Author.Username}{arg.Author.Discriminator}: {arg.Content}");
+      OnCommandReceived?.Invoke(this, arg);
 
       return Task.CompletedTask;
     }

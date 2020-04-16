@@ -34,9 +34,9 @@ namespace RaceAnnouncer.Bot.Adapters
 
           try
           {
-            if (discordService.HasWritePermission(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
+            if (discordService.HasRequiredPermissions(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
             {
-              Logger.Error($"Missing write permissions in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
+              Logger.Error($"Missing permissions in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
               continue;
             }
           }

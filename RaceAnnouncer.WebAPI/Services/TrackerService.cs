@@ -39,7 +39,7 @@ namespace RaceAnnouncer.WebAPI.Services
       {
         Tracker tracker = context
           .Trackers
-          .Where(t => t.Game.Equals(game) && t.Channel.Equals(channel))
+          .Where(t => t.Game.Equals(game) && t.Channel.GuildId.Equals(channel.GuildId))
           .SingleOrDefault();
 
         if (tracker == null)
