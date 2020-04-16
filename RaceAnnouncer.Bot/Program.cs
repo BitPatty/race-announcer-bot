@@ -308,17 +308,17 @@ namespace RaceAnnouncer.Bot
       {
         using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
-        Logger.Info($"{nameof(OnSrlUpdate)}: Reloading context");
+        Logger.Info("Reloading context");
         context.LoadRemote();
         context.ChangeTracker.DetectChanges();
 
-        Logger.Info($"{nameof(OnSrlUpdate)}: Processing channel mutations");
+        Logger.Info("Processing channel mutations");
         ProcessChannelMutations(context);
 
-        Logger.Info($"{nameof(OnSrlUpdate)}: Updating races");
+        Logger.Info("Updating races");
         RaceAdapter.SyncRaces(context, _srlService, e.ToList());
 
-        Logger.Info($"{nameof(OnSrlUpdate)}: Updating announcements");
+        Logger.Info("Updating announcements");
         if (_isInitialLoad)
         {
           AnnouncementAdapter.UpdateAnnouncements(
@@ -336,9 +336,10 @@ namespace RaceAnnouncer.Bot
             , DatabaseAdapter.GetUpdatedRaces(context).ToList());
         }
 
-        Logger.Info($"{nameof(OnSrlUpdate)}: Saving changes");
+        Logger.Info("Saving changes");
         context.SaveChanges();
-        Logger.Info($"{nameof(OnSrlUpdate)}: Update completed");
+
+        Logger.Info("Update completed");
         updateSuccessful = true;
       }
       catch (Exception ex)
