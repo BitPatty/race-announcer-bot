@@ -18,8 +18,19 @@ namespace RaceAnnouncer.Bot.Util
     {
       Title           /**/ = $"Race room: #{race.SrlId}",
       Url             /**/ = $"http://www.speedrunslive.com/race/?id={race.SrlId}",
-      Description     /**/ = $"Goal: {FormatGoal(race)}",
       Fields          /**/ = {
+                                new EmbedFieldBuilder()
+                                {
+                                  IsInline= false,
+                                  Name= "Game",
+                                  Value = race.Game.Name
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                  IsInline = false,
+                                  Name = "Goal",
+                                  Value = FormatGoal(race)
+                                },
                                 new EmbedFieldBuilder()
                                 {
                                   IsInline = false,
@@ -73,7 +84,7 @@ namespace RaceAnnouncer.Bot.Util
 
       string goal = race.Goal.Replace("&amp;", "&");
 
-      if (goal.Length > 2000) return goal.Substring(0, 1800) + "...";
+      if (goal.Length > 1000) return goal.Substring(0, 900) + "...";
       return goal;
     }
 
