@@ -165,7 +165,7 @@ namespace RaceAnnouncer.Bot.Util
 
       if (!channel.Guild.Snowflake.Equals(mentionedChannel.Guild.Id) || !channel.IsActive)
       {
-        discordService.Reply(message, "Channel not found in current guild.").Wait();
+        discordService.Reply(message, "Channel not found.").Wait();
         return;
       }
 
