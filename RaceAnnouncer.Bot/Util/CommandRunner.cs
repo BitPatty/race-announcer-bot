@@ -163,7 +163,7 @@ namespace RaceAnnouncer.Bot.Util
         return;
       }
 
-      if (!channel.Guild.Snowflake.Equals(mentionedChannel.Guild.Id))
+      if (!channel.Guild.Snowflake.Equals(mentionedChannel.Guild.Id) || !channel.IsActive)
       {
         discordService.Reply(message, "Channel not found in current guild.").Wait();
         return;
