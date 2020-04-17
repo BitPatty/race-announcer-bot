@@ -80,7 +80,7 @@ namespace RaceAnnouncer.Bot.Util
     /// <returns>Returns the formatted goal description</returns>
     private static string FormatGoal(Race race)
     {
-      if (race.Goal == null) return "-";
+      if (race.Goal == null || string.IsNullOrWhiteSpace(race.Goal)) return "-";
 
       string goal = race.Goal.Replace("&amp;", "&");
 

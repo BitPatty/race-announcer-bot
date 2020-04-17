@@ -105,6 +105,8 @@ namespace RaceAnnouncer.Bot.Services
     /// <returns>Returns true if the permissions are set correctly</returns>
     public bool? HasRequiredPermissions(ulong guildId, ulong channelId)
     {
+      Logger.Info($"Checking channel permissions {guildId}/{channelId}");
+
       SocketTextChannel channel = GetTextChannel(channelId);
       if (channel == null) return null;
 

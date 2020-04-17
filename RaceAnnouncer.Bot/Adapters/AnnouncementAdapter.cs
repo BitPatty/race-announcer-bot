@@ -30,11 +30,13 @@ namespace RaceAnnouncer.Bot.Adapters
       {
         foreach (Tracker tracker in context.GetActiveTrackers(race.Game))
         {
+          Logger.Info($"({race.SrlId}) Updating tracker {tracker.Id}");
+
           Announcement? announcement = context.GetAnnouncement(race, tracker);
 
           try
           {
-            if (discordService.HasRequiredPermissions(tracker.Channel.Guild.Snowflake, tracker.Channel.Snowflake) != true)
+            if (discordService.HasRequiredPermissions(tracker.Channel.Guild.Snowflake, announcement?.Channel?.Snowflake ?? tracker.Channel.Snowflake) != true)
             {
               Logger.Error($"Missing permissions in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}");
               continue;

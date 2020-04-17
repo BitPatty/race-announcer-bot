@@ -3,6 +3,7 @@ using System.Linq;
 using Discord.WebSocket;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
+using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 
@@ -99,10 +100,12 @@ namespace RaceAnnouncer.Bot.Adapters
       DatabaseContext context
       , IEnumerable<SocketTextChannel> textChannels)
     {
-      foreach (Channel c in context.Channels.Local.Where(c => c.IsActive))
+      foreach (Channel c in context.Channels.Local)
       {
         if (!textChannels.Any(tc => tc.Id.Equals(c.Snowflake)))
         {
+          Logger.Info($"Disabling channel {c.Id} (Dropped)");
+
           c.IsActive = false;
           context.DisableTrackersByChannel(c);
         }
@@ -123,6 +126,8 @@ namespace RaceAnnouncer.Bot.Adapters
       {
         if (!guilds.Any(sg => sg.Id.Equals(guild.Snowflake)))
         {
+          Logger.Info($"Disabling guild {guild.Id} (Dropped)");
+
           context.DisableTrackersByGuild(guild);
           context.DisableChannelsByGuild(guild);
           guild.IsActive = false;

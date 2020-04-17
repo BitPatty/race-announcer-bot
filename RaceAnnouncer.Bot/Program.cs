@@ -271,8 +271,12 @@ namespace RaceAnnouncer.Bot
         Logger.Info("Loading guilds and channels");
         using (DatabaseContext context = new ContextBuilder().CreateDbContext())
         {
-          context.Channels.Load();
-          context.Guilds.Load();
+          context
+            .Channels
+            .Include(c => c.Guild)
+            .Include(c => c.Trackers)
+            .Load();
+
           context.ChangeTracker.DetectChanges();
           ChannelAdapter.SyncAll(context, _discordService);
           context.SaveChanges();
