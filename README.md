@@ -4,7 +4,7 @@
 [![MySQL 5.7](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%205.7/badge.svg)](https://github.com/BitPatty/RaceAnnouncerBot/actions)
 [![MySQL 8.0](https://github.com/BitPatty/RaceAnnouncerBot/workflows/MySQL%208.0/badge.svg)](https://github.com/BitPatty/RaceAnnouncerBot/actions)
 
-A cross-platform rewrite of the SRL race announcer bot for Discord, originally written in NodeJS.
+A Discord Race Announcer Bot for SpeedRunsLive races.
 
 ## Adding the bot to your server
 
