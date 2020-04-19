@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using RaceAnnouncer.Schema;
 
@@ -10,7 +11,12 @@ namespace RaceAnnouncer.Common
     {
       DbContextOptionsBuilder<DatabaseContext> optionsBuilder
         = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseMySql(Credentials.BuildConnectionString(envPath));
+            .UseMySql(
+              Credentials.BuildConnectionString(envPath)
+              , o => o.EnableRetryOnFailure(
+                5
+                , TimeSpan.FromSeconds(30)
+                , null));
 
       return new DatabaseContext(optionsBuilder.Options);
     }
