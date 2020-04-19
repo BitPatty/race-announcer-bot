@@ -365,10 +365,12 @@ namespace RaceAnnouncer.Bot
           Logger.Error("Exception thrown", ex);
           throw;
         }
-
-        _contextSemaphore.Release();
-        _srlService.IsUpdateTriggerEnabled = true;
-        Logger.Info("Released triggers");
+        finally
+        {
+          _contextSemaphore.Release();
+          _srlService.IsUpdateTriggerEnabled = true;
+          Logger.Info("Released triggers");
+        }
       }
     }
 
