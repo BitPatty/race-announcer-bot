@@ -10,6 +10,19 @@ A Discord Race Announcer Bot for SpeedRunsLive races.
 
 You can visit [https://discordapp.com/oauth2/authorize?client_id=445640978557304834&permissions=67193856&scope=bot](https://discordapp.com/oauth2/authorize?client_id=445640978557304834&permissions=67193856&scope=bot) to let the bot join your server. The requested permissions are mandatory for the bot to work properly.
 
+```
+Fair Use Notice
+
+The Race Announcer Bot service is a free, public instance intended for use in speedrunning community 
+Discord guilds to track races on SpeedRunsLive. If it is established that the bot is being used 
+excessively (e.g. the amount of games tracked by an individual guild exceeds normal levels), I reserve 
+the right to curtail or restrict the service (on a temporary or permanent basis) with or without prior 
+notice for these guilds or take other appropriate steps such that the tracking performance for other 
+guilds will not be impacted negatively.
+```
+
+### Hosting your own instance
+
 If you prefer to host your own instance you can find more information on the requirements in the following sections.
 
 ### Commands
