@@ -180,6 +180,7 @@ namespace RaceAnnouncer.Bot.Services
 
     private System.Threading.Tasks.Task OnClientDisconnected(Exception arg)
     {
+      Logger.Error("Discord disconnected. Exception thrown: ", arg);
       OnDisconnected?.Invoke(this, arg);
       return Task.CompletedTask;
     }

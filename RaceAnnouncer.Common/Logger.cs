@@ -29,13 +29,13 @@ namespace RaceAnnouncer.Common
 
       Exception? ex = exception;
 
-      do
+      while (ex != null)
       {
         Write(LogLevel.ERR, $"{ex.GetType().ToString()}");
         Write(LogLevel.ERR, $"{ex.Message}");
         Write(LogLevel.ERR, $"{ex.StackTrace}");
         ex = ex.InnerException;
-      } while (ex != null);
+      }
     }
 
     /// <summary>
