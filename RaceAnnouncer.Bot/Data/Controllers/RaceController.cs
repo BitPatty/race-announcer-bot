@@ -13,7 +13,14 @@ namespace RaceAnnouncer.Bot.Data.Controllers
 
       if (r == null)
       {
-        if (race.State == SRLApiClient.Endpoints.RaceState.Over) return null;
+        // Don't create new entries for finished races, we don't care about them
+        if (
+          race.State == SRLApiClient.Endpoints.RaceState.Over
+          || race.State == SRLApiClient.Endpoints.RaceState.Unknown
+        )
+        {
+          return null;
+        }
 
         context.Races.Local.Add(race);
         return race;
@@ -49,6 +56,6 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       => context
           .Races
           .Local
-          .SingleOrDefault(res => res.SrlId.Equals(srlId));
+          .SingleOrDefault(res => res.SrlId.Equals(srlId, System.StringComparison.CurrentCultureIgnoreCase));
   }
 }

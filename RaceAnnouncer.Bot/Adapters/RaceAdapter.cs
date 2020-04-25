@@ -44,19 +44,44 @@ namespace RaceAnnouncer.Bot.Adapters
 
       foreach (SRLRace srlRace in races)
       {
-        Logger.Info($"({srlRace.Id}) Synchronizing...");
+        Race? race = SyncRace(context, srlRace);
 
-        Game g = SyncGame(context, srlRace);
-        Race? r = SyncRace(context, srlRace, g);
-
-        if (r != null)
-        {
-          SyncEntrants(context, srlRace, r);
-          res.Add(r);
-        }
+        if (race != null)
+          res.Add(race);
       }
 
       return res;
+    }
+
+    /// <summary>
+    /// Syncs a srl race with it's persistent euivalent
+    /// </summary>
+    /// <param name="context">The database context</param>
+    /// <param name="srlRace">The srl race</param>
+    /// <returns>Returns the persisted race</returns>
+    private static Race? SyncRace(
+      DatabaseContext context
+      , SRLRace srlRace
+    )
+    {
+      Logger.Info($"({srlRace.Id}) Synchronizing...");
+
+      Game g = SyncGame(context, srlRace);
+
+      if (srlRace.State == SRLApiClient.Endpoints.RaceState.Over
+        && context.GetRace(srlRace.Id) == null)
+      {
+        Logger.Info($"({srlRace.Id}) Race over and not persisted, continuing.");
+        return null;
+      }
+
+      Race? race = srlRace.Convert(g);
+      race = context.AddOrUpdate(race);
+
+      if (race != null)
+        SyncEntrants(context, srlRace, race);
+
+      return race;
     }
 
     /// <summary>
@@ -72,28 +97,6 @@ namespace RaceAnnouncer.Bot.Adapters
     {
       Game game = srlRace.Game.Convert();
       return context.AddOrUpdate(game);
-    }
-
-    /// <summary>
-    /// Updates the existing or adds a new race entity based on the
-    /// <paramref name="srlRace"/>
-    /// </summary>
-    /// <param name="context">The database context</param>
-    /// <param name="srlRace">The SRL race</param>
-    /// <param name="game">The game entity</param>
-    /// <returns>The updated race entity</returns>
-    private static Race? SyncRace(DatabaseContext context
-      , SRLRace srlRace
-      , Game game)
-    {
-      if (srlRace.State >= SRLApiClient.Endpoints.RaceState.Finished
-        && context.GetRace(srlRace.Id) == null)
-      {
-        return null;
-      }
-
-      Race race = srlRace.Convert(game);
-      return context.AddOrUpdate(race);
     }
 
     /// <summary>
@@ -164,17 +167,7 @@ namespace RaceAnnouncer.Bot.Adapters
 
           Logger.Info($"({race.Id}) Race fetched, Synchronizing...");
 
-          Schema.Models.Game game
-            = context.AddOrUpdate(srlRace.Game.Convert());
-
-          race.AssignAttributes(srlRace.Convert(game));
-
-          race.IsActive =
-            srlRace.State != SRLApiClient.Endpoints.RaceState.Over
-            && srlRace.State != SRLApiClient.Endpoints.RaceState.Unknown;
-
-          foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
-            context.AddOrUpdate(entrant.Convert(race));
+          SyncRace(context, srlRace);
         }
         catch (Exception ex)
         {
