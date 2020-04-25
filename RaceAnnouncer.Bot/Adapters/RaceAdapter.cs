@@ -151,10 +151,11 @@ namespace RaceAnnouncer.Bot.Adapters
       , SRLService srlService
       , List<Race> updatedRaces)
     {
-      IEnumerable<Race> remainingActiveRaces = context
+      List<Race> remainingActiveRaces = context
         .Races
         .Local
-        .Where(r => r.IsActive && !updatedRaces.Contains(r));
+        .Where(r => r.IsActive && !updatedRaces.Contains(r))
+        .ToList();
 
       foreach (Race race in remainingActiveRaces)
       {
