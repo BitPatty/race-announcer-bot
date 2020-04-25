@@ -226,7 +226,6 @@ namespace RaceAnnouncer.Bot
       }
     }
 
-
     /// <summary>
     /// Try reconnecting after 10 seconds on discord disconnect
     /// </summary>

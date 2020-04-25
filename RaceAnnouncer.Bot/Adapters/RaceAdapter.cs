@@ -8,6 +8,7 @@ using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 using SRLApiClient.Exceptions;
+using SRLRace = SRLApiClient.Endpoints.Races.Race;
 
 namespace RaceAnnouncer.Bot.Adapters
 {
@@ -23,7 +24,7 @@ namespace RaceAnnouncer.Bot.Adapters
     public static void SyncRaces(
       DatabaseContext context
       , SRLService srlService
-      , List<SRLApiClient.Endpoints.Races.Race> races)
+      , List<SRLRace> races)
     {
       List<Race> res = UpdateSRLRaces(context, races);
       UpdateDroppedRaces(context, srlService, res);
@@ -37,11 +38,11 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <returns>Returns the list of updated race entities</returns>
     private static List<Race> UpdateSRLRaces(
       DatabaseContext context
-      , List<SRLApiClient.Endpoints.Races.Race> races)
+      , List<SRLRace> races)
     {
       List<Race> res = new List<Race>();
 
-      foreach (SRLApiClient.Endpoints.Races.Race srlRace in races)
+      foreach (SRLRace srlRace in races)
       {
         Logger.Info($"({srlRace.Id}) Synchronizing...");
 
@@ -67,7 +68,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <returns>The updated game entity</returns>
     private static Game SyncGame(
       DatabaseContext context
-      , SRLApiClient.Endpoints.Races.Race srlRace)
+      , SRLRace srlRace)
     {
       Game game = srlRace.Game.Convert();
       return context.AddOrUpdate(game);
@@ -82,7 +83,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="game">The game entity</param>
     /// <returns>The updated race entity</returns>
     private static Race? SyncRace(DatabaseContext context
-      , SRLApiClient.Endpoints.Races.Race srlRace
+      , SRLRace srlRace
       , Game game)
     {
       if (srlRace.State >= SRLApiClient.Endpoints.RaceState.Finished
@@ -104,7 +105,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="race">The race entity</param>
     private static void SyncEntrants
       (DatabaseContext context
-      , SRLApiClient.Endpoints.Races.Race srlRace
+      , SRLRace srlRace
       , Race race)
     {
       foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
@@ -122,7 +123,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="race">The race entity</param>
     private static void UpdateRemovedEntrants(
       DatabaseContext context
-      , SRLApiClient.Endpoints.Races.Race srlRace
+      , SRLRace srlRace
       , Race race)
     {
       IEnumerable<Entrant> registeredEntrants = context.GetEntrants(race);
@@ -141,34 +142,36 @@ namespace RaceAnnouncer.Bot.Adapters
     /// </summary>
     /// <param name="context">The database context</param>
     /// <param name="srlService">The srl service</param>
-    /// <param name="srlRaces">The list of received SRL races</param>
+    /// <param name="updatedRaces">The list of updated races</param>
     public static void UpdateDroppedRaces(
       DatabaseContext context
       , SRLService srlService
-      , List<Race> srlRaces)
+      , List<Race> updatedRaces)
     {
-      IEnumerable<Race> activeRaces = context
+      IEnumerable<Race> remainingActiveRaces = context
         .Races
         .Local
-        .Where(r => r.IsActive && !srlRaces.Contains(r));
+        .Where(r => r.IsActive && !updatedRaces.Contains(r));
 
-      foreach (Race race in activeRaces)
+      foreach (Race race in remainingActiveRaces)
       {
         try
         {
-          SRLApiClient.Endpoints.Races.Race srlRace
+          Logger.Info($"({race.Id}) Dropped, Fetching race...");
+
+          SRLRace srlRace
             = srlService.GetRaceAsync(race.SrlId).Result;
+
+          Logger.Info($"({race.Id}) Race fetched, Synchronizing...");
 
           Schema.Models.Game game
             = context.AddOrUpdate(srlRace.Game.Convert());
 
           race.AssignAttributes(srlRace.Convert(game));
 
-          //Since SRL doesn't implement the
-          //pagination of active races properly
-          //we just ignore finished races for now
-          race.IsActive = srlRace.State
-            < SRLApiClient.Endpoints.RaceState.Finished;
+          race.IsActive =
+            srlRace.State != SRLApiClient.Endpoints.RaceState.Over
+            && srlRace.State != SRLApiClient.Endpoints.RaceState.Unknown;
 
           foreach (SRLApiClient.Endpoints.Races.Entrant entrant in srlRace.Entrants)
             context.AddOrUpdate(entrant.Convert(race));
