@@ -177,8 +177,8 @@ namespace RaceAnnouncer.Bot.Adapters
           // Avoid catching HttpExceptions
           if (
             ((ex is SRLParseException || ex.InnerException is SRLParseException)
-            && race.State == SRLApiClient.Endpoints.RaceState.Over)
-            || DateTime.UtcNow.Subtract(race.CreatedAt).TotalDays >= 7
+            && (race.State == SRLApiClient.Endpoints.RaceState.Over || race.State == SRLApiClient.Endpoints.RaceState.Finished))
+            || DateTime.UtcNow.Subtract(race.CreatedAt).TotalDays >= 1
           )
           {
             Logger.Info($"({race.SrlId}) Deactivating race...");
