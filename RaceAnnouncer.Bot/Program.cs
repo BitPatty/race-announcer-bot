@@ -84,6 +84,12 @@ namespace RaceAnnouncer.Bot
     /// <param name="e"></param>
     private static void _Shutdown(object? sender, EventArgs e)
     {
+      try
+      {
+        _contextSemaphore.Wait();
+      }
+      catch { }
+
       Logger.Info("Disposing Services");
 
       try

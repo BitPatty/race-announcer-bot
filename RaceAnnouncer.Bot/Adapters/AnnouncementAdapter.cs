@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Discord.Rest;
 using Microsoft.EntityFrameworkCore;
@@ -56,10 +57,31 @@ namespace RaceAnnouncer.Bot.Adapters
               entrants.Add(e);
           }
 
-          if (announcement == null && race.State < SRLApiClient.Endpoints.RaceState.Finished)
+          if (
+            announcement == null
+            && race.State < SRLApiClient.Endpoints.RaceState.Finished
+            && race.State != SRLApiClient.Endpoints.RaceState.Unknown
+          )
           {
-            announcement = PostAnnouncement(discordService, tracker, race, entrants);
-            if (announcement != null) context.AddOrUpdate(announcement);
+            DateTime controlRange = DateTime.UtcNow.Subtract(TimeSpan.FromDays(7));
+
+            using DatabaseContext altContext = new ContextBuilder().CreateDbContext();
+            Race? persistedRace = altContext
+              .Races
+              .FirstOrDefault(r => r
+                .SrlId.Equals(race.SrlId, StringComparison.CurrentCultureIgnoreCase)
+                  && r.CreatedAt > controlRange);
+
+            if (persistedRace != null)
+            {
+              // If a race with the same id was registered within the last week, skip announcement
+              Logger.Info($"({race.SrlId}) Persisted race found: {persistedRace.Id}/{persistedRace.SrlId}. Skipping announcement!");
+            }
+            else
+            {
+              announcement = PostAnnouncement(discordService, tracker, race, entrants);
+              if (announcement != null) context.AddOrUpdate(announcement);
+            }
           }
           else if (announcement != null)
           {

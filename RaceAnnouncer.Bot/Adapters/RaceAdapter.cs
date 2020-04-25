@@ -154,7 +154,7 @@ namespace RaceAnnouncer.Bot.Adapters
       List<Race> remainingActiveRaces = context
         .Races
         .Local
-        .Where(r => r.IsActive && !updatedRaces.Contains(r))
+        .Where(r => r.IsActive && !updatedRaces.Any(ur => ur.SrlId.Equals(r.SrlId, StringComparison.CurrentCultureIgnoreCase)))
         .ToList();
 
       foreach (Race race in remainingActiveRaces)
@@ -178,7 +178,7 @@ namespace RaceAnnouncer.Bot.Adapters
           if (
             ex is SRLParseException
             || ex.InnerException is SRLParseException
-            || race.State >= SRLApiClient.Endpoints.RaceState.Finished
+            || race.State == SRLApiClient.Endpoints.RaceState.Over
             || DateTime.UtcNow.Subtract(race.CreatedAt).TotalHours >= 12
           )
           {
