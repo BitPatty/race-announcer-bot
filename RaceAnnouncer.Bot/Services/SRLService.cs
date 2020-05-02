@@ -64,7 +64,9 @@ namespace RaceAnnouncer.Bot.Services
         {
           OnUpdate?.Invoke(this, _client.Races
             .GetActive()
-            .Where(r => r.Game.Id != 0 && !r.Game.Abbreviation.Equals("newgame"))
+            .Where(r => r.Game.Id != 0
+              && !r.Game.Abbreviation.Equals("newgame")
+              && !String.IsNullOrWhiteSpace(r.Game.Name))
             .ToList()
             .AsReadOnly()
           );
