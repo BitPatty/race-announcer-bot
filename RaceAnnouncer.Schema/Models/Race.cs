@@ -57,6 +57,13 @@ namespace RaceAnnouncer.Schema.Models
     public int Time { get; set; }
 
     /// <summary>
+    /// The races entrant count
+    /// </summary>
+    [Required]
+    [Column("entrant_count")]
+    public int EntrantCount { get; set; }
+
+    /// <summary>
     /// True if the race is still active on SRL
     /// </summary>
     [Required]

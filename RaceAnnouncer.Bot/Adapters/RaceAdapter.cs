@@ -115,6 +115,7 @@ namespace RaceAnnouncer.Bot.Adapters
         context.AddOrUpdate(entrant.Convert(race));
 
       UpdateRemovedEntrants(context, srlRace, race);
+      race.EntrantCount = srlRace.Entrants.Count;
     }
 
     /// <summary>

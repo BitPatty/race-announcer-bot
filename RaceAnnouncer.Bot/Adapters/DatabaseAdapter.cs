@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using RaceAnnouncer.Bot.Data.Controllers;
+using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
 
@@ -41,12 +42,14 @@ namespace RaceAnnouncer.Bot.Adapters
       {
         if (HasEntityChanged(context.Entry(race)))
         {
+          Logger.Info($"({race.SrlId}) Race changed.");
           races.Add(race);
         }
         else if (context
           .GetEntrants(race)
           .Any(e => HasEntityChanged(context.Entry(e))))
         {
+          Logger.Info($"({race.SrlId}) Entrants changed.");
           races.Add(race);
         }
       }
