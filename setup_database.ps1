@@ -1,5 +1,3 @@
-param([string]$MigrationName)
-
 $ErrorActionPreference="Stop";
 
 Write-Host -ForegroundColor Cyan "Rebuilding projects..";

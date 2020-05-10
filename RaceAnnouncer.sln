@@ -18,6 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		preview.png = preview.png
 		README.md = README.md
 		run_tests.ps1 = run_tests.ps1
+		setup_database.ps1 = setup_database.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaceAnnouncer.Schema", "RaceAnnouncer.Schema\RaceAnnouncer.Schema.csproj", "{430EBBA4-5A63-4BDD-AEA2-268ED4BBE2A7}"
