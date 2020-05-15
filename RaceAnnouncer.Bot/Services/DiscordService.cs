@@ -37,7 +37,11 @@ namespace RaceAnnouncer.Bot.Services
 
     public DiscordService()
     {
-      _discordClient                    /**/ = new DiscordSocketClient();
+      _discordClient                    /**/ = new DiscordSocketClient(new DiscordSocketConfig()
+      {
+        LogLevel = LogSeverity.Verbose,
+      });
+
       _discordClient.Ready              /**/ += OnClientReady;
       _discordClient.Disconnected       /**/ += OnClientDisconnected;
       _discordClient.Connected          /**/ += OnClientConnected;
