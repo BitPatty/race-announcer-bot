@@ -41,6 +41,7 @@ public class NUnitSetup
       Guild guild =
         context
         .Guilds
+        .AsQueryable()
         .OrderBy(g => g.Id)
         .ToArray()[i];
 
