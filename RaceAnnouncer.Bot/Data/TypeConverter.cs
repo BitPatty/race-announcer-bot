@@ -17,7 +17,7 @@
             , race.Goal
             , race.Id.ToLower()
             , race.Time
-            , race.State != SRLApiClient.Endpoints.RaceState.Over
+            , true
             , race.State);
 
     public static RaceAnnouncer.Schema.Models.Entrant Convert(
