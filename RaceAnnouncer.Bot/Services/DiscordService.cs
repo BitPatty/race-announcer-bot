@@ -46,6 +46,17 @@ namespace RaceAnnouncer.Bot.Services
       _discordClient.ChannelDestroyed   /**/ += OnClientChannelDestroyed;
       _discordClient.LeftGuild          /**/ += OnClientLeftGuild;
       _discordClient.MessageReceived    /**/ += OnClientMessageReceived;
+      _discordClient.Log                /**/ += OnClientLog;
+    }
+
+    private Task OnClientLog(LogMessage arg)
+    {
+      if (arg.Exception != null)
+        Logger.Error($"[Discord Client] {arg.Message}", arg.Exception);
+      else
+        Logger.Debug($"[Discord Client] {arg.Severity} : {arg.Message}");
+
+      return Task.CompletedTask;
     }
 
     /// <summary>

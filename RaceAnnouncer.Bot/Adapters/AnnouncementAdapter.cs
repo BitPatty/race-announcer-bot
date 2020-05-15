@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Discord.Rest;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Data.Controllers;
@@ -87,8 +86,6 @@ namespace RaceAnnouncer.Bot.Adapters
           {
             UpdateAnnouncement(discordService, announcement, entrants);
           }
-
-          Thread.Sleep(1000);
         }
       }
     }
