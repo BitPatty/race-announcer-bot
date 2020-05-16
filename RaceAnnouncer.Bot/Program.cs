@@ -19,7 +19,6 @@ namespace RaceAnnouncer.Bot
   internal static class Program
   {
     private static readonly SemaphoreSlim _contextSemaphore = new SemaphoreSlim(1, 1);
-    private static bool _isInitialLoad = true;
 
     #region Queues
 
@@ -328,22 +327,10 @@ namespace RaceAnnouncer.Bot
         RaceAdapter.SyncRaces(context, _srlService, e.ToList());
 
         Logger.Info("Updating announcements");
-        if (_isInitialLoad)
-        {
-          AnnouncementAdapter.UpdateAnnouncements(
-           context
-           , _discordService
-           , context.Races.Local.ToList());
-
-          _isInitialLoad = false;
-        }
-        else
-        {
-          AnnouncementAdapter.UpdateAnnouncements(
-            context
-            , _discordService
-            , DatabaseAdapter.GetUpdatedRaces(context).ToList());
-        }
+        AnnouncementAdapter.UpdateAnnouncements(
+          context
+          , _discordService
+          , DatabaseAdapter.GetUpdatedRaces(context).ToList());
 
         Logger.Info("Saving changes");
         context.SaveChanges();
