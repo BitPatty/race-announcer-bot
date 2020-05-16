@@ -171,7 +171,7 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void MigrateDatabase()
     {
-      _contextSemaphore.WaitAsync();
+      _contextSemaphore.Wait();
 
       try
       {
@@ -303,7 +303,7 @@ namespace RaceAnnouncer.Bot
       }
       catch (Exception ex)
       {
-        Logger.Error($"Exception thrown", ex);
+        Logger.Error("Exception thrown", ex);
         Environment.Exit(-1);
       }
       finally

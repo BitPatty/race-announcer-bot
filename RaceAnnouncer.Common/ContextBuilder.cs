@@ -21,6 +21,7 @@ namespace RaceAnnouncer.Common
       return new DatabaseContext(optionsBuilder.Options);
     }
 
+    // Required for EF Core CLI
     public DatabaseContext CreateDbContext(string[] args) => CreateDbContext();
   }
 }

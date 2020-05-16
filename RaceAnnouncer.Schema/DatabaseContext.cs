@@ -50,7 +50,7 @@ namespace RaceAnnouncer.Schema
     public override int SaveChanges()
     {
       ChangeTracker.DetectChanges();
-      return base.SaveChanges();
+      return base.SaveChangesAsync().ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)

@@ -31,7 +31,7 @@ namespace RaceAnnouncer.Common
 
       while (ex != null)
       {
-        Write(LogLevel.ERR, $"{ex.GetType().ToString()}");
+        Write(LogLevel.ERR, $"{ex.GetType()}");
         Write(LogLevel.ERR, $"{ex.Message}");
         Write(LogLevel.ERR, $"{ex.StackTrace}");
         ex = ex.InnerException;
