@@ -236,11 +236,24 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     private static void OnDiscordDisconnected(object? sender, Exception? e)
     {
-      Logger.Info("Discord disconnected!");
-      Logger.Info("Stopping Discord Service");
-      _discordService.Stop();
-      Logger.Info("Discord Service Stopped, Exiting");
-      Environment.Exit(-2);
+      _contextSemaphore.Wait();
+
+      try
+      {
+        Logger.Info("Discord disconnected!");
+        Logger.Info("Stopping Discord Service");
+        _discordService.Stop();
+        Logger.Info("Discord Service Stopped, Exiting");
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Exception thrown", ex);
+      }
+      finally
+      {
+        _contextSemaphore.Release();
+        Environment.Exit(-2);
+      }
     }
 
     /// <summary>
