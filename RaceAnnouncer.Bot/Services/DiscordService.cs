@@ -53,7 +53,6 @@ namespace RaceAnnouncer.Bot.Services
       {
         ShardId = 0,
         LogLevel = LogSeverity.Verbose,
-        UseSystemClock = false,
       });
 
       _discordClient.Ready              /**/ += OnClientReady;
