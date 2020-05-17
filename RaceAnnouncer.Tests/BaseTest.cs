@@ -46,7 +46,7 @@ namespace RaceAnnouncer.Tests
 
       Assert.DoesNotThrow(delegate
       {
-        _context.LoadRemoteAsync();
+        _context.LoadRemoteAsync().Wait();
       });
     }
 
