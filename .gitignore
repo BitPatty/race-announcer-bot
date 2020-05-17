@@ -11,6 +11,7 @@
 *.sln.docstates
 *.config
 *.env
+!nuget.config
 
 # Test environment files
 !RaceAnnouncer.Tests/*.env

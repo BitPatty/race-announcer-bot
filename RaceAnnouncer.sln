@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.ps1 = compose.ps1
 		create_migration.ps1 = create_migration.ps1
 		docker-compose.yml = docker-compose.yml
+		NuGet.config = NuGet.config
 		preview.png = preview.png
 		README.md = README.md
 		run_tests.ps1 = run_tests.ps1
