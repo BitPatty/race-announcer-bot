@@ -74,7 +74,6 @@ namespace RaceAnnouncer.Bot.Services
       _messageCache = factory.GetCachingProvider(_messageCacheKey);
     }
 
-
     private Task OnClientLog(LogMessage arg)
     {
       if (arg.Exception != null)
@@ -101,8 +100,8 @@ namespace RaceAnnouncer.Bot.Services
     /// <summary>
     /// Stops the client
     /// </summary>
-    public void Stop()
-      => _discordClient.StopAsync().Wait();
+    public async Task StopAsync()
+      => await _discordClient.StopAsync().ConfigureAwait(false);
 
     /// <summary>
     /// Gets the list of text channels
@@ -169,8 +168,11 @@ namespace RaceAnnouncer.Bot.Services
 
     #region Messages
 
-    public async Task<RestUserMessage> Reply(SocketMessage message, string content)
-      => await message.Channel.SendMessageAsync($"{message.Author.Mention} {content}");
+    public async Task<RestUserMessage> ReplyAsync(SocketMessage message, string content)
+      => await message
+         .Channel
+         .SendMessageAsync($"{message.Author.Mention} {content}")
+         .ConfigureAwait(false);
 
     /// <summary>
     /// Sends an embed to the specified <paramref name="channelId"/>
@@ -282,7 +284,10 @@ namespace RaceAnnouncer.Bot.Services
     {
       if (arg == null
         || OnCommandReceived == null
-        || arg.Author == null) return Task.CompletedTask;
+        || arg.Author == null)
+      {
+        return Task.CompletedTask;
+      }
 
       bool isMention = arg
         .MentionedUsers
@@ -294,8 +299,7 @@ namespace RaceAnnouncer.Bot.Services
         .Guilds
         .FirstOrDefault(g => g
           .Channels
-          .FirstOrDefault(c => c.Id.Equals(arg.Channel.Id))
-        != null);
+          .Any(c => c.Id.Equals(arg.Channel.Id)));
 
       bool userIsAdmin =
         !arg.Author.IsBot

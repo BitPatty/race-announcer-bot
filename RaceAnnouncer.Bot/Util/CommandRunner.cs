@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Discord.WebSocket;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Services;
@@ -29,34 +30,34 @@ namespace RaceAnnouncer.Bot.Util
     /// </summary>
     /// <param name="message">The request message</param>
     /// <param name="discordService">The discord service</param>
-    public static void Run(
+    public static async Task RunAsync(
       SocketMessage message
       , DiscordService discordService
     )
     {
       using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
-      context.LoadRemote();
+      await context.LoadRemoteAsync().ConfigureAwait(false);
       context.ChangeTracker.DetectChanges();
 
       CommandType commandType = ParseCommandType(message.Content, out string[]? args);
 
       if (commandType == CommandType.INVALID || args == null)
       {
-        discordService.Reply(message, "Invalid command").Wait();
+        await discordService.ReplyAsync(message, "Invalid command").ConfigureAwait(false);
         return;
       }
 
       switch (commandType)
       {
         case CommandType.ADD_TRACKER:
-          AddTracker(message, discordService, context, args);
+          await AddTrackerAsync(message, discordService, context, args).ConfigureAwait(false);
           return;
         case CommandType.REMOVE_TRACKER:
-          RemoveTracker(message, discordService, context, args);
+          await RemoveTrackerAsync(message, discordService, context, args).ConfigureAwait(false);
           return;
         case CommandType.LIST:
-          ListTrackers(message, discordService, context);
+          await ListTrackersAsync(message, discordService, context).ConfigureAwait(false);
           return;
       }
     }
@@ -67,7 +68,7 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="message">The request message</param>
     /// <param name="discordService">The discord service</param>
     /// <param name="context">The database context</param>
-    private static void ListTrackers(
+    private static async Task ListTrackersAsync(
       SocketMessage message
       , DiscordService discordService
       , DatabaseContext context
@@ -81,9 +82,9 @@ namespace RaceAnnouncer.Bot.Util
 
       if (!trackers.Any())
       {
-        discordService
-          .Reply(message, "No active trackers found!")
-          .Wait();
+        await discordService
+          .ReplyAsync(message, "No active trackers found!")
+          .ConfigureAwait(false);
 
         return;
       }
@@ -116,7 +117,7 @@ namespace RaceAnnouncer.Bot.Util
 
       reply += "```";
 
-      discordService.Reply(message, reply).Wait();
+      await discordService.ReplyAsync(message, reply).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -126,7 +127,7 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="discordService">The discord service</param>
     /// <param name="context">The database context</param>
     /// <param name="args">The command arguments</param>
-    private static void AddTracker(
+    private static async Task AddTrackerAsync(
       SocketMessage message,
       DiscordService discordService,
       DatabaseContext context,
@@ -136,13 +137,13 @@ namespace RaceAnnouncer.Bot.Util
       if (args.Length != 4)
       {
         Logger.Error("Invalid command pattern");
-        discordService.Reply(message, "Invalid command pattern. Command usage: track <srl abbreviation> <channel mention>").Wait();
+        await discordService.ReplyAsync(message, "Invalid command pattern. Command usage: track <srl abbreviation> <channel mention>").ConfigureAwait(false);
         return;
       }
 
       if (message.MentionedChannels.Count != 1)
       {
-        discordService.Reply(message, "No channel specified! Command usage: track <srl abbreviation> <channel mention>").Wait();
+        await discordService.ReplyAsync(message, "No channel specified! Command usage: track <srl abbreviation> <channel mention>").ConfigureAwait(false);
         return;
       }
 
@@ -150,7 +151,7 @@ namespace RaceAnnouncer.Bot.Util
 
       if (game == null)
       {
-        discordService.Reply(message, $"Game abbreviation '{args[2]}' not found").Wait();
+        await discordService.ReplyAsync(message, $"Game abbreviation '{args[2]}' not found").ConfigureAwait(false);
         return;
       }
 
@@ -159,19 +160,19 @@ namespace RaceAnnouncer.Bot.Util
 
       if (channel == null)
       {
-        discordService.Reply(message, "Channel not registered yet, please try again later.").Wait();
+        await discordService.ReplyAsync(message, "Channel not registered yet, please try again later.").ConfigureAwait(false);
         return;
       }
 
       if (!channel.Guild.Snowflake.Equals(mentionedChannel.Guild.Id) || !channel.IsActive)
       {
-        discordService.Reply(message, "Channel not found.").Wait();
+        await discordService.ReplyAsync(message, "Channel not found.").ConfigureAwait(false);
         return;
       }
 
       if (discordService.HasRequiredPermissions(channel.Guild.Snowflake, channel.Snowflake) != true)
       {
-        discordService.Reply(message, $"Missing permissions in channel #{mentionedChannel.Name}").Wait();
+        await discordService.ReplyAsync(message, $"Missing permissions in channel #{mentionedChannel.Name}").ConfigureAwait(false);
         return;
       }
 
@@ -193,7 +194,7 @@ namespace RaceAnnouncer.Bot.Util
       }
 
       context.SaveChanges();
-      discordService.Reply(message, $"{game.Abbreviation} is now being tracked in {channel.DisplayName}").Wait();
+      await discordService.ReplyAsync(message, $"{game.Abbreviation} is now being tracked in {channel.DisplayName}").ConfigureAwait(false);
     }
 
     /// <summary>
@@ -203,7 +204,7 @@ namespace RaceAnnouncer.Bot.Util
     /// <param name="discordService">The discord service</param>
     /// <param name="context">The database context</param>
     /// <param name="args">The command arguments</param>
-    private static void RemoveTracker(
+    private static async Task RemoveTrackerAsync(
       SocketMessage message
       , DiscordService discordService
       , DatabaseContext context
@@ -212,7 +213,7 @@ namespace RaceAnnouncer.Bot.Util
     {
       if (args.Length != 3)
       {
-        discordService.Reply(message, "Invalid command pattern. Command usage: untrack <srl abbreviation>").Wait();
+        await discordService.ReplyAsync(message, "Invalid command pattern. Command usage: untrack <srl abbreviation>").ConfigureAwait(false);
         return;
       }
 
@@ -220,7 +221,7 @@ namespace RaceAnnouncer.Bot.Util
 
       if (game == null)
       {
-        discordService.Reply(message, $"Unknown game abbreviation: {args[2]}").Wait();
+        await discordService.ReplyAsync(message, $"Unknown game abbreviation: {args[2]}").ConfigureAwait(false);
         return;
       }
 
@@ -232,14 +233,14 @@ namespace RaceAnnouncer.Bot.Util
 
       if (tracker == null)
       {
-        discordService.Reply(message, $"No tracker for '{game.Abbreviation}' registered in guild").Wait();
+        await discordService.ReplyAsync(message, $"No tracker for '{game.Abbreviation}' registered in guild").ConfigureAwait(false);
         return;
       }
 
       tracker.State = TrackerState.Dead;
       context.SaveChanges();
 
-      discordService.Reply(message, "Tracker removed").Wait();
+      await discordService.ReplyAsync(message, "Tracker removed").ConfigureAwait(false);
     }
 
     /// <summary>

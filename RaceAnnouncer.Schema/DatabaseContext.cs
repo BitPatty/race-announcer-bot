@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RaceAnnouncer.Schema.Models;
@@ -23,35 +24,47 @@ namespace RaceAnnouncer.Schema
 #endif
     }
 
-    public void LoadRemote()
+    public async Task LoadRemoteAsync()
     {
       ChangeTracker.AutoDetectChangesEnabled = false;
 
-      Guilds
-        .Load();
+      await Guilds
+        .LoadAsync()
+        .ConfigureAwait(false);
 
-      Channels
-        .Load();
+      await Channels
+        .LoadAsync()
+        .ConfigureAwait(false);
 
-      Games
-        .Load();
+      await Games
+        .LoadAsync()
+        .ConfigureAwait(false);
 
-      Trackers
+      await Trackers
         .Where(t => t.State != TrackerState.Dead)
-        .Load();
+        .LoadAsync()
+        .ConfigureAwait(false);
 
-      Races
+      await Races
         .Include(r => r.Entrants)
         .Include(r => r.Announcements)
         .Where(r => r.IsActive)
-        .Load();
+        .LoadAsync()
+        .ConfigureAwait(false);
     }
 
     public override int SaveChanges()
     {
       ChangeTracker.DetectChanges();
-      return base.SaveChangesAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+      return base.SaveChanges();
     }
+
+    public async Task<int> SaveChangesAsync()
+    {
+      ChangeTracker.DetectChanges();
+      return await base.SaveChangesAsync().ConfigureAwait(false);
+    }
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord.Rest;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Data.Controllers;
@@ -21,7 +22,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="context">The database context</param>
     /// <param name="discordService">The discord service</param>
     /// <param name="races">The races</param>
-    public static void UpdateAnnouncements(
+    public static async Task UpdateAnnouncementsAsync(
       DatabaseContext context
       , DiscordService discordService
       , List<Race> races)
@@ -78,13 +79,13 @@ namespace RaceAnnouncer.Bot.Adapters
             }
             else
             {
-              announcement = PostAnnouncement(discordService, tracker, race, entrants);
+              announcement = await PostAnnouncementAsync(discordService, tracker, race, entrants).ConfigureAwait(false);
               if (announcement != null) context.AddOrUpdate(announcement);
             }
           }
           else if (announcement != null)
           {
-            UpdateAnnouncement(discordService, announcement, entrants);
+            await UpdateAnnouncementAsync(discordService, announcement, entrants).ConfigureAwait(false);
           }
         }
       }
@@ -97,15 +98,14 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="tracker">The tracker</param>
     /// <param name="race">The race</param>
     /// <returns>On Success, returns the announcement</returns>
-    private static Announcement? PostAnnouncement(DiscordService discordService, Tracker tracker, Race race, List<Entrant> entrants)
+    private static async Task<Announcement?> PostAnnouncementAsync(DiscordService discordService, Tracker tracker, Race race, List<Entrant> entrants)
     {
       Logger.Info($"({race.SrlId}) Posting announcement in channel {tracker.ChannelId}: {tracker.Channel.Guild.DisplayName}/{tracker.Channel.DisplayName}.");
 
       try
       {
-        RestUserMessage? message = discordService
-            .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race, entrants))
-            .Result;
+        RestUserMessage? message = await discordService
+           .SendEmbedAsync(tracker.Channel.Snowflake, EmbedFactory.Build(race, entrants)).ConfigureAwait(false);
 
         if (message != null)
         {
@@ -126,17 +126,17 @@ namespace RaceAnnouncer.Bot.Adapters
     /// </summary>
     /// <param name="discordService">The discord service</param>
     /// <param name="announcement">The target announcement</param>
-    private static void UpdateAnnouncement(DiscordService discordService, Announcement announcement, List<Entrant> entrants)
+    private static async Task UpdateAnnouncementAsync(DiscordService discordService, Announcement announcement, List<Entrant> entrants)
     {
       Logger.Info($"({announcement.Race.SrlId}) Updating announcement {announcement.Snowflake} in channel {announcement.ChannelId}: {announcement.Channel.Guild.DisplayName}/{announcement.Channel.DisplayName}.");
 
-      RestUserMessage? message = discordService.FindMessageAsync(announcement.Channel, announcement.Snowflake).Result;
+      RestUserMessage? message = await discordService.FindMessageAsync(announcement.Channel, announcement.Snowflake).ConfigureAwait(false);
 
       if (message != null)
       {
         try
         {
-          discordService.ModifyMessageAsync(message, EmbedFactory.Build(announcement.Race, entrants)).Wait();
+          await discordService.ModifyMessageAsync(message, EmbedFactory.Build(announcement.Race, entrants)).ConfigureAwait(false);
           announcement.MessageUpdatedAt = DateTime.UtcNow;
         }
         catch (Exception ex)

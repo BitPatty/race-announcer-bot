@@ -3,10 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Adapters;
@@ -65,7 +63,7 @@ namespace RaceAnnouncer.Bot
     internal static void Main()
     {
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-      AppDomain.CurrentDomain.ProcessExit += _Shutdown;
+      AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
 
       Logger.Debug("Initializing Database");
       MigrateDatabase();
@@ -96,7 +94,7 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private static void _Shutdown(object? sender, EventArgs e)
+    private static void OnApplicationExit(object? sender, EventArgs e)
     {
       try
       {
@@ -108,7 +106,7 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        _discordService.Stop();
+        _discordService.StopAsync();
         _discordService.Dispose();
       }
       catch { }
@@ -222,16 +220,18 @@ namespace RaceAnnouncer.Bot
     /// <summary>
     /// Enqueue received commands
     /// </summary>
-    private static void OnDiscordCommandReceived(object? sender, SocketMessage e)
+    private static async void OnDiscordCommandReceived(object? sender, SocketMessage e)
     {
-      _contextSemaphore.Wait();
+      await _contextSemaphore
+         .WaitAsync()
+         .ConfigureAwait(false);
 
       try
       {
         if (e != null)
         {
           Logger.Info($"Running command: {e.Author.Username}{e.Author.Discriminator}: {e.Content}");
-          CommandRunner.Run(e, _discordService);
+          await CommandRunner.RunAsync(e, _discordService).ConfigureAwait(false);
         }
 
         Logger.Info("Finished processing received commands");
@@ -257,7 +257,7 @@ namespace RaceAnnouncer.Bot
       {
         Logger.Info("Discord disconnected!");
         Logger.Info("Stopping Discord Service");
-        _discordService.Stop();
+        _discordService.StopAsync();
         Logger.Info("Discord Service Stopped, Exiting");
       }
       catch (Exception ex)
@@ -292,10 +292,10 @@ namespace RaceAnnouncer.Bot
     /// <summary>
     /// Sync channels and guild when discord is ready
     /// </summary>
-    private static void OnDiscordReady(object? sender, EventArgs? e)
+    private static async void OnDiscordReady(object? sender, EventArgs? e)
     {
       Logger.Info("Discord Ready, waiting for lock");
-      _contextSemaphore.Wait();
+      await _contextSemaphore.WaitAsync().ConfigureAwait(false);
       Logger.Info("Lock acquired");
 
       try
@@ -303,11 +303,12 @@ namespace RaceAnnouncer.Bot
         Logger.Info("Loading guilds and channels");
         using (DatabaseContext context = new ContextBuilder().CreateDbContext())
         {
-          context
+          await context
             .Channels
             .Include(c => c.Guild)
             .Include(c => c.Trackers)
-            .Load();
+            .LoadAsync()
+            .ConfigureAwait(false);
 
           context.ChangeTracker.DetectChanges();
           ChannelAdapter.SyncAll(context, _discordService);
@@ -330,12 +331,12 @@ namespace RaceAnnouncer.Bot
     /// <summary>
     /// Update races and announcements
     /// </summary>
-    private static void OnSrlUpdate(object? sender, IReadOnlyCollection<SRLApiClient.Endpoints.Races.Race> e)
+    private static async void OnSrlUpdate(object? sender, IReadOnlyCollection<SRLApiClient.Endpoints.Races.Race> e)
     {
       _srlService.IsUpdateTriggerEnabled = false;
 
       Logger.Info("Waiting for lock..");
-      _contextSemaphore.Wait();
+      await _contextSemaphore.WaitAsync().ConfigureAwait(false);
 
       DateTime startTime = DateTime.UtcNow;
       bool updateSuccessful = false;
@@ -345,34 +346,25 @@ namespace RaceAnnouncer.Bot
         using DatabaseContext context = new ContextBuilder().CreateDbContext();
 
         Logger.Info("Reloading context");
-        context.LoadRemote();
+        await context.LoadRemoteAsync().ConfigureAwait(false);
+
         context.ChangeTracker.DetectChanges();
 
-        try
-        {
-          Task.Factory.StartNew(() =>
-          {
-            Logger.Info("Processing channel mutations");
-            ProcessChannelMutations(context);
+        Logger.Info("Processing channel mutations");
+        ProcessChannelMutations(context);
 
-            Logger.Info("Updating races");
-            RaceAdapter.SyncRaces(context, _srlService, e.ToList());
+        Logger.Info("Updating races");
+        await RaceAdapter
+            .SyncRaces(context, _srlService, e.ToList())
+            .ConfigureAwait(false);
 
-            Logger.Info("Updating announcements");
-            AnnouncementAdapter.UpdateAnnouncements(
-              context
-              , _discordService
-              , DatabaseAdapter.GetUpdatedRaces(context).ToList());
-
-          }).Wait(TimeSpan.FromSeconds(30));
-        }
-        catch (Exception ex)
-        {
-          Logger.Error("Exception thrown", ex);
-        }
+        Logger.Info("Updating announcements");
+        await AnnouncementAdapter
+            .UpdateAnnouncementsAsync(context, _discordService, DatabaseAdapter.GetUpdatedRaces(context).ToList())
+            .ConfigureAwait(false);
 
         Logger.Info("Saving changes");
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         Logger.Info("Update completed");
         updateSuccessful = true;
@@ -488,7 +480,7 @@ namespace RaceAnnouncer.Bot
       if (token == null)
         throw new Exception("Failed to load the Discord token");
 
-      _discordService.AuthenticateAsync(token).Wait();
+      await _discordService.AuthenticateAsync(token).ConfigureAwait(false);
       await _discordService.StartAsync().ConfigureAwait(false);
       _srlService.StartTimer();
 

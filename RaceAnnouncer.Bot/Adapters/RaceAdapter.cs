@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using RaceAnnouncer.Bot.Data.Controllers;
 using RaceAnnouncer.Bot.Data.Converters;
 using RaceAnnouncer.Bot.Services;
@@ -21,13 +22,13 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="context">The database context</param>
     /// <param name="srlService">The SRL service</param>
     /// <param name="races">The SRL races</param>
-    public static void SyncRaces(
+    public static async Task SyncRaces(
       DatabaseContext context
       , SRLService srlService
       , List<SRLRace> races)
     {
       List<Race> res = UpdateSRLRaces(context, races);
-      UpdateDroppedRaces(context, srlService, res);
+      await UpdateDroppedRacesAsync(context, srlService, res).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -147,7 +148,7 @@ namespace RaceAnnouncer.Bot.Adapters
     /// <param name="context">The database context</param>
     /// <param name="srlService">The srl service</param>
     /// <param name="updatedRaces">The list of updated races</param>
-    public static void UpdateDroppedRaces(
+    public static async Task UpdateDroppedRacesAsync(
       DatabaseContext context
       , SRLService srlService
       , List<Race> updatedRaces)
@@ -165,7 +166,7 @@ namespace RaceAnnouncer.Bot.Adapters
           Logger.Info($"({race.Id}) Dropped, Fetching race...");
 
           SRLRace srlRace
-            = srlService.GetRaceAsync(race.SrlId).Result;
+            = await srlService.GetRaceAsync(race.SrlId).ConfigureAwait(false);
 
           Logger.Info($"({race.Id}) Race fetched, Synchronizing...");
 
