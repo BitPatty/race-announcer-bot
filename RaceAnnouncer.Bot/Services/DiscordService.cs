@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using EasyCaching.Core;
-using Microsoft.Extensions.DependencyInjection;
 using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema.Models;
 
@@ -33,16 +31,6 @@ namespace RaceAnnouncer.Bot.Services
     private readonly DiscordSocketClient _discordClient;
 
     /// <summary>
-    /// Message cache
-    /// </summary>
-    private readonly IEasyCachingProvider _messageCache;
-
-    /// <summary>
-    /// Message cache key
-    /// </summary>
-    private string _messageCacheKey => "RestUserMessageCache";
-
-    /// <summary>
     /// User IDs of bot administrators
     /// </summary>
     private readonly string[] _admins = Environment.GetEnvironmentVariable("ADMINS")?.Split(",") ?? new string[0];
@@ -64,13 +52,6 @@ namespace RaceAnnouncer.Bot.Services
       _discordClient.LeftGuild          /**/ += OnClientLeftGuild;
       _discordClient.MessageReceived    /**/ += OnClientMessageReceived;
       _discordClient.Log                /**/ += OnClientLog;
-
-      // Setup message cache
-      IServiceCollection services = new ServiceCollection();
-      services.AddEasyCaching(o => o.UseInMemory(_messageCacheKey));
-      IServiceProvider _serviceProvider = services.BuildServiceProvider();
-      IEasyCachingProviderFactory factory = _serviceProvider.GetService<IEasyCachingProviderFactory>();
-      _messageCache = factory.GetCachingProvider(_messageCacheKey);
     }
 
     private Task OnClientLog(LogMessage arg)
@@ -185,13 +166,8 @@ namespace RaceAnnouncer.Bot.Services
           .SelectMany(g => g.TextChannels.Where(c => c.Id.Equals(channelId)))
           .First();
 
-      RestUserMessage? msg = await channel
+      return await channel
           .SendMessageAsync(text: "", embed: embed).ConfigureAwait(false);
-
-      if (msg != null)
-        _messageCache.Set<RestUserMessage>($"{channel.Id}/{msg.Id}", msg, TimeSpan.FromHours(24));
-
-      return msg;
     }
 
     /// <summary>
@@ -211,25 +187,10 @@ namespace RaceAnnouncer.Bot.Services
     /// <returns>Returns the message</returns>
     public async Task<RestUserMessage?> FindMessageAsync(Channel channel, ulong messageId)
     {
-      string cacheKey = $"{channel.Snowflake}/{messageId}";
-
-      CacheValue<RestUserMessage?> cacheEntry = _messageCache.Get<RestUserMessage?>($"{channel.Snowflake}/{messageId}");
-
-      if (!cacheEntry.IsNull && cacheEntry.HasValue && cacheEntry.Value is RestUserMessage)
-      {
-        Logger.Info($"Loading message {messageId} from cache");
-        return cacheEntry.Value;
-      }
-
-      RestUserMessage? msg = await _discordClient.Guilds
+      return await _discordClient.Guilds
          .SelectMany(g => g.TextChannels.Where(c => c.Id.Equals(channel.Snowflake)))
          .First()
          .GetMessageAsync(messageId).ConfigureAwait(false) as RestUserMessage;
-
-      if (msg != null)
-        _messageCache.Set<RestUserMessage>(cacheKey, msg, TimeSpan.FromHours(24));
-
-      return msg;
     }
 
     #endregion Message
