@@ -66,11 +66,13 @@ namespace RaceAnnouncer.Bot.Adapters
             DateTime controlRange = DateTime.UtcNow.Subtract(TimeSpan.FromDays(7));
 
             using DatabaseContext altContext = new ContextBuilder().CreateDbContext();
-            Race? persistedRace = altContext
+            Race? persistedRace = await altContext
               .Races
-              .FirstOrDefault(r => r
+              .AsQueryable()
+              .FirstOrDefaultAsync(r => r
                 .SrlId.Equals(race.SrlId, StringComparison.CurrentCultureIgnoreCase)
-                  && r.CreatedAt > controlRange);
+                  && r.CreatedAt > controlRange)
+              .ConfigureAwait(false);
 
             if (persistedRace != null)
             {
