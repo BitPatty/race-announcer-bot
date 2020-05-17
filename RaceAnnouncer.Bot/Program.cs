@@ -2,8 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using RaceAnnouncer.Bot.Adapters;
@@ -61,6 +64,7 @@ namespace RaceAnnouncer.Bot
     /// </summary>
     internal static void Main()
     {
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
       AppDomain.CurrentDomain.ProcessExit += _Shutdown;
 
       Logger.Debug("Initializing Database");
@@ -74,6 +78,17 @@ namespace RaceAnnouncer.Bot
 
       Logger.Debug("Starting Bot");
       StartBotAsync().GetAwaiter().GetResult();
+    }
+
+    private static void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+      Logger.Error("Unobserved Exception", e?.Exception);
+
+      if (e?.Exception?.InnerException is WebSocketException || e?.Exception?.InnerException?.InnerException is WebSocketException)
+      {
+        e.SetObserved();
+        OnDiscordDisconnected(null, null);
+      }
     }
 
     /// <summary>
@@ -333,17 +348,28 @@ namespace RaceAnnouncer.Bot
         context.LoadRemote();
         context.ChangeTracker.DetectChanges();
 
-        Logger.Info("Processing channel mutations");
-        ProcessChannelMutations(context);
+        try
+        {
+          Task.Factory.StartNew(() =>
+          {
+            Logger.Info("Processing channel mutations");
+            ProcessChannelMutations(context);
 
-        Logger.Info("Updating races");
-        RaceAdapter.SyncRaces(context, _srlService, e.ToList());
+            Logger.Info("Updating races");
+            RaceAdapter.SyncRaces(context, _srlService, e.ToList());
 
-        Logger.Info("Updating announcements");
-        AnnouncementAdapter.UpdateAnnouncements(
-          context
-          , _discordService
-          , DatabaseAdapter.GetUpdatedRaces(context).ToList());
+            Logger.Info("Updating announcements");
+            AnnouncementAdapter.UpdateAnnouncements(
+              context
+              , _discordService
+              , DatabaseAdapter.GetUpdatedRaces(context).ToList());
+
+          }).Wait(TimeSpan.FromSeconds(30));
+        }
+        catch (Exception ex)
+        {
+          Logger.Error("Exception thrown", ex);
+        }
 
         Logger.Info("Saving changes");
         context.SaveChanges();

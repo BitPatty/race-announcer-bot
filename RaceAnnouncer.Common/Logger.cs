@@ -23,9 +23,9 @@ namespace RaceAnnouncer.Common
     /// Posts a log message with the <see cref="LogLevel.ERR"/> severity
     /// </summary>
     /// <param name="message">The log message</param>
-    public static void Error(string message, Exception exception)
+    public static void Error(string message, Exception? exception)
     {
-      Write(LogLevel.ERR, $"{message}");
+      Write(LogLevel.ERR, $"{message ?? "N/A"}");
 
       Exception? ex = exception;
 
@@ -58,7 +58,7 @@ namespace RaceAnnouncer.Common
     /// <param name="level">The severity level</param>
     /// <param name="message">The log message</param>
     private static void Write(LogLevel level, string message)
-      => Console.WriteLine($"[{DateTime.Now}] {level}: {GetCallerName() ?? "N/A"} | {message}");
+      => Console.WriteLine($"[{DateTime.Now}] {level}: {GetCallerName() ?? "N/A"} | {message ?? "N/A"}");
 
     /// <summary>
     /// Get name of method that called the logger
