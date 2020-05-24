@@ -34,7 +34,7 @@ namespace RaceAnnouncer.Bot.Services
     {
       if (interval <= 9999) throw new ArgumentException($"{nameof(interval)}: Value must be greater than 9999: '{interval}' given.");
 
-      _client = new SRLClient(poolSize: 5);
+      _client = new SRLClient();
 
       _updateTimer = new Timer(interval);
       _updateTimer.Elapsed += Timer_Elapsed;

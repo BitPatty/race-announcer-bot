@@ -106,7 +106,7 @@ namespace RaceAnnouncer.Bot
 
       try
       {
-        _discordService.StopAsync();
+        _discordService.StopAsync().Wait();
         _discordService.Dispose();
       }
       catch { }
@@ -257,7 +257,7 @@ namespace RaceAnnouncer.Bot
       {
         Logger.Info("Discord disconnected!");
         Logger.Info("Stopping Discord Service");
-        _discordService.StopAsync();
+        _discordService.StopAsync().Wait();
         Logger.Info("Discord Service Stopped, Exiting");
       }
       catch (Exception ex)
@@ -364,7 +364,7 @@ namespace RaceAnnouncer.Bot
             .ConfigureAwait(false);
 
         Logger.Info("Saving changes");
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync().ConfigureAwait(false);
 
         Logger.Info("Update completed");
         updateSuccessful = true;
