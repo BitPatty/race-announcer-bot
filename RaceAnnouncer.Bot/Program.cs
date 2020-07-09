@@ -60,13 +60,20 @@ namespace RaceAnnouncer.Bot
     /// <summary>
     /// Entry point
     /// </summary>
-    internal static void Main()
+    internal static int Main()
     {
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
       AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
 
-      Logger.Debug("Initializing Database");
-      MigrateDatabase();
+      try
+      {
+        Logger.Debug("Initializing Database");
+        MigrateDatabase();
+      }
+      catch
+      {
+        return -1;
+      }
 
       Logger.Debug("Initializing SRL Service");
       InitSrlService();
@@ -76,6 +83,8 @@ namespace RaceAnnouncer.Bot
 
       Logger.Debug("Starting Bot");
       StartBotAsync().GetAwaiter().GetResult();
+
+      return 0;
     }
 
     private static void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
@@ -195,7 +204,7 @@ namespace RaceAnnouncer.Bot
       {
         Logger.Error("Failed to migrate context! Exiting");
         Logger.Error("Exception thrown", ex);
-        Environment.Exit(-1);
+        throw;
       }
       finally
       {
