@@ -70,6 +70,15 @@ namespace RaceAnnouncer.Schema.Models
     [Column("is_active")]
     public bool IsActive { get; set; }
 
+
+    /// <summary>
+    /// The number of update failures
+    /// </summary>
+    [Required]
+    [Column("consecutive_update_failures")]
+    [JsonIgnore]
+    public int ConsecutiveUpdateFailures { get; set; }
+
     /// <summary>
     /// The races current state
     /// </summary>

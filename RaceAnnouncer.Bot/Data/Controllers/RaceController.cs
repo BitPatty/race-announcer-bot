@@ -40,6 +40,7 @@ namespace RaceAnnouncer.Bot.Data.Controllers
       destination.IsActive = source.IsActive;
       destination.Time = source.Time;
       destination.State = source.State;
+      destination.ConsecutiveUpdateFailures = source.ConsecutiveUpdateFailures;
     }
 
     public static IEnumerable<Entrant> GetEntrants(

@@ -14,7 +14,7 @@ namespace RaceAnnouncer.Schema.Migrations
     {
 #pragma warning disable 612, 618
       modelBuilder
-          .HasAnnotation("ProductVersion", "3.1.3")
+          .HasAnnotation("ProductVersion", "3.1.4")
           .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
       modelBuilder.Entity("RaceAnnouncer.Schema.Models.APIUser", b =>
@@ -291,6 +291,10 @@ namespace RaceAnnouncer.Schema.Migrations
                       .ValueGeneratedOnAdd()
                       .HasColumnName("id")
                       .HasColumnType("bigint");
+
+            b.Property<int>("ConsecutiveUpdateFailures")
+                      .HasColumnName("consecutive_update_failures")
+                      .HasColumnType("int");
 
             b.Property<DateTime>("CreatedAt")
                       .ValueGeneratedOnAdd()

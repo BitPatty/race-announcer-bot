@@ -8,7 +8,6 @@ using RaceAnnouncer.Bot.Services;
 using RaceAnnouncer.Common;
 using RaceAnnouncer.Schema;
 using RaceAnnouncer.Schema.Models;
-using SRLApiClient.Exceptions;
 using SRLRace = SRLApiClient.Endpoints.Races.Race;
 
 namespace RaceAnnouncer.Bot.Adapters
@@ -80,7 +79,10 @@ namespace RaceAnnouncer.Bot.Adapters
       race = context.AddOrUpdate(race);
 
       if (race != null)
+      {
+        race.ConsecutiveUpdateFailures = 0;
         SyncEntrants(context, srlRace, race);
+      }
 
       return race;
     }
@@ -176,15 +178,9 @@ namespace RaceAnnouncer.Bot.Adapters
         {
           Logger.Error($"({race.SrlId}) Exception thrown", ex);
 
-          // Avoid catching HttpExceptions
-          if (
-            ((ex is SRLParseException || ex.InnerException is SRLParseException)
-            && (
-            race.State == SRLApiClient.Endpoints.RaceState.Over
-            || race.State == SRLApiClient.Endpoints.RaceState.Finished
-            || DateTime.UtcNow.Subtract(race.UpdatedAt).TotalHours >= 12))
-            || DateTime.UtcNow.Subtract(race.UpdatedAt).TotalDays >= 7
-          )
+          race.ConsecutiveUpdateFailures++;
+
+          if (race.ConsecutiveUpdateFailures > 10)
           {
             Logger.Info($"({race.SrlId}) Deactivating race...");
 
