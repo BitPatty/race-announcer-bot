@@ -1,0 +1,30 @@
+{
+  "name": "Race Announcer Bot",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "application",
+  "workspaceFolder": "/workspace",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/workspace/bin"
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "grapecity.gc-excelviewer",
+    "mechatroner.rainbow-csv",
+    "mikestead.dotenv",
+    "ms-azuretools.vscode-docker",
+    "ms-vsliveshare.vsliveshare",
+    "ryanluker.vscode-coverage-gutters",
+    "wayou.vscode-todo-highlight",
+    "xshrim.txt-syntax"
+  ],
+  "forwardPorts": [
+    4000,
+    3306
+  ],
+  "postCreateCommand": "make all && make",
+  "remoteUser": "node"
+}

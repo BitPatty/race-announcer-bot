@@ -1,0 +1,58 @@
+version: '3.7'
+
+networks:
+  race-announcer-bot-network:
+    name: race-announcer-bot-network
+    driver: bridge
+
+volumes:
+  race-announcer-bot-mariadb-10.5.9__data:
+    driver: local
+  race-announcer-bot-mariadb-10.5.9__config:
+    driver: local
+
+services:
+  application:
+    container_name: race-announcer-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VARIANT: 14
+        USER_UID: 1000
+        USER_GID: 1000
+    networks:
+      - race-announcer-bot-network
+    volumes:
+      - ..:/workspace:cached
+      - ~/.ssh:/home/node/.ssh:ro
+      - ~/.npmrc:/home/node/.npmrc:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sleep infinity
+    user: node
+    env_file:
+      - ./workspace.env
+    ports:
+      - 3306:3306
+      - 4000:4000
+
+  race-announcer-bot-mariadb-10.5.9:
+    container_name: race-announcer-bot-mariadb-10.5.9
+    image: mariadb:10.6.1
+    network_mode: service:application
+    volumes:
+      - type: bind
+        source: ./init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+      - type: volume
+        source: race-announcer-bot-mariadb-10.5.9__data
+        target: /etc
+        volume:
+          nocopy: false
+      - type: volume
+        source: race-announcer-bot-mariadb-10.5.9__config
+        target: /var/lib/mysql
+        volume:
+          nocopy: false
+    env_file:
+      - ./mariadb.env

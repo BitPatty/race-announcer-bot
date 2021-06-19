@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2020",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "resolveJsonModule": true,
+    "sourceRoot": "./src",
+    "strictNullChecks": true,
+    "plugins": [
+      {
+        "transform": "ts-nameof",
+        "type": "raw"
+      },
+      {
+        "transform": "ts-transformer-keys/transformer"
+      }
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "./*.ts"
+  ]
+}
