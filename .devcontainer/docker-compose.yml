@@ -26,7 +26,6 @@ services:
     volumes:
       - ..:/workspace:cached
       - ~/.ssh:/home/node/.ssh:ro
-      - ~/.npmrc:/home/node/.npmrc:ro
       - /var/run/docker.sock:/var/run/docker.sock
     command: sleep infinity
     user: node
