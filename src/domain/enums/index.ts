@@ -4,6 +4,8 @@ import EntrantStatus from './entrant-status.enum';
 import LockIdentifier from './lock-identifier.enum';
 import RaceStatus from './race-status.enum';
 import SourceConnectorIdentifier from './source-connector-identifier.enum';
+import WorkerEgressType from './worker-egress-type.enum';
+import WorkerIngressType from './worker-inress-type.enum';
 
 export {
   SourceConnectorIdentifier,
@@ -12,4 +14,6 @@ export {
   LockIdentifier,
   EntrantStatus,
   DestinationConnectorIdentifier,
+  WorkerEgressType,
+  WorkerIngressType,
 };

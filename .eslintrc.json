@@ -4,7 +4,7 @@
     "node": true,
     "es6": true
   },
-  "ignorePatterns": ["coverage/**", "dist/**", "scripts/**", "**/*.sh"],
+  "ignorePatterns": ["coverage/**", "dist/**", "scripts/**", "**/*.sh", "**/init-worker.js"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",

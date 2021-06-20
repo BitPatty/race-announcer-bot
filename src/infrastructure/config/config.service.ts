@@ -22,10 +22,21 @@ class ConfigService {
       password: this.environmentConfiguration.DATABASE_PASSWORD,
       synchronize: Boolean(this.environmentConfiguration.DATABASE_SYNCHRONIZE),
       entities: [
-        joinPaths(__dirname + '/../../domain/models/*.entity.{ts,js}'),
+        joinPaths(
+          __dirname,
+          '..',
+          '..',
+          'domain',
+          'models',
+          '*.entity.{ts,js}',
+        ),
       ],
       logging: this.environmentConfiguration.DATABASE_LOGGING,
     } as ConnectionOptions;
+  }
+
+  static get discordToken(): string {
+    return this.environmentConfiguration.DISCORD_BOT_TOKEN;
   }
 
   /**
@@ -51,6 +62,7 @@ class ConfigService {
         .truthy('1', 'true', 1)
         .falsy('', 'false', '0', 0)
         .default(false),
+      DISCORD_BOT_TOKEN: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(

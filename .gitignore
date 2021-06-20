@@ -44,3 +44,6 @@ test/source-data.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Secrets
+.env
