@@ -25,10 +25,22 @@ class DatabaseService {
     });
   }
 
-  public static async closeConnection(): Promise<void> {
-    if (this.connection?.isConnected) {
-      await this.connection.close();
-    }
+  public static closeConnection(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      Lock()(LockIdentifier.DATABASE_CONNECTION, async (release) => {
+        try {
+          if (this.connection?.isConnected) {
+            await this.connection.close();
+            resolve();
+          }
+        } catch (err) {
+          console.error(err);
+          reject(err);
+        } finally {
+          release();
+        }
+      });
+    });
   }
 }
 
