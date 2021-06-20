@@ -1,0 +1,17 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '*'
+      - '*/*'
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Create a new build
+        run: docker build -f ./dockerfiles/Build.Dockerfile .
