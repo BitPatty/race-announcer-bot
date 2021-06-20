@@ -1,5 +1,6 @@
-import { Column, Entity } from 'typeorm';
-import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
+import { Entity } from 'typeorm';
+import { EntityColumn } from '../decorators';
+import { SourceConnectorIdentifier } from '../enums';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import Transformers from '../../utils/transformers';
@@ -14,19 +15,10 @@ class RacerEntity extends BaseEntity<RacerEntity> {
     for (const key of entityKeys) this[key] = d[key];
   }
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<RacerEntity>((e) => e.displayName),
-    ),
-    nullable: false,
-  })
+  @EntityColumn({ nullable: false })
   public displayName: string;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RacerEntity>((e) => e.connector)),
-    type: DatabaseAttributeType.ENUM,
-    enum: SourceConnectorIdentifier,
-  })
+  @EntityColumn({ enum: SourceConnectorIdentifier })
   public connector: SourceConnectorIdentifier;
 }
 

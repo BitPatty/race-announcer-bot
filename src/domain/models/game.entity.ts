@@ -1,5 +1,6 @@
-import { Column, Entity } from 'typeorm';
-import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
+import { Entity } from 'typeorm';
+import { EntityColumn } from '../decorators';
+import { SourceConnectorIdentifier } from '../enums';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import Transformers from '../../utils/transformers';
@@ -14,31 +15,16 @@ class GameEntity extends BaseEntity<GameEntity> {
     for (const key of entityKeys) this[key] = d[key];
   }
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<GameEntity>((e) => e.name)),
-    nullable: false,
-  })
+  @EntityColumn({ nullable: false })
   public name: string;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<GameEntity>((e) => e.identifier)),
-    nullable: false,
-  })
+  @EntityColumn({ nullable: false })
   public identifier: string;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<GameEntity>((e) => e.connector)),
-    type: DatabaseAttributeType.ENUM,
-    enum: SourceConnectorIdentifier,
-  })
+  @EntityColumn({ enum: SourceConnectorIdentifier })
   public connector: SourceConnectorIdentifier;
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<GameEntity>((e) => e.abbreviation),
-    ),
-    nullable: true,
-  })
+  @EntityColumn({ nullable: true })
   public abbreviation?: string;
 }
 

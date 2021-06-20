@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { DatabaseAttributeType, EntrantStatus } from '../enums';
+import { Entity, ManyToOne } from 'typeorm';
+import { EntityColumn, EntityJoinColumn } from '../decorators';
+import { EntrantStatus } from '../enums';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import RaceEntity from './race.entity';
@@ -16,10 +17,8 @@ class EntrantEntity extends BaseEntity<EntrantEntity> {
     for (const key of entityKeys) this[key] = d[key];
   }
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<EntrantEntity>((e) => e.status)),
+  @EntityColumn({
     nullable: false,
-    type: DatabaseAttributeType.ENUM,
     enum: EntrantStatus,
   })
   public status: EntrantStatus;
@@ -27,17 +26,13 @@ class EntrantEntity extends BaseEntity<EntrantEntity> {
   @ManyToOne(() => RacerEntity, {
     nullable: false,
   })
-  @JoinColumn({
-    name: Transformers.toAttributeName(nameof<EntrantEntity>((e) => e.racer)),
-  })
+  @EntityJoinColumn()
   public racer: RacerEntity;
 
   @ManyToOne(() => RaceEntity, {
     nullable: false,
   })
-  @JoinColumn({
-    name: Transformers.toAttributeName(nameof<EntrantEntity>((e) => e.race)),
-  })
+  @EntityJoinColumn()
   public race: RaceEntity;
 }
 

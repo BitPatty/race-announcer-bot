@@ -1,8 +1,6 @@
-import { Column, Entity } from 'typeorm';
-import {
-  DatabaseAttributeType,
-  DestinationConnectorIdentifier,
-} from '../enums';
+import { DestinationConnectorIdentifier } from '../enums';
+import { Entity } from 'typeorm';
+import { EntityColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import Transformers from '../../utils/transformers';
@@ -18,34 +16,20 @@ class CommunicationChannelEntity extends BaseEntity<CommunicationChannelEntity> 
     for (const key of entityKeys) this[key] = d[key];
   }
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<CommunicationChannelEntity>((e) => e.isActive),
-    ),
+  @EntityColumn({
     default: false,
   })
   public isActive: boolean;
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<CommunicationChannelEntity>((e) => e.identifier),
-    ),
-  })
+  @EntityColumn()
   public identifier: string;
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<CommunicationChannelEntity>((e) => e.permissionCheckSuccessful),
-    ),
+  @EntityColumn({
     default: false,
   })
   public permissionCheckSuccessful: boolean;
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<CommunicationChannelEntity>((e) => e.connector),
-    ),
-    type: DatabaseAttributeType.ENUM,
+  @EntityColumn({
     enum: DestinationConnectorIdentifier,
   })
   public connector: DestinationConnectorIdentifier;

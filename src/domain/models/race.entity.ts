@@ -1,9 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import {
   DatabaseAttributeType,
   RaceStatus,
   SourceConnectorIdentifier,
 } from '../enums';
+import { Entity, ManyToOne } from 'typeorm';
+import { EntityColumn, EntityJoinColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import GameEntity from './game.entity';
@@ -19,39 +20,32 @@ class RaceEntity extends BaseEntity<RaceEntity> {
     for (const key of entityKeys) this[key] = d[key];
   }
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.startedAt)),
+  @EntityColumn({
+    type: DatabaseAttributeType.DATETIME,
     nullable: true,
   })
   public startedAt?: Date;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.finishedAt)),
+  @EntityColumn({
+    type: DatabaseAttributeType.DATETIME,
     nullable: true,
   })
   public finishedAt?: Date;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.goal)),
+  @EntityColumn({
     nullable: true,
   })
   public goal: string;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.identifier)),
-  })
+  @EntityColumn()
   public identifier: string;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.connector)),
-    type: DatabaseAttributeType.ENUM,
+  @EntityColumn({
     enum: SourceConnectorIdentifier,
   })
   public connector: SourceConnectorIdentifier;
 
-  @Column({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.status)),
-    type: DatabaseAttributeType.ENUM,
+  @EntityColumn({
     enum: RaceStatus,
   })
   public status: RaceStatus;
@@ -59,9 +53,7 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   @ManyToOne(() => GameEntity, {
     nullable: false,
   })
-  @JoinColumn({
-    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.game)),
-  })
+  @EntityJoinColumn()
   public game: GameEntity;
 }
 

@@ -1,54 +1,21 @@
-import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Generated,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { DatabaseAttributeType } from '../enums';
-import Transformers from '../../utils/transformers';
+import { GeneratedColumn, GeneratedColumnType } from '../decorators';
 
 type EntityInitializer<T extends BaseEntity<T>> = Omit<T, keyof BaseEntity<T>>;
 
 abstract class BaseEntity<T extends BaseEntity<T>> {
-  @PrimaryGeneratedColumn({
-    name: Transformers.toAttributeName(nameof<BaseEntity<T>>((e) => e.id)),
-  })
+  @GeneratedColumn(GeneratedColumnType.PRIMARY)
   id: number;
 
-  @Generated('uuid')
-  @Column({
-    name: Transformers.toAttributeName(nameof<BaseEntity<T>>((e) => e.uuid)),
-    unique: true,
-  })
+  @GeneratedColumn(GeneratedColumnType.UUID)
   public uuid: string;
 
-  @CreateDateColumn({
-    name: Transformers.toAttributeName(
-      nameof<BaseEntity<T>>((e) => e.createdAt),
-    ),
-    type: DatabaseAttributeType.DATETIME,
-    nullable: false,
-  })
+  @GeneratedColumn(GeneratedColumnType.CREATED_AT)
   public createdAt: Date;
 
-  @UpdateDateColumn({
-    name: Transformers.toAttributeName(
-      nameof<BaseEntity<T>>((e) => e.updatedAt),
-    ),
-    type: DatabaseAttributeType.DATETIME,
-    nullable: false,
-  })
+  @GeneratedColumn(GeneratedColumnType.UPDATED_AT)
   public updatedAt: Date;
 
-  @DeleteDateColumn({
-    // name: Transformers.toAttributeName(
-    //   nameof<BaseEntity<T>>((e) => e.deletedAt),
-    // ),
-    type: DatabaseAttributeType.DATETIME,
-    nullable: true,
-  })
+  @GeneratedColumn(GeneratedColumnType.DELETED_AT)
   public deletedAt: Date;
 }
 

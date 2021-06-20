@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, ManyToOne } from 'typeorm';
+import { EntityColumn, EntityJoinColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import CommunicationChannelEntity from './communication-channel.entity';
@@ -15,35 +16,22 @@ class TrackerEntity extends BaseEntity<TrackerEntity> {
     for (const key of entityKeys) this[key] = d[key];
   }
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<TrackerEntity>((e) => e.isActive),
-    ),
-    default: false,
-  })
+  @EntityColumn({ default: false })
   public isActive: boolean;
 
-  @Column({
-    name: Transformers.toAttributeName(
-      nameof<TrackerEntity>((e) => e.identifier),
-    ),
-  })
+  @EntityColumn({ nullable: false })
   public identifier: string;
 
   @ManyToOne(() => CommunicationChannelEntity, {
     nullable: false,
   })
-  @JoinColumn({
-    name: Transformers.toAttributeName(nameof<TrackerEntity>((e) => e.channel)),
-  })
+  @EntityJoinColumn()
   public channel: CommunicationChannelEntity;
 
   @ManyToOne(() => GameEntity, {
     nullable: false,
   })
-  @JoinColumn({
-    name: Transformers.toAttributeName(nameof<TrackerEntity>((e) => e.game)),
-  })
+  @EntityJoinColumn()
   public game: GameEntity;
 }
 
