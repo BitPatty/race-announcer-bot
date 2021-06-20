@@ -79,6 +79,7 @@ class RaceTimeGGConnector
   private raceTimeRaceDetailToRace(racetimeRace: RaceTimeRaceDetail): Race {
     return {
       identifier: racetimeRace.name,
+      goal: racetimeRace.goal?.name,
       game: {
         identifier: racetimeRace.category.slug,
         name: racetimeRace.category.name,

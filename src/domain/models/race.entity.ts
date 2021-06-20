@@ -32,6 +32,12 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   public finishedAt?: Date;
 
   @Column({
+    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.goal)),
+    nullable: true,
+  })
+  public goal: string;
+
+  @Column({
     name: Transformers.toAttributeName(
       nameof<RaceEntity>((e) => e.raceIdentifier),
     ),

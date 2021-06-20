@@ -8,6 +8,7 @@ interface Race {
     name: string;
     abbreviation?: string;
   };
+  goal?: string;
   status: RaceStatus;
   entrants: Entrant[];
 }

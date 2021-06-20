@@ -75,6 +75,7 @@ class SpeedRunsLiveConnector
         name: srlRace.game.name,
         abbreviation: srlRace.game.abbrev,
       },
+      goal: srlRace.goal,
       status: this.numericRaceStateToStatus(srlRace.state),
       entrants: Object.values(srlRace.entrants).map((e) =>
         this.srlEntrantToEntrant(e),

@@ -1,5 +1,4 @@
 import DatabaseService from './infrastructure/database/database.service';
-import RaceTimeGGConnector from './connectors/source-connectors/racetimegg/racetimegg.connector';
 
 const bootstrap = async (): Promise<void> => {
   await DatabaseService.getConnection();
