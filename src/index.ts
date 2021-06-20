@@ -1,7 +1,8 @@
 import DatabaseService from './infrastructure/database/database.service';
 
 const bootstrap = async (): Promise<void> => {
-  await DatabaseService.getConnection();
+  const conn = await DatabaseService.getConnection();
+  await conn.synchronize();
   await DatabaseService.closeConnection();
 
   // console.log(await new RaceTimeGGConnector().getActiveRaces());

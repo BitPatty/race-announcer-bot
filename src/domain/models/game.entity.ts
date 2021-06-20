@@ -16,17 +16,22 @@ class GameEntity extends BaseEntity<GameEntity> {
 
   @Column({
     name: Transformers.toAttributeName(nameof<GameEntity>((e) => e.name)),
+    nullable: false,
   })
   public name: string;
 
   @Column({
-    name: Transformers.toAttributeName(
-      nameof<GameEntity>((e) => e.sourceConnectorIdentifier),
-    ),
+    name: Transformers.toAttributeName(nameof<GameEntity>((e) => e.identifier)),
+    nullable: false,
+  })
+  public identifier: string;
+
+  @Column({
+    name: Transformers.toAttributeName(nameof<GameEntity>((e) => e.connector)),
     type: DatabaseAttributeType.ENUM,
     enum: SourceConnectorIdentifier,
   })
-  public sourceConnectorIdentifier: SourceConnectorIdentifier;
+  public connector: SourceConnectorIdentifier;
 
   @Column({
     name: Transformers.toAttributeName(

@@ -38,20 +38,16 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   public goal: string;
 
   @Column({
-    name: Transformers.toAttributeName(
-      nameof<RaceEntity>((e) => e.raceIdentifier),
-    ),
+    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.identifier)),
   })
-  public raceIdentifier: string;
+  public identifier: string;
 
   @Column({
-    name: Transformers.toAttributeName(
-      nameof<RaceEntity>((e) => e.sourceConnectorIdentifier),
-    ),
+    name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.connector)),
     type: DatabaseAttributeType.ENUM,
     enum: SourceConnectorIdentifier,
   })
-  public sourceConnectorIdentifier: SourceConnectorIdentifier;
+  public connector: SourceConnectorIdentifier;
 
   @Column({
     name: Transformers.toAttributeName(nameof<RaceEntity>((e) => e.status)),

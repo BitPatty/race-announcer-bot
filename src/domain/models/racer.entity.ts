@@ -23,13 +23,11 @@ class RacerEntity extends BaseEntity<RacerEntity> {
   public displayName: string;
 
   @Column({
-    name: Transformers.toAttributeName(
-      nameof<RacerEntity>((e) => e.sourceConnectorIdentifier),
-    ),
+    name: Transformers.toAttributeName(nameof<RacerEntity>((e) => e.connector)),
     type: DatabaseAttributeType.ENUM,
     enum: SourceConnectorIdentifier,
   })
-  public sourceConnectorIdentifier: SourceConnectorIdentifier;
+  public connector: SourceConnectorIdentifier;
 }
 
 export default RacerEntity;
