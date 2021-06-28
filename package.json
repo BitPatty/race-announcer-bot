@@ -20,7 +20,7 @@
     "typeorm": "^0.2.34"
   },
   "devDependencies": {
-    "@types/node": "^15.12.4",
+    "@types/node": "^15.12.5",
     "@types/ts-nameof": "^4.2.1",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "dotenv": "^10.0.0",
