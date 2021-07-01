@@ -22,7 +22,7 @@ class RaceTimeGGConnector
 {
   private readonly baseUrl = 'https://racetime.gg';
 
-  get connectorType(): SourceConnectorIdentifier.RACETIME_GG {
+  public get connectorType(): SourceConnectorIdentifier.RACETIME_GG {
     return SourceConnectorIdentifier.RACETIME_GG;
   }
 

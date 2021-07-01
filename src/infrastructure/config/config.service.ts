@@ -12,7 +12,7 @@ class ConfigService {
    * Load the database configuration from the
    * current enviroment
    */
-  static get databaseConfiguration(): ConnectionOptions {
+  public static get databaseConfiguration(): ConnectionOptions {
     return {
       database: this.environmentConfiguration.DATABASE_NAME,
       type: this.environmentConfiguration.DATABASE_TYPE,
@@ -35,7 +35,7 @@ class ConfigService {
     } as ConnectionOptions;
   }
 
-  static get discordToken(): string {
+  public static get discordToken(): string {
     return this.environmentConfiguration.DISCORD_BOT_TOKEN;
   }
 

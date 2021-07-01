@@ -19,7 +19,6 @@
   },
   "plugins": ["@typescript-eslint", "jest", "prettier", "unused-imports", "sort-imports-es6-autofix"],
   "rules": {
-    "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
@@ -27,11 +26,16 @@
         "allowConciseArrowFunctionExpressionsStartingWithVoid": true
       }
     ],
-    "prettier/prettier": ["error", {}, { "usePrettierrc": true }],
-    "require-await": ["error"],
-    "no-return-await": ["error"],
     "@typescript-eslint/no-floating-promises": ["error"],
     "@typescript-eslint/no-shadow": ["error"],
+    "@typescript-eslint/explicit-member-accessibility": ["error"],
+    "no-return-await": ["error"],
+    "padding-line-between-statements": ["error", {
+      "blankLine": "always", "prev": "*", "next": "function"
+    }],
+    "prettier/prettier": ["error", {}, { "usePrettierrc": true }],
+    "require-await": ["error"],
+    "unused-imports/no-unused-imports": "error",
     "sort-imports-es6-autofix/sort-imports-es6": [
       2,
       {

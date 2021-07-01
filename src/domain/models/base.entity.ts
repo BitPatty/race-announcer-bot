@@ -4,7 +4,7 @@ type EntityInitializer<T extends BaseEntity<T>> = Omit<T, keyof BaseEntity<T>>;
 
 abstract class BaseEntity<T extends BaseEntity<T>> {
   @GeneratedColumn(GeneratedColumnType.PRIMARY)
-  id: number;
+  public id: number;
 
   @GeneratedColumn(GeneratedColumnType.UUID)
   public uuid: string;

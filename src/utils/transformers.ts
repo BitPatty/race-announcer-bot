@@ -6,11 +6,11 @@ class Transformers {
       .replace(/^_+/, '');
   }
 
-  static toAttributeName(propName: string): string {
+  public static toAttributeName(propName: string): string {
     return this.replaceUppercaseWithUnderscorePrefix(propName);
   }
 
-  static toTableName<T>(className: new () => T): string {
+  public static toTableName<T>(className: new () => T): string {
     return this.replaceUppercaseWithUnderscorePrefix(className.name).replace(
       /_entity$/,
       '',
