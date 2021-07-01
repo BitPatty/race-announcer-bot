@@ -23,7 +23,7 @@ class SpeedRunsLiveConnector
 {
   private readonly baseUrl = 'https://api.speedrunslive.com';
 
-  get connectorType(): SourceConnectorIdentifier.SPEEDRUNSLIVE {
+  public get connectorType(): SourceConnectorIdentifier.SPEEDRUNSLIVE {
     return SourceConnectorIdentifier.SPEEDRUNSLIVE;
   }
 

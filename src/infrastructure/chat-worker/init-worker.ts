@@ -1,6 +1,7 @@
 import { DestinationConnector } from '../../domain/interfaces';
 import {
   DestinationConnectorIdentifier,
+  DestinationEvent,
   WorkerIngressType,
 } from '../../domain/enums';
 import { parentPort } from 'worker_threads';
@@ -41,6 +42,15 @@ const getProvider = <T extends DestinationConnectorIdentifier>(
 };
 
 const provider = getProvider(selectedProvider);
+
+provider.addEventListener(DestinationEvent.COMMAND_RECEIVED, (msg) => {
+  console.log(`[Worker] ${JSON.stringify(msg)}`);
+  // provider.removeEventListener(DestinationEvent.COMMAND_RECEIVED);
+});
+
+provider.addEventListener(DestinationEvent.DISCONNECTED, () => {
+  console.log(`[Worker] Disconnected`);
+});
 
 const cleanup = async (): Promise<void> => {
   console.log(`[Worker] Cleaning up`);
