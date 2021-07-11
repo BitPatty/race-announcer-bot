@@ -1,23 +1,24 @@
+import axios from 'axios';
+
 import {
   Entrant,
   Game,
   Race,
   SourceConnector,
 } from '../../../domain/interfaces';
-import {
-  EntrantStatus,
-  RaceStatus,
-  SourceConnectorIdentifier,
-} from '../../../domain/enums';
-
 import SRLEntrant from './interfaces/srl-entrant.interface';
 import SRLGame from './interfaces/srl-game.interface';
 import SRLGameList from './interfaces/srl-game-list.interface';
 import SRLRace from './interfaces/srl-race.interface';
 import SRLRaceList from './interfaces/srl-race-list.interface';
 
+import {
+  EntrantStatus,
+  RaceStatus,
+  SourceConnectorIdentifier,
+} from '../../../domain/enums';
+
 import ConfigService from '../../../infrastructure/config/config.service';
-import axios from 'axios';
 
 class SpeedRunsLiveConnector
   implements SourceConnector<SourceConnectorIdentifier.SPEEDRUNSLIVE>

@@ -35,6 +35,8 @@ class ConfigService {
     } as ConnectionOptions;
   }
 
+  // Connector configurations
+
   public static get discordToken(): string {
     return this.environmentConfiguration.DISCORD_BOT_TOKEN;
   }

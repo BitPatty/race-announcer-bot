@@ -1,16 +1,22 @@
 import * as fs from 'fs';
+import { Worker } from 'worker_threads';
+import { join as joinPaths } from 'path';
+
 import {
   DestinationConnectorIdentifier,
   WorkerIngressType,
 } from '../../domain/enums';
-import { Worker } from 'worker_threads';
-import { join as joinPaths } from 'path';
 import WorkerEgressType from '../../domain/enums/worker-egress-type.enum';
 
 class ChatWorker {
   private readonly scriptFileIdentifier = 'init-worker.js';
   private worker: Worker;
 
+  /**
+   * Checks if the init script exists and returns
+   * the name of the init script file
+   * @returns The name of the init script file
+   */
   private getInitScriptName = (): Promise<string> => {
     return new Promise((resolve, reject) => {
       fs.readdir(__dirname, (err, files) => {
@@ -29,14 +35,20 @@ class ChatWorker {
     });
   };
 
-  public async start(): Promise<void> {
+  /**
+   * Starts the worker process
+   */
+  public async start(connector: DestinationConnectorIdentifier): Promise<void> {
     const fileName = await this.getInitScriptName();
     const filePath = joinPaths(__dirname, fileName);
 
     this.worker = new Worker(joinPaths(filePath), {
-      argv: [DestinationConnectorIdentifier.DISCORD],
+      argv: [connector],
     });
 
+    /**
+     * Cleanup function when exiting the worker
+     */
     const cleanupWorker = (): Promise<void> => {
       return new Promise((resolve) => {
         this.worker.removeAllListeners('message');
@@ -55,6 +67,7 @@ class ChatWorker {
       });
     };
 
+    // Clean up the worker on SIGTERM and SIGINT
     process.on('SIGTERM', () => {
       console.log('SIGTERM => Shutting down worker');
       cleanupWorker().finally(() => process.exit(0));

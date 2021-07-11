@@ -1,24 +1,27 @@
+import { parentPort } from 'worker_threads';
+
 import { DestinationConnector } from '../../domain/interfaces';
+
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
   WorkerIngressType,
 } from '../../domain/enums';
-import { parentPort } from 'worker_threads';
-import DiscordConnector from '../../connectors/destination-connectors/discord.connector';
 import WorkerEgressType from '../../domain/enums/worker-egress-type.enum';
+
+import DiscordConnector from '../../connectors/destination-connectors/discord.connector';
 
 const processArgs = process.argv;
 console.log('Starting worker with args => ', processArgs);
 
-if (processArgs.length < 3) {
-  throw new Error('Missing provider identifier');
-}
-
+// The worker expects one arg with the identifier
+// of the connector that should be initiated
+if (processArgs.length < 3) throw new Error('Missing provider identifier');
 if (processArgs.length > 3) throw new Error('Too many arguments');
-
 const providerArg = processArgs[2];
 
+// Validate that the suppied identifier maps to
+// an actual connector
 if (
   !(Object.values(DestinationConnectorIdentifier) as string[]).includes(
     providerArg,
@@ -30,6 +33,12 @@ if (
 const selectedProvider: DestinationConnectorIdentifier =
   providerArg as DestinationConnectorIdentifier;
 
+/**
+ * Get the provider connector for the specified
+ * provider identifier
+ * @param identifier The provider identifier
+ * @returns The provider connector instance
+ */
 const getProvider = <T extends DestinationConnectorIdentifier>(
   identifier: T,
 ): DestinationConnector<T> => {
@@ -42,43 +51,41 @@ const getProvider = <T extends DestinationConnectorIdentifier>(
 };
 
 const provider = getProvider(selectedProvider);
+const workerName = provider.constructor.name;
 
 provider.addEventListener(DestinationEvent.COMMAND_RECEIVED, (msg) => {
-  console.log(`[Worker] ${JSON.stringify(msg)}`);
-  // if (msg.content === 'list') {
-  //   (async () => {
-  //     const races = await new RaceTimeGGConnector().getActiveRaces();
-  //     for (let i = 0; i < races.length && i < 1; i++) {
-  //       await provider.postRaceMessage(msg.server, msg.channel, races[i]);
-  //     }
-
-  //     const srlRaces = await new SpeedRunsLiveConnector().getActiveRaces();
-  //     const race = srlRaces.pop() as Race;
-  //     await provider.postRaceMessage(msg.server, msg.channel, race);
-  //   })();
-  // }
+  console.log(`[Worker] (${workerName}) ${JSON.stringify(msg)}`);
 });
 
 provider.addEventListener(DestinationEvent.DISCONNECTED, () => {
-  console.log(`[Worker] Disconnected`);
+  console.log(`[Worker] (${workerName}) Disconnected`);
 });
 
+/**
+ * Clean up the worker and ready for exit
+ */
 const cleanup = async (): Promise<void> => {
-  console.log(`[Worker] Cleaning up`);
+  console.log(`[Worker] (${workerName}) Cleaning up`);
   await provider.dispose();
-  console.log(`[Worker] Finished cleaning up`);
+  console.log(`[Worker] (${workerName}) Finished cleaning up`);
   parentPort?.postMessage(WorkerIngressType.CLEANUP_FINISHED);
 };
 
+/**
+ * Start up procedure
+ */
 const bootstrap = async (): Promise<void> => {
-  parentPort?.postMessage('[Worker] Connecting..');
+  parentPort?.postMessage(`[Worker] (${workerName}) Connecting..`);
   await provider.connect();
-  parentPort?.postMessage('[Worker] Connected');
+  parentPort?.postMessage(`[Worker] (${workerName}) Connected`);
 };
 
+/**
+ * Start up the worker
+ */
 void bootstrap().then(() => {
   parentPort?.on('message', async (msg) => {
-    console.log(`[Worker] Received parent message "${msg}"`);
+    console.log(`[Worker] (${workerName}) Received parent message "${msg}"`);
     if (msg === WorkerEgressType.CLEANUP) {
       await cleanup();
     }
