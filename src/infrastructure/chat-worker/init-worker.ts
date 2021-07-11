@@ -1,4 +1,4 @@
-import { DestinationConnector, Race } from '../../domain/interfaces';
+import { DestinationConnector } from '../../domain/interfaces';
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
@@ -7,8 +7,6 @@ import {
 import { parentPort } from 'worker_threads';
 import DiscordConnector from '../../connectors/destination-connectors/discord.connector';
 import WorkerEgressType from '../../domain/enums/worker-egress-type.enum';
-import RaceTimeGGConnector from '../../connectors/source-connectors/racetimegg/racetimegg.connector';
-import SpeedRunsLiveConnector from '../../connectors/source-connectors/speedrunslive/speedrunslive.connector';
 
 const processArgs = process.argv;
 console.log('Starting worker with args => ', processArgs);

@@ -1,5 +1,5 @@
-import { EntrantStatus, RaceStatus } from '../domain/enums';
 import { Entrant, Race } from '../domain/interfaces';
+import { EntrantStatus, RaceStatus } from '../domain/enums';
 
 class MessageBuilderUtils {
   private static readonly raceStatusIndicatorColor: {
@@ -71,6 +71,7 @@ class MessageBuilderUtils {
     entrantList.push(
       ...entrants
         .filter((e) => e.status === EntrantStatus.DONE && e.finalTime != null)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .sort((a, b) => a.finalTime! - b.finalTime!),
     );
 
@@ -82,7 +83,7 @@ class MessageBuilderUtils {
     return entrantList;
   }
 
-  public static getEntrantStatusText(entrant: Entrant) {
+  public static getEntrantStatusText(entrant: Entrant): string {
     const additionalContext =
       entrant.status === EntrantStatus.DONE
         ? ` (${this.formatFinalTime(entrant.finalTime ?? 0)})`

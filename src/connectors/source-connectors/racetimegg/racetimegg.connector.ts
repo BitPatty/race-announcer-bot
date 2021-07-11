@@ -9,6 +9,8 @@ import {
   RaceStatus,
   SourceConnectorIdentifier,
 } from '../../../domain/enums';
+import ConfigService from '../../../infrastructure/config/config.service';
+import DateTimeUtils from '../../../utils/date-time.utils';
 import RaceTimeEntrant from './interfaces/racetime-entrant.interface';
 import RaceTimeEntrantStatus from './enums/racetime-entrant-status.enum';
 import RaceTimeRace from './interfaces/racetime-race.interface';
@@ -16,8 +18,6 @@ import RaceTimeRaceDetail from './interfaces/race-time-race-detail.interface';
 import RaceTimeRaceList from './interfaces/racetime-race-list.interface';
 import RaceTimeRaceStatus from './enums/racetime-race-status.enum';
 import axios from 'axios';
-import ConfigService from '../../../infrastructure/config/config.service';
-import DateTimeUtils from '../../../utils/date-time.utils';
 
 class RaceTimeGGConnector
   implements SourceConnector<SourceConnectorIdentifier.RACETIME_GG>

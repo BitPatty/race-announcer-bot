@@ -16,8 +16,8 @@ import SRLGameList from './interfaces/srl-game-list.interface';
 import SRLRace from './interfaces/srl-race.interface';
 import SRLRaceList from './interfaces/srl-race-list.interface';
 
-import axios from 'axios';
 import ConfigService from '../../../infrastructure/config/config.service';
+import axios from 'axios';
 
 class SpeedRunsLiveConnector
   implements SourceConnector<SourceConnectorIdentifier.SPEEDRUNSLIVE>

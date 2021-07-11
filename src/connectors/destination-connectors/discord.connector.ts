@@ -8,15 +8,14 @@ import {
   DestinationConnectorIdentifier,
   DestinationEvent,
   MessageChannelType,
-  RaceStatus,
 } from '../../domain/enums';
 
 import * as Discord from 'discord.js';
+import * as Joi from 'joi';
+import ChatMessage from '../../domain/interfaces/chat-message.interface';
 import ConfigService from '../../infrastructure/config/config.service';
 import DestinationEventListenerMap from '../../domain/interfaces/destination-event-listener-map.interface';
-import ChatMessage from '../../domain/interfaces/chat-message.interface';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
-import * as Joi from 'joi';
 
 class DiscordConnector
   implements DestinationConnector<DestinationConnectorIdentifier.DISCORD>
@@ -94,7 +93,7 @@ class DiscordConnector
     const channel = await this.findTextChannel(channelId);
     if (!channel) return null;
 
-    const [[_, originalMessage]] = await channel.messages.fetch({
+    const [[, originalMessage]] = await channel.messages.fetch({
       around: messageId,
       limit: 1,
     });
@@ -239,7 +238,7 @@ class DiscordConnector
       return;
     }
 
-    originalMessage.reply(msg);
+    await originalMessage.reply(msg);
   }
 
   public connect(): Promise<void> {
