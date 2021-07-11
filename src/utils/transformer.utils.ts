@@ -1,4 +1,4 @@
-class Transformers {
+class TransformerUtils {
   private static replaceUppercaseWithUnderscorePrefix(str: string): string {
     return str
       .replace(/([A-Z]+)/g, '_$1')
@@ -18,4 +18,4 @@ class Transformers {
   }
 }
 
-export default Transformers;
+export default TransformerUtils;

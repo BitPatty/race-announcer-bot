@@ -1,6 +1,6 @@
 import { Column } from 'typeorm';
 import { DatabaseAttributeType } from '../enums';
-import Transformers from '../../utils/transformers';
+import TransformerUtils from '../../utils/transformer.utils';
 
 /* eslint-disable @typescript-eslint/ban-types */
 
@@ -14,7 +14,7 @@ type EntityColumnProps = {
 
 const EntityColumn = (columnProps?: EntityColumnProps): PropertyDecorator => {
   return (target: Object, propertyKey: string | symbol): void => {
-    const columnName = Transformers.toAttributeName(propertyKey as string);
+    const columnName = TransformerUtils.toAttributeName(propertyKey as string);
 
     Column({
       ...(columnProps ?? {}),

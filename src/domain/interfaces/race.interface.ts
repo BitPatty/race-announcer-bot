@@ -7,8 +7,10 @@ interface Race {
     identifier: string;
     name: string;
     abbreviation?: string;
+    imageUrl?: string;
   };
   goal?: string;
+  url?: string;
   status: RaceStatus;
   entrants: Entrant[];
 }

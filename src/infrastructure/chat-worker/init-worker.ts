@@ -1,4 +1,4 @@
-import { DestinationConnector } from '../../domain/interfaces';
+import { DestinationConnector, Race } from '../../domain/interfaces';
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
@@ -7,6 +7,8 @@ import {
 import { parentPort } from 'worker_threads';
 import DiscordConnector from '../../connectors/destination-connectors/discord.connector';
 import WorkerEgressType from '../../domain/enums/worker-egress-type.enum';
+import RaceTimeGGConnector from '../../connectors/source-connectors/racetimegg/racetimegg.connector';
+import SpeedRunsLiveConnector from '../../connectors/source-connectors/speedrunslive/speedrunslive.connector';
 
 const processArgs = process.argv;
 console.log('Starting worker with args => ', processArgs);
@@ -45,7 +47,18 @@ const provider = getProvider(selectedProvider);
 
 provider.addEventListener(DestinationEvent.COMMAND_RECEIVED, (msg) => {
   console.log(`[Worker] ${JSON.stringify(msg)}`);
-  // provider.removeEventListener(DestinationEvent.COMMAND_RECEIVED);
+  // if (msg.content === 'list') {
+  //   (async () => {
+  //     const races = await new RaceTimeGGConnector().getActiveRaces();
+  //     for (let i = 0; i < races.length && i < 1; i++) {
+  //       await provider.postRaceMessage(msg.server, msg.channel, races[i]);
+  //     }
+
+  //     const srlRaces = await new SpeedRunsLiveConnector().getActiveRaces();
+  //     const race = srlRaces.pop() as Race;
+  //     await provider.postRaceMessage(msg.server, msg.channel, race);
+  //   })();
+  // }
 });
 
 provider.addEventListener(DestinationEvent.DISCONNECTED, () => {

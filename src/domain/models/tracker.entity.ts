@@ -4,9 +4,9 @@ import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import CommunicationChannelEntity from './communication-channel.entity';
 import GameEntity from './game.entity';
-import Transformers from '../../utils/transformers';
+import TransformerUtils from '../../utils/transformer.utils';
 
-@Entity(Transformers.toTableName(TrackerEntity))
+@Entity(TransformerUtils.toTableName(TrackerEntity))
 class TrackerEntity extends BaseEntity<TrackerEntity> {
   public constructor(d?: EntityInitializer<TrackerEntity>) {
     super();

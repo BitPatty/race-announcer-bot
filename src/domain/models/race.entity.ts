@@ -8,9 +8,9 @@ import { EntityColumn, EntityJoinColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import GameEntity from './game.entity';
-import Transformers from '../../utils/transformers';
+import TransformerUtils from '../../utils/transformer.utils';
 
-@Entity(Transformers.toTableName(RaceEntity))
+@Entity(TransformerUtils.toTableName(RaceEntity))
 class RaceEntity extends BaseEntity<RaceEntity> {
   public constructor(d?: EntityInitializer<RaceEntity>) {
     super();

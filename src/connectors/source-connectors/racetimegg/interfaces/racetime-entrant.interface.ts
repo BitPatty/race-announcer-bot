@@ -20,7 +20,7 @@ interface RaceTimeEntrant {
     verbose_value: string;
     help_text: string;
   };
-  finished_time: string | null;
+  finish_time: string | null;
   finished_at: Date | null;
   place: number | null;
   place_ordinal: string | null;

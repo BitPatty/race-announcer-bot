@@ -16,6 +16,8 @@ import RaceTimeRaceDetail from './interfaces/race-time-race-detail.interface';
 import RaceTimeRaceList from './interfaces/racetime-race-list.interface';
 import RaceTimeRaceStatus from './enums/racetime-race-status.enum';
 import axios from 'axios';
+import ConfigService from '../../../infrastructure/config/config.service';
+import DateTimeUtils from '../../../utils/date-time.utils';
 
 class RaceTimeGGConnector
   implements SourceConnector<SourceConnectorIdentifier.RACETIME_GG>
@@ -72,7 +74,9 @@ class RaceTimeGGConnector
     return {
       displayName: racetimeEntrant.user.name,
       status: this.raceTimeEntrantStateToStatus(racetimeEntrant.status.value),
-      finalTime: 123,
+      finalTime: DateTimeUtils.parseISOTimeSpanToSeconds(
+        racetimeEntrant.finish_time,
+      ),
     };
   }
 
@@ -80,10 +84,12 @@ class RaceTimeGGConnector
     return {
       identifier: racetimeRace.name,
       goal: racetimeRace.goal?.name,
+      url: `${ConfigService.raceTimeBaseUrl}${racetimeRace.url}`,
       game: {
         identifier: racetimeRace.category.slug,
         name: racetimeRace.category.name,
         abbreviation: racetimeRace.category.short_name,
+        imageUrl: racetimeRace.category.image,
       },
       status: this.raceTimeRaceStateToStatus(racetimeRace.status.value),
       entrants: racetimeRace.entrants.map((e) =>

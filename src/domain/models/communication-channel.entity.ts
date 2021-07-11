@@ -3,9 +3,9 @@ import { Entity } from 'typeorm';
 import { EntityColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
-import Transformers from '../../utils/transformers';
+import TransformerUtils from '../../utils/transformer.utils';
 
-@Entity(Transformers.toTableName(CommunicationChannelEntity))
+@Entity(TransformerUtils.toTableName(CommunicationChannelEntity))
 class CommunicationChannelEntity extends BaseEntity<CommunicationChannelEntity> {
   public constructor(d?: EntityInitializer<CommunicationChannelEntity>) {
     super();

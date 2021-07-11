@@ -39,6 +39,14 @@ class ConfigService {
     return this.environmentConfiguration.DISCORD_BOT_TOKEN;
   }
 
+  public static get speedRunsLiveBaseUrl(): string {
+    return this.environmentConfiguration.SRL_BASE_URL;
+  }
+
+  public static get raceTimeBaseUrl(): string {
+    return this.environmentConfiguration.RACETIME_BASE_URL;
+  }
+
   /**
    * Validates the environment configuration
    * @returns The validate environment configuration
@@ -63,6 +71,8 @@ class ConfigService {
         .falsy('', 'false', '0', 0)
         .default(false),
       DISCORD_BOT_TOKEN: Joi.string().required(),
+      SRL_BASE_URL: Joi.string().uri().default('https://speedrunslive.com'),
+      RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(

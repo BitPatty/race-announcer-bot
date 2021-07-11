@@ -17,6 +17,7 @@ import SRLRace from './interfaces/srl-race.interface';
 import SRLRaceList from './interfaces/srl-race-list.interface';
 
 import axios from 'axios';
+import ConfigService from '../../../infrastructure/config/config.service';
 
 class SpeedRunsLiveConnector
   implements SourceConnector<SourceConnectorIdentifier.SPEEDRUNSLIVE>
@@ -70,6 +71,7 @@ class SpeedRunsLiveConnector
   private srlRaceToRace(srlRace: SRLRace): Race {
     return {
       identifier: srlRace.id.toString(),
+      url: `${ConfigService.speedRunsLiveBaseUrl}/race/?id=${srlRace.id}`,
       game: {
         identifier: srlRace.game.id.toString(),
         name: srlRace.game.name,

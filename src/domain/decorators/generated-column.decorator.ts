@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { EntityColumn } from './entity-column.decorator';
-import Transformers from '../../utils/transformers';
+import TransformerUtils from '../../utils/transformer.utils';
 
 /* eslint-disable @typescript-eslint/ban-types */
 
@@ -20,7 +20,7 @@ enum GeneratedColumnType {
 
 const GeneratedColumn = (type: GeneratedColumnType): PropertyDecorator => {
   return (target: Object, propertyKey: string | symbol): void => {
-    const columnName = Transformers.toAttributeName(propertyKey as string);
+    const columnName = TransformerUtils.toAttributeName(propertyKey as string);
 
     switch (type) {
       case GeneratedColumnType.PRIMARY:
