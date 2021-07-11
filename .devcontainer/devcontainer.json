@@ -26,6 +26,6 @@
     4000,
     3306
   ],
-  "postCreateCommand": "make all && make",
+  "postCreateCommand": "bash -i .devcontainer/init.sh",
   "remoteUser": "node"
 }
