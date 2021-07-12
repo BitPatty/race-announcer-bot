@@ -1,16 +1,19 @@
 import * as fs from 'fs';
-import { Worker } from 'worker_threads';
+import { Worker as WorkerThread } from 'worker_threads';
 import { join as joinPaths } from 'path';
 
 import {
   DestinationConnectorIdentifier,
+  SourceConnectorIdentifier,
   WorkerIngressType,
+  WorkerType,
 } from '../../domain/enums';
 import WorkerEgressType from '../../domain/enums/worker-egress-type.enum';
 
-class ChatWorker {
+class Worker<T extends WorkerType> {
   private readonly scriptFileIdentifier = 'init-worker.js';
-  private worker: Worker;
+  private worker: WorkerThread;
+  public constructor(private readonly type: T) {}
 
   /**
    * Checks if the init script exists and returns
@@ -38,12 +41,14 @@ class ChatWorker {
   /**
    * Starts the worker process
    */
-  public async start(connector: DestinationConnectorIdentifier): Promise<void> {
+  public async start(
+    connector: SourceConnectorIdentifier | DestinationConnectorIdentifier,
+  ): Promise<void> {
     const fileName = await this.getInitScriptName();
     const filePath = joinPaths(__dirname, fileName);
 
-    this.worker = new Worker(joinPaths(filePath), {
-      argv: [connector],
+    this.worker = new WorkerThread(joinPaths(filePath), {
+      argv: [this.type, connector],
     });
 
     /**
@@ -100,4 +105,4 @@ class ChatWorker {
   }
 }
 
-export default ChatWorker;
+export default Worker;

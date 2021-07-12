@@ -8,16 +8,18 @@ import RaceStatus from './race-status.enum';
 import SourceConnectorIdentifier from './source-connector-identifier.enum';
 import WorkerEgressType from './worker-egress-type.enum';
 import WorkerIngressType from './worker-inress-type.enum';
+import WorkerType from './worker-type.enum';
 
 export {
-  SourceConnectorIdentifier,
-  RaceStatus,
   DatabaseAttributeType,
-  LockIdentifier,
-  EntrantStatus,
   DestinationConnectorIdentifier,
+  DestinationEvent,
+  EntrantStatus,
+  LockIdentifier,
+  MessageChannelType,
+  RaceStatus,
+  SourceConnectorIdentifier,
   WorkerEgressType,
   WorkerIngressType,
-  DestinationEvent,
-  MessageChannelType,
+  WorkerType,
 };

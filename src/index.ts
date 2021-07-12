@@ -1,13 +1,17 @@
 import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
+  WorkerType,
 } from './domain/enums';
-import ChatWorker from './infrastructure/chat-worker/chat.worker';
-import SourceWorker from './infrastructure/source-worker/source-worker';
+import Worker from './infrastructure/worker/worker';
 
 const bootstrap = async (): Promise<void> => {
-  await new ChatWorker().start(DestinationConnectorIdentifier.DISCORD);
-  await new SourceWorker().start(SourceConnectorIdentifier.SPEEDRUNSLIVE);
+  await Promise.all([
+    new Worker(WorkerType.CHAT).start(DestinationConnectorIdentifier.DISCORD),
+    new Worker(WorkerType.SOURCE_SYNC).start(
+      SourceConnectorIdentifier.SPEEDRUNSLIVE,
+    ),
+  ]);
 };
 
 void bootstrap().then(() => {

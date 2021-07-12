@@ -21,6 +21,7 @@
     "editor.suggest.insertMode": "replace",
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "files.autoSave": "off",
   "breadcrumbs.symbolSortOrder": "type",
   "coverage-gutters.coverageReportFileName": "coverage/**/index.html",
   "coverage-gutters.showLineCoverage": true,

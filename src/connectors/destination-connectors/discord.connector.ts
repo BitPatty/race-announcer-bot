@@ -225,6 +225,13 @@ class DiscordConnector
     if (race.url && Joi.string().uri().validate(race.url).error == null)
       embed = embed.setURL(race.url);
 
+    // Set the cover as thumbnail if it exists
+    if (
+      race.game.imageUrl &&
+      Joi.string().uri().validate(race.game.imageUrl).error == null
+    )
+      embed = embed.setThumbnail(race.game.imageUrl);
+
     // List the entrants
     const entrantString =
       race.entrants.length === 0
