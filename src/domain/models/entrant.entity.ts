@@ -1,11 +1,13 @@
 import { Entity, ManyToOne } from 'typeorm';
-import { EntityColumn, EntityJoinColumn } from '../decorators';
-import { EntrantStatus } from '../enums';
 import { keys } from 'ts-transformer-keys';
+
+import { DatabaseAttributeType, EntrantStatus } from '../enums';
+import { EntityColumn, EntityJoinColumn } from '../decorators';
+import TransformerUtils from '../../utils/transformer.utils';
+
 import BaseEntity, { EntityInitializer } from './base.entity';
 import RaceEntity from './race.entity';
 import RacerEntity from './racer.entity';
-import TransformerUtils from '../../utils/transformer.utils';
 
 @Entity(TransformerUtils.toTableName(EntrantEntity))
 class EntrantEntity extends BaseEntity<EntrantEntity> {
@@ -22,6 +24,12 @@ class EntrantEntity extends BaseEntity<EntrantEntity> {
     enum: EntrantStatus,
   })
   public status: EntrantStatus;
+
+  @EntityColumn({
+    nullable: true,
+    type: DatabaseAttributeType.INTEGER,
+  })
+  public finalTime: number | null;
 
   @ManyToOne(() => RacerEntity, {
     nullable: false,

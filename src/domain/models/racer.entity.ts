@@ -16,6 +16,9 @@ class RacerEntity extends BaseEntity<RacerEntity> {
   }
 
   @EntityColumn({ nullable: false })
+  public identifier: string;
+
+  @EntityColumn({ nullable: false })
   public displayName: string;
 
   @EntityColumn({ enum: SourceConnectorIdentifier })

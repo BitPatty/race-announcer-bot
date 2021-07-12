@@ -108,7 +108,9 @@ class SpeedRunsLiveConnector
 
   public async listGames(): Promise<Game[]> {
     const { data } = await axios.get<SRLGameList>(`${this.baseUrl}/games`);
-    return data.games.map((g) => this.srlGameToGame(g));
+    return data.games
+      .filter((g) => g.name && g.name.length > 0 && g.abbrev !== 'newgame')
+      .map((g) => this.srlGameToGame(g));
   }
 }
 

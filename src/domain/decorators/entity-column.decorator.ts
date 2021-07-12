@@ -9,7 +9,7 @@ type EntityColumnProps = {
   enum?: (string | number)[] | Object;
   type?: DatabaseAttributeType;
   unique?: boolean;
-  default?: boolean;
+  default?: boolean | number;
 };
 
 const EntityColumn = (columnProps?: EntityColumnProps): PropertyDecorator => {

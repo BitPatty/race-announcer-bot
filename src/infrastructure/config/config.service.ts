@@ -49,6 +49,14 @@ class ConfigService {
     return this.environmentConfiguration.RACETIME_BASE_URL;
   }
 
+  public static get raceSyncInterval(): string {
+    return this.environmentConfiguration.RACE_SYNC_INTERVAL;
+  }
+
+  public static get gameSyncInterval(): string {
+    return this.environmentConfiguration.GAME_SYNC_INTERVAL;
+  }
+
   /**
    * Validates the environment configuration
    * @returns The validate environment configuration
@@ -75,6 +83,8 @@ class ConfigService {
       DISCORD_BOT_TOKEN: Joi.string().required(),
       SRL_BASE_URL: Joi.string().uri().default('https://speedrunslive.com'),
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
+      RACE_SYNC_INTERVAL: Joi.string().default('*/30 * * * * *'),
+      GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(

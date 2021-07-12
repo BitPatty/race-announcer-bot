@@ -50,6 +50,18 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   })
   public status: RaceStatus;
 
+  @EntityColumn({
+    type: DatabaseAttributeType.DATETIME,
+    nullable: true,
+  })
+  public lastSyncAt?: Date;
+
+  @EntityColumn({
+    type: DatabaseAttributeType.DATETIME,
+    nullable: true,
+  })
+  public lastChangeAt?: Date;
+
   @ManyToOne(() => GameEntity, {
     nullable: false,
   })
