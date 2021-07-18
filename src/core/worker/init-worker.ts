@@ -7,8 +7,8 @@ import {
   SourceConnectorIdentifier,
   WorkerIngressType,
   WorkerType,
-} from '../../domain/enums';
-import WorkerEgressType from '../../domain/enums/worker-egress-type.enum';
+} from '../../models/enums';
+import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
 import ChatWorker from './chat-worker';
 import SourceWorker from './source-worker';

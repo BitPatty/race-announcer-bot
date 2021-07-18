@@ -10,6 +10,7 @@ type EntityColumnProps = {
   type?: DatabaseAttributeType;
   unique?: boolean;
   default?: boolean | number;
+  length?: number;
 };
 
 const EntityColumn = (columnProps?: EntityColumnProps): PropertyDecorator => {
@@ -22,6 +23,7 @@ const EntityColumn = (columnProps?: EntityColumnProps): PropertyDecorator => {
         columnProps?.type ??
         (columnProps?.enum ? DatabaseAttributeType.ENUM : undefined),
       name: columnName,
+      length: columnProps?.length,
     })(target, propertyKey);
   };
 };

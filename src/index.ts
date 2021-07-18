@@ -2,8 +2,8 @@ import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
   WorkerType,
-} from './domain/enums';
-import Worker from './infrastructure/worker/worker';
+} from './models/enums';
+import Worker from './core/worker/worker';
 
 const bootstrap = async (): Promise<void> => {
   await Promise.all([

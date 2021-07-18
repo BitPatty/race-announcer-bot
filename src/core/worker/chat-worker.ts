@@ -1,6 +1,6 @@
-import { DestinationConnector } from '../../domain/interfaces';
-import { DestinationConnectorIdentifier } from '../../domain/enums';
-import DiscordConnector from '../../connectors/destination-connectors/discord.connector';
+import { DestinationConnector } from '../../models/interfaces';
+import { DestinationConnectorIdentifier } from '../../models/enums';
+import DiscordConnector from '../../connectors/discord/discord.connector';
 import Worker from './worker.interface';
 
 class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {

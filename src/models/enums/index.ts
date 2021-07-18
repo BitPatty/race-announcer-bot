@@ -6,6 +6,8 @@ import LockIdentifier from './lock-identifier.enum';
 import MessageChannelType from './message-channel-type.enum';
 import RaceStatus from './race-status.enum';
 import SourceConnectorIdentifier from './source-connector-identifier.enum';
+import TaskStatus from './task-status.enum';
+import TaskType from './task-type.enum';
 import WorkerEgressType from './worker-egress-type.enum';
 import WorkerIngressType from './worker-inress-type.enum';
 import WorkerType from './worker-type.enum';
@@ -19,6 +21,8 @@ export {
   MessageChannelType,
   RaceStatus,
   SourceConnectorIdentifier,
+  TaskStatus,
+  TaskType,
   WorkerEgressType,
   WorkerIngressType,
   WorkerType,

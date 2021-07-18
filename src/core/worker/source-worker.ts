@@ -1,17 +1,17 @@
 import { Connection, In } from 'typeorm';
 import { CronJob } from 'cron';
-import { Entrant, SourceConnector } from '../../domain/interfaces';
+import { Entrant, SourceConnector } from '../../models/interfaces';
 import {
   EntrantEntity,
   GameEntity,
   RaceEntity,
   RacerEntity,
-} from '../../domain/models';
-import { SourceConnectorIdentifier } from '../../domain/enums';
+} from '../../models/entities';
+import { SourceConnectorIdentifier } from '../../models/enums';
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database.service';
-import RaceTimeGGConnector from '../../connectors/source-connectors/racetimegg/racetimegg.connector';
-import SpeedRunsLiveConnector from '../../connectors/source-connectors/speedrunslive/speedrunslive.connector';
+import RaceTimeGGConnector from '../../connectors/racetimegg/racetimegg.connector';
+import SpeedRunsLiveConnector from '../../connectors/speedrunslive/speedrunslive.connector';
 import Worker from './worker.interface';
 
 class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
@@ -34,9 +34,6 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       default:
         throw new Error(`Invalid source connector ${connector}`);
     }
-
-    this.initRaceSyncJob();
-    this.initGameSyncJob();
   }
 
   private initRaceSyncJob = (): void => {
@@ -187,32 +184,36 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     });
   };
 
+  private async syncGames(): Promise<void> {
+    console.log('Fetching game list');
+    const gameList = await this.connector.listGames();
+    const gameCount = gameList.length;
+
+    console.log(`Updating games in database (${gameCount} total)`);
+    const gameRepository = this.databaseConnection.getRepository(GameEntity);
+
+    for (const [idx, game] of gameList.entries()) {
+      console.log(`Updating ${idx}/${gameCount}: ${game.name}`);
+      const existingGame = await gameRepository.find({
+        where: {
+          identifier: game.identifier,
+          connector: this.connector.connectorType,
+        },
+      });
+
+      await gameRepository.save({
+        ...(existingGame ?? {}),
+        ...game,
+      });
+    }
+  }
+
   private initGameSyncJob(): void {
     this.gameSyncJob = new CronJob(
       ConfigService.gameSyncInterval,
       async () => {
         try {
-          console.log('Fetching game list');
-          const gamelist = await this.connector.listGames();
-
-          console.log(`Updating games in database (${gamelist.length} total)`);
-          const gameRepository =
-            this.databaseConnection.getRepository(GameEntity);
-
-          for (const game of gamelist) {
-            console.log(`Updating ${game.name}`);
-            const existingGame = await gameRepository.find({
-              where: {
-                identifier: game.identifier,
-                connector: this.connector.connectorType,
-              },
-            });
-
-            await gameRepository.save({
-              ...(existingGame ?? {}),
-              ...game,
-            });
-          }
+          await this.syncGames();
         } catch (err) {
           console.error(err);
         }
@@ -227,6 +228,8 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
 
   public async start(): Promise<void> {
     this.databaseConnection = await DatabaseService.getConnection();
+    this.initRaceSyncJob();
+    this.initGameSyncJob();
     this.gameSyncJob.start();
     this.raceSyncJob.start();
   }

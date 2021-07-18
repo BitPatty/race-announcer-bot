@@ -3,20 +3,20 @@ import {
   ChatServer,
   DestinationConnector,
   Race,
-} from '../../domain/interfaces';
+} from '../../models/interfaces';
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
   MessageChannelType,
-} from '../../domain/enums';
+} from '../../models/enums';
 
 import * as Discord from 'discord.js';
 import * as Joi from 'joi';
 
-import ChatMessage from '../../domain/interfaces/chat-message.interface';
-import DestinationEventListenerMap from '../../domain/interfaces/destination-event-listener-map.interface';
+import ChatMessage from '../../models/interfaces/chat-message.interface';
+import DestinationEventListenerMap from '../../models/interfaces/destination-event-listener-map.interface';
 
-import ConfigService from '../../infrastructure/config/config.service';
+import ConfigService from '../../core/config/config.service';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
 
 class DiscordConnector

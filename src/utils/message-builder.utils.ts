@@ -1,5 +1,5 @@
-import { Entrant, Race } from '../domain/interfaces';
-import { EntrantStatus, RaceStatus } from '../domain/enums';
+import { Entrant, Race } from '../models/interfaces';
+import { EntrantStatus, RaceStatus } from '../models/enums';
 
 class MessageBuilderUtils {
   private static readonly raceStatusIndicatorColor: {
