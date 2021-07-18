@@ -177,7 +177,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
                 : updatedRace.lastChangeAt,
           });
         } catch (err) {
-          Logger.error(err);
+          Logger.error('Failed to sync race', err);
         }
       }
 

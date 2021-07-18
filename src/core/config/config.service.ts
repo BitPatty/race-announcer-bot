@@ -91,7 +91,7 @@ class ConfigService {
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
       RACE_SYNC_INTERVAL: Joi.string().default('*/30 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
-      LOG_LEVLE: Joi.string().default(LogLevel.INFO),
+      LOG_LEVEL: Joi.string().default(LogLevel.INFO),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(

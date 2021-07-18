@@ -1,12 +1,18 @@
 import { Connection, Repository } from 'typeorm';
-import { LogLevel, TaskStatus, TaskType } from '../../models/enums';
 import { TaskLogEntity } from '../../models/entities';
-import ConfigService from '../config/config.service';
+import { TaskStatus, TaskType } from '../../models/enums';
+import pino from 'pino';
 
 /* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 class Logger {
   private taskLogRepository: Repository<TaskLogEntity>;
+
+  private static readonly logger = pino({
+    level: 'debug',
+    prettyPrint: true,
+  });
 
   public constructor(private readonly databaseConnection: Connection) {
     this.taskLogRepository =
@@ -39,22 +45,20 @@ class Logger {
     );
   }
 
-  public static log(msg: string): void {
-    console.log(msg);
+  public static log(msg: string, ...args: any[]): void {
+    this.logger.info(msg, args);
   }
 
-  public static warn(msg: string): void {
-    console.warn(msg);
+  public static warn(msg: string, ...args: any[]): void {
+    this.logger.warn(msg, args);
   }
 
-  public static debug(msg: string): void {
-    if (ConfigService.logLevel !== LogLevel.DEBUG) return;
-    console.debug(msg);
+  public static debug(msg: string, ...args: any[]): void {
+    this.logger.debug(msg, args);
   }
 
-  public static error(msg: string): void {
-    console.error(msg);
-    console.trace();
+  public static error(msg: string, ...args: any[]): void {
+    this.logger.error(msg, args);
   }
 }
 
