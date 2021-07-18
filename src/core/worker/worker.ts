@@ -21,7 +21,7 @@ class Worker<T extends WorkerType> {
    * the name of the init script file
    * @returns The name of the init script file
    */
-  private getInitScriptName = (): Promise<string> => {
+  private getInitScriptName(): Promise<string> {
     return new Promise((resolve, reject) => {
       fs.readdir(__dirname, (err, files) => {
         if (err) {
@@ -37,7 +37,7 @@ class Worker<T extends WorkerType> {
         resolve(this.scriptFileIdentifier);
       });
     });
-  };
+  }
 
   /**
    * Starts the worker process

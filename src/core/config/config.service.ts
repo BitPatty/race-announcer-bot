@@ -8,7 +8,8 @@ class ConfigService {
   /**
    * The validated environment configuration
    */
-  private static environmentConfiguration = ConfigService.validateEnv();
+  private static readonly environmentConfiguration =
+    ConfigService.validateEnv();
 
   /**
    * Load the database configuration from the

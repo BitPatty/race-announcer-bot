@@ -37,7 +37,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
   }
 
-  private initRaceSyncJob = (): void => {
+  private initRaceSyncJob(): void {
     this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
       Logger.log('Synchronizing races');
       const syncTimeStamp = new Date();
@@ -183,7 +183,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
 
       Logger.log('Synchronization finished');
     });
-  };
+  }
 
   private async syncGames(): Promise<void> {
     Logger.log('Fetching game list');

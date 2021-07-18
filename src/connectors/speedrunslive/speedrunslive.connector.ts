@@ -24,7 +24,7 @@ class SpeedRunsLiveConnector
     return SourceConnectorIdentifier.SPEEDRUNSLIVE;
   }
 
-  private numericRaceStateToStatus = (state: number): RaceStatus => {
+  private readonly numericRaceStateToStatus = (state: number): RaceStatus => {
     switch (state) {
       case 1:
         return RaceStatus.ENTRY_OPEN;
@@ -41,7 +41,9 @@ class SpeedRunsLiveConnector
     }
   };
 
-  private numericEntrantStateToStatus = (time: number): EntrantStatus => {
+  private readonly numericEntrantStateToStatus = (
+    time: number,
+  ): EntrantStatus => {
     switch (time) {
       case -3:
         return EntrantStatus.READY;

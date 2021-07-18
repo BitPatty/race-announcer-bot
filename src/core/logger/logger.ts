@@ -7,7 +7,7 @@ import pino from 'pino';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 class Logger {
-  private taskLogRepository: Repository<TaskLogEntity>;
+  private readonly taskLogRepository: Repository<TaskLogEntity>;
 
   private static readonly logger = pino({
     level: 'debug',

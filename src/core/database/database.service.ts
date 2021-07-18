@@ -11,10 +11,15 @@ class DatabaseService {
     return new Promise<Connection>((resolve, reject) => {
       Lock()(LockIdentifier.DATABASE_CONNECTION, async (release) => {
         try {
-          if (this.connection?.isConnected) return resolve(this.connection);
+          if (this.connection?.isConnected) {
+            resolve(this.connection);
+            return;
+          }
+
           this.connection = await createConnection(
             ConfigService.databaseConfiguration,
           );
+
           resolve(this.connection);
         } catch (err) {
           Logger.error(err);
