@@ -10,6 +10,7 @@ import {
 import { SourceConnectorIdentifier } from '../../models/enums';
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database.service';
+import Logger from '../logger/logger';
 import RaceTimeGGConnector from '../../connectors/racetimegg/racetimegg.connector';
 import SpeedRunsLiveConnector from '../../connectors/speedrunslive/speedrunslive.connector';
 import Worker from './worker.interface';
@@ -38,7 +39,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
 
   private initRaceSyncJob = (): void => {
     this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
-      console.log('Synchronizing races');
+      Logger.log('Synchronizing races');
       const syncTimeStamp = new Date();
 
       const raceList = await this.connector.getActiveRaces();
@@ -49,7 +50,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       const racerRepository =
         this.databaseConnection.getRepository(RacerEntity);
 
-      console.log(`Found ${raceList.length} races to sync`);
+      Logger.log(`Found ${raceList.length} races to sync`);
       for (const race of raceList) {
         try {
           const game = await gameRepository.findOne({
@@ -165,7 +166,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
             updatedRace.updatedAt !== existingRace?.updatedAt;
 
           if (hasRaceChanges)
-            console.log(`Race change detected: ${race.identifier}`);
+            Logger.log(`Race change detected: ${race.identifier}`);
 
           await raceRepository.save({
             ...updatedRace,
@@ -176,24 +177,24 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
                 : updatedRace.lastChangeAt,
           });
         } catch (err) {
-          console.error(err);
+          Logger.error(err);
         }
       }
 
-      console.log('Synchronization finished');
+      Logger.log('Synchronization finished');
     });
   };
 
   private async syncGames(): Promise<void> {
-    console.log('Fetching game list');
+    Logger.log('Fetching game list');
     const gameList = await this.connector.listGames();
     const gameCount = gameList.length;
 
-    console.log(`Updating games in database (${gameCount} total)`);
+    Logger.log(`Updating games in database (${gameCount} total)`);
     const gameRepository = this.databaseConnection.getRepository(GameEntity);
 
     for (const [idx, game] of gameList.entries()) {
-      console.log(`Updating ${idx}/${gameCount}: ${game.name}`);
+      Logger.log(`Updating ${idx}/${gameCount}: ${game.name}`);
       const existingGame = await gameRepository.find({
         where: {
           identifier: game.identifier,
@@ -215,7 +216,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         try {
           await this.syncGames();
         } catch (err) {
-          console.error(err);
+          Logger.error(err);
         }
       },
       undefined,

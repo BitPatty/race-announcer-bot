@@ -11,10 +11,11 @@ import {
 import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
 import ChatWorker from './chat-worker';
+import Logger from '../logger/logger';
 import SourceWorker from './source-worker';
 
 const processArgs = process.argv;
-console.log('Starting worker with args => ', processArgs);
+Logger.log(`Starting worker with args => ${processArgs}`);
 
 if (processArgs.length < 4) throw new Error('Missing provider identifier');
 if (processArgs.length > 4) throw new Error('Too many arguments');
@@ -54,15 +55,15 @@ const bootstrap = async (): Promise<void> => {
  * Clean up the worker and ready for exit
  */
 const cleanup = async (): Promise<void> => {
-  console.log(`[Worker] (${workerName}) Cleaning up`);
+  Logger.log(`[Worker] (${workerName}) Cleaning up`);
   await workerInstance.dispose();
-  console.log(`[Worker] (${workerName}) Finished cleaning up`);
+  Logger.log(`[Worker] (${workerName}) Finished cleaning up`);
   parentPort?.postMessage(WorkerIngressType.CLEANUP_FINISHED);
 };
 
 void bootstrap().then(() => {
   parentPort?.on('message', async (msg) => {
-    console.log(`[Worker] (${workerName}) Received parent message "${msg}"`);
+    Logger.log(`[Worker] (${workerName}) Received parent message "${msg}"`);
     if (msg === WorkerEgressType.CLEANUP) {
       await cleanup();
     }

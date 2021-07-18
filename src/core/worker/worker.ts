@@ -8,6 +8,7 @@ import {
   WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
+import Logger from '../logger/logger';
 import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
 class Worker<T extends WorkerType> {
@@ -67,40 +68,40 @@ class Worker<T extends WorkerType> {
           resolve();
         });
 
-        console.log('Cleaning up worker');
+        Logger.log('Cleaning up worker');
         this.worker.postMessage(WorkerEgressType.CLEANUP);
       });
     };
 
     // Clean up the worker on SIGTERM and SIGINT
     process.on('SIGTERM', () => {
-      console.log('SIGTERM => Shutting down worker');
+      Logger.log('SIGTERM => Shutting down worker');
       cleanupWorker().finally(() => process.exit(0));
     });
 
     process.on('SIGINT', () => {
-      console.log('SIGINT => Shutting down worker');
+      Logger.log('SIGINT => Shutting down worker');
       cleanupWorker().finally(() => process.exit(0));
     });
 
     this.worker.on('message', (msg) => {
-      console.log('[Worker] message: ', msg);
+      Logger.log(`[Worker] message: ${msg}`);
     });
 
     this.worker.on('error', (err) => {
-      console.log('[Worker] error: ', err);
+      Logger.log(`[Worker] message: ${err}`);
     });
 
     this.worker.on('messageerror', (err) => {
-      console.log('[Worker] messageerror', err);
+      Logger.log(`[Worker] message: ${err}`);
     });
 
     this.worker.on('online', (err) => {
-      console.log('[Worker] online', err);
+      Logger.log(`[Worker] message: ${err}`);
     });
 
     this.worker.on('exit', (err) => {
-      console.error(`[Worker] exit: `, err);
+      Logger.log(`[Worker] message: ${err}`);
     });
   }
 }

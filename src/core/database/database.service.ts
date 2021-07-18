@@ -2,6 +2,7 @@ import { Connection, createConnection } from 'typeorm';
 import { Lock } from 'lock';
 import { LockIdentifier } from '../../models/enums';
 import ConfigService from '../config/config.service';
+import Logger from '../logger/logger';
 
 class DatabaseService {
   private static connection: Connection;
@@ -16,7 +17,7 @@ class DatabaseService {
           );
           resolve(this.connection);
         } catch (err) {
-          console.error(err);
+          Logger.error(err);
           reject(err);
         } finally {
           release();
@@ -34,7 +35,7 @@ class DatabaseService {
             resolve();
           }
         } catch (err) {
-          console.error(err);
+          Logger.error(err);
           reject(err);
         } finally {
           release();

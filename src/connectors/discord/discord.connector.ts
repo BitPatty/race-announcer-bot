@@ -17,6 +17,7 @@ import ChatMessage from '../../models/interfaces/chat-message.interface';
 import DestinationEventListenerMap from '../../models/interfaces/destination-event-listener-map.interface';
 
 import ConfigService from '../../core/config/config.service';
+import Logger from '../../core/logger/logger';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
 
 class DiscordConnector
@@ -160,7 +161,7 @@ class DiscordConnector
     if (!channel) return null;
 
     if (!(channel instanceof Discord.TextChannel)) {
-      console.warn(`Found channel ${channelId}, but it is not a text channel`);
+      Logger.warn(`Found channel ${channelId}, but it is not a text channel`);
       return null;
     }
 
@@ -268,7 +269,7 @@ class DiscordConnector
 
     const discordChannel = await this.findTextChannel(channel.identifier);
     if (!discordChannel) {
-      console.error('Failed to fetch channel', discordChannel);
+      Logger.error(`Failed to fetch channel => ${discordChannel}`);
       return null;
     }
 
@@ -294,7 +295,7 @@ class DiscordConnector
     );
 
     if (!originalMessage) {
-      console.error('Failed to fetch original message');
+      Logger.error('Failed to fetch original message');
       return null;
     }
 
@@ -315,7 +316,7 @@ class DiscordConnector
     );
 
     if (!originalMessage) {
-      console.error('Failed to fetch original message');
+      Logger.error('Failed to fetch original message');
       return;
     }
 
@@ -347,7 +348,7 @@ class DiscordConnector
       });
 
       this.client.on('error', (err) => {
-        console.log(`[Discord] error: ${err}`);
+        Logger.log(`[Discord] error: ${err}`);
         reject(err);
       });
 

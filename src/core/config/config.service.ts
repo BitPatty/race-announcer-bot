@@ -1,6 +1,8 @@
 import * as Joi from 'joi';
 import { ConnectionOptions } from 'typeorm';
 import { join as joinPaths } from 'path';
+import LogLevel from '../../models/enums/log-level.enum';
+import Logger from '../logger/logger';
 
 class ConfigService {
   /**
@@ -57,6 +59,10 @@ class ConfigService {
     return this.environmentConfiguration.GAME_SYNC_INTERVAL;
   }
 
+  public static get logLevel(): LogLevel {
+    return this.environmentConfiguration.LOG_LEVEL as LogLevel;
+  }
+
   /**
    * Validates the environment configuration
    * @returns The validate environment configuration
@@ -85,6 +91,7 @@ class ConfigService {
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
       RACE_SYNC_INTERVAL: Joi.string().default('*/30 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
+      LOG_LEVLE: Joi.string().default(LogLevel.INFO),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(
@@ -95,7 +102,7 @@ class ConfigService {
     );
 
     if (error) {
-      console.error(`Config validation error: ${error.message}`);
+      Logger.error(`Config validation error: ${error.message}`);
       process.exit(1);
     }
 

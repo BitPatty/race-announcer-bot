@@ -3,6 +3,7 @@ import {
   SourceConnectorIdentifier,
   WorkerType,
 } from './models/enums';
+import Logger from './core/logger/logger';
 import Worker from './core/worker/worker';
 
 const bootstrap = async (): Promise<void> => {
@@ -15,5 +16,5 @@ const bootstrap = async (): Promise<void> => {
 };
 
 void bootstrap().then(() => {
-  console.log(':)');
+  Logger.log(':)');
 });
