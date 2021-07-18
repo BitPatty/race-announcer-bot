@@ -1,7 +1,9 @@
 import { Connection, Repository } from 'typeorm';
+import pino from 'pino';
+
 import { TaskLogEntity } from '../../models/entities';
 import { TaskStatus, TaskType } from '../../models/enums';
-import pino from 'pino';
+import ConfigService from '../config/config.service';
 
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -10,7 +12,7 @@ class Logger {
   private readonly taskLogRepository: Repository<TaskLogEntity>;
 
   private static readonly logger = pino({
-    level: 'debug',
+    level: ConfigService.logLevel,
     prettyPrint: true,
   });
 
@@ -46,19 +48,19 @@ class Logger {
   }
 
   public static log(msg: string, ...args: any[]): void {
-    this.logger.info(msg, args);
+    this.logger.info(`[${ConfigService.instanceUuid}] ${msg}`, ...args);
   }
 
   public static warn(msg: string, ...args: any[]): void {
-    this.logger.warn(msg, args);
+    this.logger.warn(`[${ConfigService.instanceUuid}] ${msg}`, ...args);
   }
 
   public static debug(msg: string, ...args: any[]): void {
-    this.logger.debug(msg, args);
+    this.logger.debug(`[${ConfigService.instanceUuid}] ${msg}`, ...args);
   }
 
   public static error(msg: string, ...args: any[]): void {
-    this.logger.error(msg, args);
+    this.logger.error(`[${ConfigService.instanceUuid}] ${msg}`, ...args);
   }
 }
 

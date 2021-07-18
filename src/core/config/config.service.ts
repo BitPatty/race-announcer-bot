@@ -1,8 +1,9 @@
 import * as Joi from 'joi';
 import { ConnectionOptions } from 'typeorm';
 import { join as joinPaths } from 'path';
+import { v4 as uuidV4 } from 'uuid';
+
 import LogLevel from '../../models/enums/log-level.enum';
-import Logger from '../logger/logger';
 
 class ConfigService {
   /**
@@ -10,6 +11,8 @@ class ConfigService {
    */
   private static readonly environmentConfiguration =
     ConfigService.validateEnv();
+
+  private static readonly _instanceUuid: string = uuidV4();
 
   /**
    * Load the database configuration from the
@@ -64,6 +67,14 @@ class ConfigService {
     return this.environmentConfiguration.LOG_LEVEL as LogLevel;
   }
 
+  public static get instanceUuid(): string {
+    return this._instanceUuid;
+  }
+
+  public static get workerHealthCheckInterval(): string {
+    return this.environmentConfiguration.WORKER_HEALTH_CHECK_INTERVAL;
+  }
+
   /**
    * Validates the environment configuration
    * @returns The validate environment configuration
@@ -92,7 +103,8 @@ class ConfigService {
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
       RACE_SYNC_INTERVAL: Joi.string().default('*/30 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
-      LOG_LEVEL: Joi.string().default(LogLevel.INFO),
+      LOG_LEVEL: Joi.string().default(LogLevel.DEBUG),
+      WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(
@@ -103,7 +115,8 @@ class ConfigService {
     );
 
     if (error) {
-      Logger.error(`Config validation error: ${error.message}`);
+      /* eslint-disable-next-line no-console */
+      console.error(`Config validation error: ${error.message}`);
       process.exit(1);
     }
 

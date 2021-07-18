@@ -37,151 +37,158 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
   }
 
-  private initRaceSyncJob(): void {
-    this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
-      Logger.log('Synchronizing races');
-      const syncTimeStamp = new Date();
+  private async syncRaces(): Promise<void> {
+    Logger.log('Synchronizing races');
+    const syncTimeStamp = new Date();
 
-      const raceList = await this.connector.getActiveRaces();
-      const raceRepository = this.databaseConnection.getRepository(RaceEntity);
-      const gameRepository = this.databaseConnection.getRepository(GameEntity);
-      const entrantRepository =
-        this.databaseConnection.getRepository(EntrantEntity);
-      const racerRepository =
-        this.databaseConnection.getRepository(RacerEntity);
+    const raceList = await this.connector.getActiveRaces();
+    const raceRepository = this.databaseConnection.getRepository(RaceEntity);
+    const gameRepository = this.databaseConnection.getRepository(GameEntity);
+    const entrantRepository =
+      this.databaseConnection.getRepository(EntrantEntity);
+    const racerRepository = this.databaseConnection.getRepository(RacerEntity);
 
-      Logger.log(`Found ${raceList.length} races to sync`);
-      for (const race of raceList) {
-        try {
-          const game = await gameRepository.findOne({
+    Logger.log(`Found ${raceList.length} races to sync`);
+    for (const race of raceList) {
+      try {
+        const game = await gameRepository.findOne({
+          where: {
+            identifier: race.game.identifier,
+            connector: this.connector.connectorType,
+          },
+        });
+
+        if (!game) continue;
+
+        const racers: RacerEntity[] = [];
+
+        // Update racer entities
+        for (const entrant of race.entrants) {
+          const existingRacer = await racerRepository.findOne({
             where: {
-              identifier: race.game.identifier,
+              identifier: entrant.displayName.toLowerCase(),
               connector: this.connector.connectorType,
             },
           });
 
-          if (!game) continue;
-
-          const racers: RacerEntity[] = [];
-
-          // Update racer entities
-          for (const entrant of race.entrants) {
-            const existingRacer = await racerRepository.findOne({
-              where: {
-                identifier: entrant.displayName.toLowerCase(),
-                connector: this.connector.connectorType,
-              },
-            });
-
-            const updatePayload: RacerEntity = {
-              ...(existingRacer ?? {}),
-              ...new RacerEntity({
-                identifier: entrant.displayName.toLowerCase(),
-                displayName: entrant.displayName,
-                connector: this.connector.connectorType,
-              }),
-            };
-
-            const updatedRacer = await racerRepository.save(updatePayload);
-            racers.push(updatedRacer);
-          }
-
-          // Update the race itself
-          const existingRace = await raceRepository.findOne({
-            where: {
-              identifier: race.identifier,
+          const updatePayload: RacerEntity = {
+            ...(existingRacer ?? {}),
+            ...new RacerEntity({
+              identifier: entrant.displayName.toLowerCase(),
+              displayName: entrant.displayName,
               connector: this.connector.connectorType,
-            },
-          });
+            }),
+          };
 
-          const updatedRace = await raceRepository.save({
-            ...(existingRace ?? {}),
-            ...new RaceEntity({
-              identifier: race.identifier,
-              goal: race.goal ?? '-',
-              connector: this.connector.connectorType,
-              status: race.status,
-              game,
+          const updatedRacer = await racerRepository.save(updatePayload);
+          racers.push(updatedRacer);
+        }
+
+        // Update the race itself
+        const existingRace = await raceRepository.findOne({
+          where: {
+            identifier: race.identifier,
+            connector: this.connector.connectorType,
+          },
+        });
+
+        const updatedRace = await raceRepository.save({
+          ...(existingRace ?? {}),
+          ...new RaceEntity({
+            identifier: race.identifier,
+            goal: race.goal ?? '-',
+            connector: this.connector.connectorType,
+            status: race.status,
+            game,
+          }),
+        });
+
+        // Update the entrant list
+        const existingEntrants = await entrantRepository.find({
+          relations: [
+            nameof<EntrantEntity>((e) => e.racer),
+            nameof<EntrantEntity>((e) => e.race),
+          ],
+          where: {
+            race: updatedRace,
+          },
+        });
+
+        const updatedEntrants: EntrantEntity[] = [];
+
+        // Add / Update entrants
+        for (const racer of racers) {
+          const existingEntrant = existingEntrants.find(
+            (e) => e.racer.id === racer.id,
+          );
+
+          const entrantData = race.entrants.find(
+            (e) => e.displayName === racer.displayName,
+          ) as Entrant;
+
+          const updatedEntrant = await entrantRepository.save({
+            ...(existingEntrant ?? {}),
+            ...new EntrantEntity({
+              race: updatedRace,
+              racer,
+              status: entrantData.status,
+              finalTime: entrantData.finalTime,
             }),
           });
 
-          // Update the entrant list
-          const existingEntrants = await entrantRepository.find({
-            relations: [
-              nameof<EntrantEntity>((e) => e.racer),
-              nameof<EntrantEntity>((e) => e.race),
-            ],
-            where: {
-              race: updatedRace,
-            },
-          });
-
-          const updatedEntrants: EntrantEntity[] = [];
-
-          // Add / Update entrants
-          for (const racer of racers) {
-            const existingEntrant = existingEntrants.find(
-              (e) => e.racer.id === racer.id,
-            );
-
-            const entrantData = race.entrants.find(
-              (e) => e.displayName === racer.displayName,
-            ) as Entrant;
-
-            const updatedEntrant = await entrantRepository.save({
-              ...(existingEntrant ?? {}),
-              ...new EntrantEntity({
-                race: updatedRace,
-                racer,
-                status: entrantData.status,
-                finalTime: entrantData.finalTime,
-              }),
-            });
-
-            updatedEntrants.push(updatedEntrant);
-          }
-
-          // Remove entrants that have left
-          const removedEntrantIds = existingEntrants
-            .filter((e) => !updatedEntrants.some((u) => u.id === e.id))
-            .map((e) => e.id);
-
-          if (removedEntrantIds.length > 0)
-            await entrantRepository.delete({
-              race: updatedRace,
-              id: In(removedEntrantIds),
-            });
-
-          // Update the tracker timestamps
-          const hasEntrantChanges =
-            removedEntrantIds.length > 0 ||
-            existingEntrants.length !== race.entrants.length ||
-            updatedEntrants.some(
-              (e) =>
-                existingEntrants.find((x) => x.id === e.id)?.updatedAt !==
-                e.updatedAt,
-            );
-
-          const hasRaceChanges =
-            updatedRace.updatedAt !== existingRace?.updatedAt;
-
-          if (hasRaceChanges)
-            Logger.log(`Race change detected: ${race.identifier}`);
-
-          await raceRepository.save({
-            ...updatedRace,
-            lastSyncAt: syncTimeStamp,
-            lastChangeAt:
-              hasEntrantChanges || hasRaceChanges
-                ? new Date()
-                : updatedRace.lastChangeAt,
-          });
-        } catch (err) {
-          Logger.error('Failed to sync race', err);
+          updatedEntrants.push(updatedEntrant);
         }
-      }
 
-      Logger.log('Synchronization finished');
+        // Remove entrants that have left
+        const removedEntrantIds = existingEntrants
+          .filter((e) => !updatedEntrants.some((u) => u.id === e.id))
+          .map((e) => e.id);
+
+        if (removedEntrantIds.length > 0)
+          await entrantRepository.delete({
+            race: updatedRace,
+            id: In(removedEntrantIds),
+          });
+
+        // Update the tracker timestamps
+        const hasEntrantChanges =
+          removedEntrantIds.length > 0 ||
+          existingEntrants.length !== race.entrants.length ||
+          updatedEntrants.some(
+            (e) =>
+              existingEntrants.find((x) => x.id === e.id)?.updatedAt !==
+              e.updatedAt,
+          );
+
+        const hasRaceChanges =
+          updatedRace.updatedAt !== existingRace?.updatedAt;
+
+        if (hasRaceChanges)
+          Logger.log(`Race change detected: ${race.identifier}`);
+
+        await raceRepository.save({
+          ...updatedRace,
+          lastSyncAt: syncTimeStamp,
+          lastChangeAt:
+            hasEntrantChanges || hasRaceChanges
+              ? new Date()
+              : updatedRace.lastChangeAt,
+        });
+      } catch (err) {
+        Logger.error('Failed to sync race', err);
+      }
+    }
+
+    Logger.log('Synchronization finished');
+  }
+
+  private initRaceSyncJob(): void {
+    this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
+      try {
+        await this.syncRaces();
+      } catch (err) {
+        Logger.error('Failed to sync races', err);
+      }
     });
   }
 
@@ -216,7 +223,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         try {
           await this.syncGames();
         } catch (err) {
-          Logger.error(err);
+          Logger.error('Failed to sync games', err);
         }
       },
       undefined,
@@ -236,8 +243,11 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   }
 
   public async dispose(): Promise<void> {
+    Logger.log('Stopping Game Sync');
     this.gameSyncJob.stop();
+    Logger.log('Stopping Race Sync');
     this.raceSyncJob.stop();
+    Logger.log('Closing Database Connection');
     await this.databaseConnection.close();
   }
 }

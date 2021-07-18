@@ -11,8 +11,9 @@ import {
 import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
 import ChatWorker from './chat-worker';
-import Logger from '../logger/logger';
 import SourceWorker from './source-worker';
+
+import Logger from '../logger/logger';
 
 const processArgs = process.argv;
 Logger.log(`Starting worker with args => ${processArgs}`);
@@ -59,13 +60,20 @@ const cleanup = async (): Promise<void> => {
   await workerInstance.dispose();
   Logger.log(`[Worker] (${workerName}) Finished cleaning up`);
   parentPort?.postMessage(WorkerIngressType.CLEANUP_FINISHED);
+  parentPort?.close();
 };
 
 void bootstrap().then(() => {
   parentPort?.on('message', async (msg) => {
     Logger.log(`[Worker] (${workerName}) Received parent message "${msg}"`);
     if (msg === WorkerEgressType.CLEANUP) {
-      await cleanup();
+      try {
+        await cleanup();
+        process.exit(0);
+      } catch (err) {
+        Logger.error(err);
+        process.exit(1);
+      }
     }
   });
 });
