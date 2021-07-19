@@ -1,5 +1,6 @@
 import { Connection, In } from 'typeorm';
 import { CronJob } from 'cron';
+
 import { Entrant, SourceConnector } from '../../models/interfaces';
 import {
   EntrantEntity,
@@ -7,12 +8,18 @@ import {
   RaceEntity,
   RacerEntity,
 } from '../../models/entities';
-import { SourceConnectorIdentifier } from '../../models/enums';
+import { SourceConnectorIdentifier, TaskIdentifier } from '../../models/enums';
+
+import RedisService from '../redis/redis.service';
+
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database.service';
+
 import Logger from '../logger/logger';
+
 import RaceTimeGGConnector from '../../connectors/racetimegg/racetimegg.connector';
 import SpeedRunsLiveConnector from '../../connectors/speedrunslive/speedrunslive.connector';
+
 import Worker from './worker.interface';
 
 class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
@@ -182,16 +189,6 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     Logger.log('Synchronization finished');
   }
 
-  private initRaceSyncJob(): void {
-    this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
-      try {
-        await this.syncRaces();
-      } catch (err) {
-        Logger.error('Failed to sync races', err);
-      }
-    });
-  }
-
   private async syncGames(): Promise<void> {
     Logger.log('Fetching game list');
     const gameList = await this.connector.listGames();
@@ -216,12 +213,40 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
   }
 
+  private initRaceSyncJob(): void {
+    this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
+      try {
+        Logger.log('Attempting to reserve race sync job');
+        const reservedByCurrentInstance = await RedisService.tryReserveTask(
+          TaskIdentifier.RACE_SYNC,
+          this.connector.connectorType,
+          ConfigService.instanceUuid,
+          10,
+        );
+
+        if (reservedByCurrentInstance) await this.syncRaces();
+        else Logger.log(`Could not reserve race sync job`);
+      } catch (err) {
+        Logger.error('Failed to sync races', err);
+      }
+    });
+  }
+
   private initGameSyncJob(): void {
     this.gameSyncJob = new CronJob(
       ConfigService.gameSyncInterval,
       async () => {
         try {
-          await this.syncGames();
+          Logger.log('Attempting to reserve game sync job');
+          const reservedByCurrentInstance = await RedisService.tryReserveTask(
+            TaskIdentifier.GAME_SYNC,
+            this.connector.connectorType,
+            ConfigService.instanceUuid,
+            60 * 60,
+          );
+
+          if (reservedByCurrentInstance) await this.syncGames();
+          else Logger.log(`Could not reserve game sync job`);
         } catch (err) {
           Logger.error('Failed to sync games', err);
         }

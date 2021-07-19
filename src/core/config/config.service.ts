@@ -41,6 +41,18 @@ class ConfigService {
     } as ConnectionOptions;
   }
 
+  public static get redisConfiguration(): {
+    host: string;
+    password: string;
+    port: number;
+  } {
+    return {
+      host: this.environmentConfiguration.REDIS_HOST,
+      port: +this.environmentConfiguration.REDIS_PORT,
+      password: this.environmentConfiguration.REDIS_PASSWORD,
+    };
+  }
+
   // Connector configurations
 
   public static get discordToken(): string {
@@ -105,6 +117,9 @@ class ConfigService {
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       LOG_LEVEL: Joi.string().default(LogLevel.DEBUG),
       WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),
+      REDIS_HOST: Joi.string().required(),
+      REDIS_PASSWORD: Joi.string().required(),
+      REDIS_PORT: Joi.number().required(),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(

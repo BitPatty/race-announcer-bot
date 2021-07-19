@@ -7,8 +7,8 @@ import LogLevel from './log-level.enum';
 import MessageChannelType from './message-channel-type.enum';
 import RaceStatus from './race-status.enum';
 import SourceConnectorIdentifier from './source-connector-identifier.enum';
+import TaskIdentifier from './task-identifier.enum';
 import TaskStatus from './task-status.enum';
-import TaskType from './task-type.enum';
 import WorkerEgressType from './worker-egress-type.enum';
 import WorkerIngressType from './worker-inress-type.enum';
 import WorkerType from './worker-type.enum';
@@ -24,7 +24,7 @@ export {
   RaceStatus,
   SourceConnectorIdentifier,
   TaskStatus,
-  TaskType,
+  TaskIdentifier,
   WorkerEgressType,
   WorkerIngressType,
   WorkerType,

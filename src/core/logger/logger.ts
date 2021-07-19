@@ -2,7 +2,6 @@ import { Connection, Repository } from 'typeorm';
 import pino from 'pino';
 
 import { TaskLogEntity } from '../../models/entities';
-import { TaskStatus, TaskType } from '../../models/enums';
 import ConfigService from '../config/config.service';
 
 /* eslint-disable no-console */
@@ -19,32 +18,6 @@ class Logger {
   public constructor(private readonly databaseConnection: Connection) {
     this.taskLogRepository =
       this.databaseConnection.getRepository(TaskLogEntity);
-  }
-
-  public initTask(type: TaskType, context?: string): Promise<TaskLogEntity> {
-    return this.taskLogRepository.save(
-      new TaskLogEntity({
-        type,
-        status: TaskStatus.INITIALIZED,
-        context: context ?? null,
-        parentUuid: null,
-      }),
-    );
-  }
-
-  public updateTask(
-    task: TaskLogEntity,
-    status: TaskStatus,
-    context?: string,
-  ): Promise<TaskLogEntity> {
-    return this.taskLogRepository.save(
-      new TaskLogEntity({
-        ...task,
-        status,
-        context: context ?? null,
-        parentUuid: task.uuid,
-      }),
-    );
   }
 
   public static log(msg: string, ...args: any[]): void {

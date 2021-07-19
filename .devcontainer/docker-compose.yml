@@ -55,3 +55,9 @@ services:
           nocopy: false
     env_file:
       - ./mariadb.env
+
+  race-announcer-bot-redis-latest:
+    container_name: race-announcer-bot-redis-latest
+    image: redis:latest
+    network_mode: service:application
+    command: redis-server --requirepass devel

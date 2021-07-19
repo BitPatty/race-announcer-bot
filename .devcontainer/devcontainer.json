@@ -20,7 +20,8 @@
     "ms-vsliveshare.vsliveshare",
     "ryanluker.vscode-coverage-gutters",
     "wayou.vscode-todo-highlight",
-    "xshrim.txt-syntax"
+    "xshrim.txt-syntax",
+    "cweijan.vscode-redis-client"
   ],
   "forwardPorts": [
     4000,

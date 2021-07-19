@@ -1,7 +1,7 @@
 import { Entity } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
 
-import { DatabaseAttributeType, TaskStatus, TaskType } from '../enums';
+import { DatabaseAttributeType, TaskIdentifier, TaskStatus } from '../enums';
 import { EntityColumn } from '../decorators';
 import TransformerUtils from '../../utils/transformer.utils';
 
@@ -20,8 +20,8 @@ class TaskLogEntity extends BaseEntity<TaskLogEntity> {
   @EntityColumn({ enum: TaskStatus })
   public status: TaskStatus;
 
-  @EntityColumn({ enum: TaskType })
-  public type: TaskType;
+  @EntityColumn({ enum: TaskIdentifier })
+  public type: TaskIdentifier;
 
   @EntityColumn({ type: DatabaseAttributeType.TEXT, nullable: true })
   public context: string | null;
