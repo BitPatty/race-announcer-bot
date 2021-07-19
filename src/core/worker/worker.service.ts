@@ -58,22 +58,33 @@ class WorkerService<T extends WorkerType> {
    */
   private cleanupWorker(): Promise<void> {
     return new Promise((resolve) => {
+      // If the worker has already exited,
+      // don't even try to terminate the process
       if (this.hasExited) {
+        LoggerService.log('Worker already exited');
         resolve();
         return;
       }
 
+      // Remove all event listeners
+      // This is primarily to remove all handlers
+      // from the 'exit' event
       this.worker.removeAllListeners();
 
       this.worker.on('message', (msg) => {
-        if (msg === WorkerIngressType.CLEANUP_FINISHED) resolve();
+        if (msg === WorkerIngressType.CLEANUP_FINISHED)
+          LoggerService.log('Cleanup finished');
       });
 
+      // When the worker exits (no matter its exit code)
+      // the cleanup can be considered done
       this.worker.on('exit', async () => {
+        LoggerService.log('Worker exited');
         await this.worker.terminate();
         resolve();
       });
 
+      // Trigger the cleanup process
       LoggerService.log(`Cleaning up worker`);
       this.worker.postMessage(WorkerEgressType.CLEANUP);
     });
@@ -133,6 +144,9 @@ class WorkerService<T extends WorkerType> {
     });
   }
 
+  /**
+   * Frees used resources and stops all tasks
+   */
   public async dispose(): Promise<void> {
     await this.cleanupWorker();
   }

@@ -8,6 +8,16 @@ class RedisService {
     ConfigService.redisConfiguration,
   );
 
+  /**
+   * Try to reserve the specified task for the current process
+   *
+   * @param taskIdentifier The task identifier
+   * @param postfix The postfix which is appended to the task identifier to
+   * uniquely identify the task
+   * @param instanceUuid The current instance UUID
+   * @param ttl The time to live for the reservation
+   * @returns True if the reservation was successful
+   */
   public static tryReserveTask(
     taskIdentifier: TaskIdentifier,
     postfix: string,

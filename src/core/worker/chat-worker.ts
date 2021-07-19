@@ -27,7 +27,6 @@ import Worker from './worker.interface';
 class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
   private readonly connector: DestinationConnector<T>;
   private databaseConnection: Connection;
-
   private trackerService: TrackerService;
 
   public constructor(connector: T) {
@@ -41,6 +40,11 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     }
   }
 
+  /**
+   * Registers/Updates a tracker for the specified server/channel
+   * @param cmd The tracker specification
+   * @returns The newly created tracker or NULL if a condition failed
+   */
   private async addTracker(
     cmd: AddTrackerCommand,
   ): Promise<TrackerEntity | null> {
@@ -70,14 +74,13 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       .findOne({
         where: {
           identifier: Like(cmd.targetChannelIdentifier),
-          connector: Like(cmd.sourceIdentifier),
+          connector: Like(this.connector.connectorType),
         },
       });
 
     const databaseChannel = await this.databaseConnection
       .getRepository(CommunicationChannelEntity)
       .save({
-        ...(existingDatabaseChannel ?? {}),
         ...new CommunicationChannelEntity({
           identifier: channel.identifier,
           serverIdentifier: channel.serverIdentifier,
@@ -85,25 +88,40 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
           permissionCheckSuccessful: hasPermissions,
           isActive: true,
         }),
+        ...(existingDatabaseChannel ?? {}),
       });
 
     return this.trackerService.addTracker(databaseChannel, game);
   }
 
+  /**
+   * Removes (disables) a tracker if there is a match on the specified
+   * server or in the current channel
+   * @param cmd The removal command
+   */
   private async removeTracker(cmd: RemoveTrackerCommand): Promise<void> {
-    const trackers = await (() =>
-      cmd.serverIdentifier
-        ? this.trackerService.findTrackersByServer(cmd.serverIdentifier)
-        : this.trackerService.findTrackersByChannel(cmd.channelIdentifier))();
+    // Get all trackers available in the current context
+    const trackers = cmd.serverIdentifier
+      ? await this.trackerService.findTrackersByServer(cmd.serverIdentifier)
+      : await this.trackerService.findTrackersByChannel(cmd.channelIdentifier);
 
+    // Find a tracker which matches the conditions
     const tracker = trackers.find(
       (t) =>
-        t.game.identifier.toLowerCase() === cmd.gameIdentifier.toLowerCase(),
+        t.isActive &&
+        t.game.abbreviation?.toLowerCase() ===
+          cmd.gameIdentifier.toLowerCase() &&
+        t.game.connector === cmd.sourceIdentifier,
     );
 
-    if (tracker) {
-      await this.trackerService.disableTracker(tracker.channel, tracker.game);
-    }
+    LoggerService.log(
+      `Disabling tracker with id ${tracker?.id} ${
+        trackers.length
+      } ${JSON.stringify(trackers)}`,
+    );
+
+    // If the tracker exists, disable it
+    if (tracker) await this.trackerService.disableTracker(tracker);
   }
 
   private async runCommand(
@@ -143,6 +161,9 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     }
   }
 
+  /**
+   * Starts the worker
+   */
   public async start(): Promise<void> {
     this.databaseConnection = await DatabaseService.getConnection();
     this.trackerService = new TrackerService(this.databaseConnection);
@@ -157,7 +178,11 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     return this.connector.connect();
   }
 
-  public dispose(): Promise<void> {
+  /**
+   * Frees used ressources and shuts down the tasks
+   */
+  public async dispose(): Promise<void> {
+    await DatabaseService.closeConnection();
     return this.connector.dispose();
   }
 }

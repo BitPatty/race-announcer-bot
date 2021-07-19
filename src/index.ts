@@ -12,6 +12,7 @@ import WorkerService from './core/worker/worker.service';
 
 import ConfigService from './core/config/config.service';
 
+// Register all connectors that should be enabled
 const workers = [
   {
     type: WorkerType.CHAT,
@@ -21,8 +22,13 @@ const workers = [
     type: WorkerType.SOURCE_SYNC,
     connector: SourceConnectorIdentifier.SPEEDRUNSLIVE,
   },
+  {
+    type: WorkerType.SOURCE_SYNC,
+    connector: SourceConnectorIdentifier.RACETIME_GG,
+  },
 ];
 
+// Keeps track of active instances
 const workerInstances = new Map<
   string,
   {
@@ -31,6 +37,11 @@ const workerInstances = new Map<
   }
 >();
 
+// CronJob to check if all workers are alive
+// if not, trigger a shutdown of the application.
+// It's easier to simply restart the whole application
+// automatically rather than trying to handle
+// revives of individual workers.
 const healthCheck = new CronJob(ConfigService.workerHealthCheckInterval, () => {
   LoggerService.log('Running healthcheck');
   for (const workerInstance of workerInstances.values()) {
@@ -39,10 +50,6 @@ const healthCheck = new CronJob(ConfigService.workerHealthCheckInterval, () => {
         `Found dead worker (${workerInstance.worker.identifier})`,
       );
       LoggerService.warn(`Shutting down`);
-      setTimeout(() => {
-        LoggerService.warn(`Process still alive, forcing exit`);
-        process.kill(process.pid, 'SIGKILL');
-      }, 30);
       process.kill(process.pid, 'SIGINT');
       return;
     }
@@ -50,23 +57,45 @@ const healthCheck = new CronJob(ConfigService.workerHealthCheckInterval, () => {
   LoggerService.log('Healthcheck finished');
 });
 
+// Whenever worker shuts down, also shutdown
+// all the other workers to cause a restart
+// of the application itself.
 const workerShutdownCallback = (
   workerIdentifier: string,
   error?: string,
 ): void => {
   LoggerService.log(`Worker ${workerIdentifier} exited`, error);
+
+  // Remove the worker that has exited from the
+  // list of active instances
   workerInstances.delete(workerIdentifier);
 
+  // If this was the last worker, shut down
+  // the application
   if (workerInstances.size === 0) {
-    healthCheck.stop();
     LoggerService.log(`No workers left, exiting main thread`);
+
+    // Remove the cronjob handle
+    healthCheck.stop();
+
+    // Dump the list of active handles in debug mode
     if (ConfigService.logLevel === LogLevel.DEBUG) wtfnode.dump();
+
+    // Some handles may or may not take a bit longer
+    // to be freed. Force kill the process if this happens
+    setTimeout(() => {
+      LoggerService.warn(`Process still alive, forcing exit`);
+      process.kill(process.pid, 'SIGKILL');
+    }, 30);
+
+    // Exit the application
     process.exit(0);
   } else {
     LoggerService.log(`${workerInstances.size} workers left`);
   }
 };
 
+// Initialize the worker instances
 for (const worker of workers) {
   const workerInstance = new WorkerService(worker.type, function (err) {
     workerShutdownCallback(this.identifier, err);
@@ -78,12 +107,14 @@ for (const worker of workers) {
   });
 }
 
+// Bootstrap the application routine
 const bootstrap = async (): Promise<void> => {
   for (const workerInstance of workerInstances.values()) {
     await workerInstance.startup();
   }
 };
 
+// Actually start the applicaiton
 void bootstrap().then(() => {
   healthCheck.start();
   LoggerService.log(':)');
