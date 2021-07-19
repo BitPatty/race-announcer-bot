@@ -1,6 +1,6 @@
 enum MessageChannelType {
   DIRECT_MESSAGE = 'direct_message',
-  CHANNEL_MESSAGE = 'channel_message',
+  TEXT_CHANNEL = 'text_channel',
   OTHER = 'other',
 }
 

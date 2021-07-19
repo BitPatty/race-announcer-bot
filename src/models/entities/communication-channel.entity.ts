@@ -1,4 +1,7 @@
-import { DestinationConnectorIdentifier } from '../enums';
+import {
+  DatabaseAttributeType,
+  DestinationConnectorIdentifier,
+} from '../enums';
 import { Entity } from 'typeorm';
 import { EntityColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
@@ -23,6 +26,13 @@ class CommunicationChannelEntity extends BaseEntity<CommunicationChannelEntity> 
 
   @EntityColumn()
   public identifier: string;
+
+  @EntityColumn({
+    type: DatabaseAttributeType.VARCHAR,
+    length: 255,
+    nullable: true,
+  })
+  public serverIdentifier: string | null;
 
   @EntityColumn({
     default: false,

@@ -9,10 +9,10 @@ import {
   WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
-import Logger from '../logger/logger';
+import LoggerService from '../logger/logger.service';
 import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
-class Worker<T extends WorkerType> {
+class WorkerService<T extends WorkerType> {
   private readonly scriptFileIdentifier = 'init-worker.js';
   private worker: WorkerThread;
 
@@ -74,7 +74,7 @@ class Worker<T extends WorkerType> {
         resolve();
       });
 
-      Logger.log(`Cleaning up worker`);
+      LoggerService.log(`Cleaning up worker`);
       this.worker.postMessage(WorkerEgressType.CLEANUP);
     });
   }
@@ -97,38 +97,38 @@ class Worker<T extends WorkerType> {
       if (this.isExiting) return;
       this.isExiting = true;
       this.dispose().finally(() => {
-        Logger.log(`Shutdown successful for ${connector}`);
+        LoggerService.log(`Shutdown successful for ${connector}`);
         this.shutdownCallback();
       });
     };
     process.on('SIGTERM', () => {
-      Logger.log(`SIGTERM => Shutting down worker for ${connector}`);
+      LoggerService.log(`SIGTERM => Shutting down worker for ${connector}`);
       disposeAndShutdown();
     });
 
     process.on('SIGINT', () => {
-      Logger.log(`SIGINT => Shutting down worker for ${connector}`);
+      LoggerService.log(`SIGINT => Shutting down worker for ${connector}`);
       disposeAndShutdown();
     });
 
     this.worker.on('message', (msg) => {
-      Logger.log(`[Worker] message: ${msg}`);
+      LoggerService.log(`[Worker] message: ${msg}`);
     });
 
     this.worker.on('error', (err) => {
-      Logger.log(`[Worker] error: ${err}`);
+      LoggerService.log(`[Worker] error: ${err}`);
     });
 
     this.worker.on('messageerror', (err) => {
-      Logger.log(`[Worker] message error: ${err}`);
+      LoggerService.log(`[Worker] message error: ${err}`);
     });
 
     this.worker.on('online', (err) => {
-      Logger.log(`[Worker] online: ${err}`);
+      LoggerService.log(`[Worker] online: ${err}`);
     });
 
     this.worker.on('exit', (err) => {
-      Logger.log(`[Worker] exit: ${err}`);
+      LoggerService.log(`[Worker] exit: ${err}`);
       this.hasExited = true;
     });
   }
@@ -138,4 +138,4 @@ class Worker<T extends WorkerType> {
   }
 }
 
-export default Worker;
+export default WorkerService;

@@ -10,12 +10,12 @@ import {
 } from '../../models/entities';
 import { SourceConnectorIdentifier, TaskIdentifier } from '../../models/enums';
 
-import RedisService from '../redis/redis.service';
+import RedisService from '../redis/redis-service';
 
 import ConfigService from '../config/config.service';
-import DatabaseService from '../database/database.service';
+import DatabaseService from '../database/database-service';
 
-import Logger from '../logger/logger';
+import LoggerService from '../logger/logger.service';
 
 import RaceTimeGGConnector from '../../connectors/racetimegg/racetimegg.connector';
 import SpeedRunsLiveConnector from '../../connectors/speedrunslive/speedrunslive.connector';
@@ -45,7 +45,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   }
 
   private async syncRaces(): Promise<void> {
-    Logger.log('Synchronizing races');
+    LoggerService.log('Synchronizing races');
     const syncTimeStamp = new Date();
 
     const raceList = await this.connector.getActiveRaces();
@@ -55,7 +55,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       this.databaseConnection.getRepository(EntrantEntity);
     const racerRepository = this.databaseConnection.getRepository(RacerEntity);
 
-    Logger.log(`Found ${raceList.length} races to sync`);
+    LoggerService.log(`Found ${raceList.length} races to sync`);
     for (const race of raceList) {
       try {
         const game = await gameRepository.findOne({
@@ -171,7 +171,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           updatedRace.updatedAt !== existingRace?.updatedAt;
 
         if (hasRaceChanges)
-          Logger.log(`Race change detected: ${race.identifier}`);
+          LoggerService.log(`Race change detected: ${race.identifier}`);
 
         await raceRepository.save({
           ...updatedRace,
@@ -182,23 +182,23 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
               : updatedRace.lastChangeAt,
         });
       } catch (err) {
-        Logger.error('Failed to sync race', err);
+        LoggerService.error('Failed to sync race', err);
       }
     }
 
-    Logger.log('Synchronization finished');
+    LoggerService.log('Synchronization finished');
   }
 
   private async syncGames(): Promise<void> {
-    Logger.log('Fetching game list');
+    LoggerService.log('Fetching game list');
     const gameList = await this.connector.listGames();
     const gameCount = gameList.length;
 
-    Logger.log(`Updating games in database (${gameCount} total)`);
+    LoggerService.log(`Updating games in database (${gameCount} total)`);
     const gameRepository = this.databaseConnection.getRepository(GameEntity);
 
     for (const [idx, game] of gameList.entries()) {
-      Logger.log(`Updating ${idx}/${gameCount}: ${game.name}`);
+      LoggerService.log(`Updating ${idx}/${gameCount}: ${game.name}`);
       const existingGame = await gameRepository.find({
         where: {
           identifier: game.identifier,
@@ -216,7 +216,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   private initRaceSyncJob(): void {
     this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
       try {
-        Logger.log('Attempting to reserve race sync job');
+        LoggerService.log('Attempting to reserve race sync job');
         const reservedByCurrentInstance = await RedisService.tryReserveTask(
           TaskIdentifier.RACE_SYNC,
           this.connector.connectorType,
@@ -225,9 +225,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         );
 
         if (reservedByCurrentInstance) await this.syncRaces();
-        else Logger.log(`Could not reserve race sync job`);
+        else LoggerService.log(`Could not reserve race sync job`);
       } catch (err) {
-        Logger.error('Failed to sync races', err);
+        LoggerService.error('Failed to sync races', err);
       }
     });
   }
@@ -237,7 +237,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       ConfigService.gameSyncInterval,
       async () => {
         try {
-          Logger.log('Attempting to reserve game sync job');
+          LoggerService.log('Attempting to reserve game sync job');
           const reservedByCurrentInstance = await RedisService.tryReserveTask(
             TaskIdentifier.GAME_SYNC,
             this.connector.connectorType,
@@ -246,9 +246,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           );
 
           if (reservedByCurrentInstance) await this.syncGames();
-          else Logger.log(`Could not reserve game sync job`);
+          else LoggerService.log(`Could not reserve game sync job`);
         } catch (err) {
-          Logger.error('Failed to sync games', err);
+          LoggerService.error('Failed to sync games', err);
         }
       },
       undefined,
@@ -268,11 +268,11 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   }
 
   public async dispose(): Promise<void> {
-    Logger.log('Stopping Game Sync');
+    LoggerService.log('Stopping Game Sync');
     this.gameSyncJob.stop();
-    Logger.log('Stopping Race Sync');
+    LoggerService.log('Stopping Race Sync');
     this.raceSyncJob.stop();
-    Logger.log('Closing Database Connection');
+    LoggerService.log('Closing Database Connection');
     await this.databaseConnection.close();
   }
 }

@@ -7,7 +7,7 @@ import ConfigService from '../config/config.service';
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-class Logger {
+class LoggerService {
   private readonly taskLogRepository: Repository<TaskLogEntity>;
 
   private static readonly logger = pino({
@@ -37,4 +37,4 @@ class Logger {
   }
 }
 
-export default Logger;
+export default LoggerService;

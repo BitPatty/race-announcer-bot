@@ -59,6 +59,14 @@ class ConfigService {
     return this.environmentConfiguration.DISCORD_BOT_TOKEN;
   }
 
+  public static get discordGlobalAdmins(): string[] {
+    return (
+      (this.environmentConfiguration.DISCORD_GLOBAL_ADMINS as string) ?? ''
+    )
+      .split(',')
+      .filter((a) => a.length > 3);
+  }
+
   public static get speedRunsLiveBaseUrl(): string {
     return this.environmentConfiguration.SRL_BASE_URL;
   }

@@ -4,13 +4,15 @@ import ChatMessage from './chat-message.interface';
 import ChatServer from './chat-server.interface';
 import DestinationEventListenerMap from './destination-event-listener-map.interface';
 import Race from './race.interface';
+import TextReply from './text-reply.interface';
+import TrackerListReply from './tracker-list-reply.interface';
 
 interface DestinationConnector<T extends DestinationConnectorIdentifier> {
   get connectorType(): T;
 
   get isReady(): boolean;
 
-  reply(to: ChatMessage, msg: string): Promise<void>;
+  reply(to: ChatMessage, content: TextReply | TrackerListReply): Promise<void>;
 
   postRaceMessage(
     server: ChatServer,
@@ -36,6 +38,10 @@ interface DestinationConnector<T extends DestinationConnectorIdentifier> {
     type: TEvent,
     listener?: DestinationEventListenerMap[TEvent],
   ): void;
+
+  findChannel(channelIdentifier: string): Promise<ChatChannel | null>;
+
+  botHasRequiredPermissions(channel: ChatChannel): Promise<boolean>;
 
   connect(): Promise<void>;
 

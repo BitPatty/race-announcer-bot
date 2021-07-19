@@ -1,7 +1,7 @@
 import * as redis from 'redis';
 import { TaskIdentifier } from '../../models/enums';
 import ConfigService from '../config/config.service';
-import Logger from '../logger/logger';
+import LoggerService from '../logger/logger.service';
 
 class RedisService {
   private static readonly client = redis.createClient(
@@ -15,7 +15,9 @@ class RedisService {
     ttl: number,
   ): Promise<boolean> {
     return new Promise((resolve) => {
-      Logger.debug(`Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`);
+      LoggerService.debug(
+        `Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`,
+      );
       this.client.set(
         `${taskIdentifier}_${postfix}`,
         instanceUuid,
@@ -24,7 +26,7 @@ class RedisService {
         'NX',
         (err, reply) => {
           if (err) {
-            Logger.error(JSON.stringify(err));
+            LoggerService.error(JSON.stringify(err));
           }
           resolve(reply === 'OK');
         },
@@ -36,7 +38,7 @@ class RedisService {
     taskIdentifier: TaskIdentifier,
     postfix: string,
   ): Promise<void> {
-    Logger.debug(`Removing key ${taskIdentifier}_${postfix}`);
+    LoggerService.debug(`Removing key ${taskIdentifier}_${postfix}`);
 
     return new Promise((resolve) => {
       this.client.del(`${taskIdentifier}_${postfix}`, () => {

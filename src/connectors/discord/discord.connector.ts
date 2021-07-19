@@ -3,11 +3,15 @@ import {
   ChatServer,
   DestinationConnector,
   Race,
+  TextReply,
+  TrackerListReply,
 } from '../../models/interfaces';
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
   MessageChannelType,
+  ReplyType,
+  SourceConnectorIdentifier,
 } from '../../models/enums';
 
 import * as Discord from 'discord.js';
@@ -16,8 +20,11 @@ import * as Joi from 'joi';
 import ChatMessage from '../../models/interfaces/chat-message.interface';
 import DestinationEventListenerMap from '../../models/interfaces/destination-event-listener-map.interface';
 
+import { TrackerEntity } from '../../models/entities';
 import ConfigService from '../../core/config/config.service';
-import Logger from '../../core/logger/logger';
+import DiscordCommandKey from './discord-command-key.enum';
+import DiscordCommandParser from './discord-command-parser';
+import LoggerService from '../../core/logger/logger.service';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
 
 class DiscordConnector
@@ -55,6 +62,24 @@ class DiscordConnector
 
   public get connectorType(): DestinationConnectorIdentifier.DISCORD {
     return DestinationConnectorIdentifier.DISCORD;
+  }
+
+  public async botHasRequiredPermissions(
+    channel: ChatChannel,
+  ): Promise<boolean> {
+    if (!this.client?.user) throw new Error('User not set');
+    const discordChannel = await this.findTextChannel(channel.identifier);
+    if (!discordChannel) return false;
+
+    const permissions = discordChannel.permissionsFor(this.client.user);
+    if (!permissions) throw new Error('Failed to load permissions');
+
+    if (!permissions.has('READ_MESSAGE_HISTORY')) return false;
+    if (!permissions.has('SEND_MESSAGES')) return false;
+    if (!permissions.has('VIEW_CHANNEL')) return false;
+    if (!permissions.has('ADD_REACTIONS')) return false;
+
+    return true;
   }
 
   /**
@@ -102,23 +127,6 @@ class DiscordConnector
   }
 
   /**
-   * Parse the type of channel in which
-   * the specifie message was posted
-   * @param msg The message
-   * @returns The channel type
-   */
-  private parseChannelType(msg: Discord.Message): MessageChannelType {
-    switch (msg.channel.type) {
-      case 'dm':
-        return MessageChannelType.DIRECT_MESSAGE;
-      case 'text':
-        return MessageChannelType.CHANNEL_MESSAGE;
-      default:
-        return MessageChannelType.OTHER;
-    }
-  }
-
-  /**
    * Attempts to find the specified message
    * @param channelId The channel in which the message is located
    * @param messageId The message identifier
@@ -132,10 +140,17 @@ class DiscordConnector
     const channel = await this.findTextChannel(channelId);
     if (!channel) return null;
 
-    const [[, originalMessage]] = await channel.messages.fetch({
+    LoggerService.log(channelId);
+    LoggerService.log(messageId);
+
+    const matches = await channel.messages.fetch({
       around: messageId,
       limit: 1,
     });
+
+    if (matches.size !== 1) return null;
+
+    const [[, originalMessage]] = matches;
 
     if (
       !originalMessage ||
@@ -161,7 +176,9 @@ class DiscordConnector
     if (!channel) return null;
 
     if (!(channel instanceof Discord.TextChannel)) {
-      Logger.warn(`Found channel ${channelId}, but it is not a text channel`);
+      LoggerService.warn(
+        `Found channel ${channelId}, but it is not a text channel`,
+      );
       return null;
     }
 
@@ -169,35 +186,21 @@ class DiscordConnector
   }
 
   /**
-   * Transforms a @see Discord.Message to a @see ChatMessage
-   * @param msg The discord message
-   * @returns The transformed chat message
+   * Finds a channel by its id
+   * @param channelIdentifier The channel id
+   * @returns The channel with the specified id
    */
-  private transformDiscordMessageToChatMessage(
-    msg: Discord.Message,
-  ): ChatMessage {
+  public async findChannel(
+    channelIdentifier: string,
+  ): Promise<ChatChannel | null> {
+    const channel = await this.findTextChannel(channelIdentifier);
+    if (!channel) return null;
+
     return {
-      identifier: msg.id,
-      server: {
-        identifier: msg.guild?.id,
-        name: msg.guild?.name,
-      },
-      channel: {
-        name: msg.channel.type !== 'dm' ? msg.channel.name : undefined,
-        identifier: msg.channel.id,
-        type: this.parseChannelType(msg),
-      },
-      author: {
-        identifier: msg.author.id,
-        displayName: msg.author.username,
-        isBotOwner: false,
-        canUseBotCommands: true,
-      },
-      isBotMention: msg.mentions.users.some(
-        (m) => m.id === this.client?.user?.id,
-      ),
-      content: msg.content,
-      cleanContent: msg.cleanContent,
+      identifier: channel.id,
+      serverIdentifier: channel.guild.id,
+      name: channel.name,
+      type: MessageChannelType.TEXT_CHANNEL,
     };
   }
 
@@ -269,13 +272,16 @@ class DiscordConnector
 
     const discordChannel = await this.findTextChannel(channel.identifier);
     if (!discordChannel) {
-      Logger.error(`Failed to fetch channel => ${discordChannel}`);
+      LoggerService.error(`Failed to fetch channel => ${discordChannel}`);
       return null;
     }
 
     const embed = this.buildRaceEmbed(race);
     const msg = await discordChannel.send(embed);
-    return this.transformDiscordMessageToChatMessage(msg);
+    return DiscordCommandParser.transformDiscordMessageToChatMessage(
+      msg,
+      this.client,
+    );
   }
 
   /**
@@ -295,13 +301,37 @@ class DiscordConnector
     );
 
     if (!originalMessage) {
-      Logger.error('Failed to fetch original message');
+      LoggerService.error('Failed to fetch original message');
       return null;
     }
 
     const embed = this.buildRaceEmbed(race);
     const msg = await originalMessage.edit(embed);
-    return this.transformDiscordMessageToChatMessage(msg);
+    return DiscordCommandParser.transformDiscordMessageToChatMessage(
+      msg,
+      this.client,
+    );
+  }
+
+  private buildTrackerListEmbed(items: TrackerEntity[]): Discord.MessageEmbed {
+    const embed = new Discord.MessageEmbed();
+
+    if (items.length === 0)
+      return embed.addField('Trackers', 'No trackers registered');
+
+    const activeTrackerList = items
+      .filter((i) => i.isActive)
+      .map((i) => `${i.game.name} in <#${i.channel.identifier}>`)
+      .join('\r\n');
+
+    const inactiveTrackerList = items
+      .filter((i) => !i.isActive)
+      .map((i) => `${i.game.name} in <#${i.channel.identifier}>`)
+      .join('\r\n');
+
+    return embed
+      .addField('Active Trackers', activeTrackerList || '-')
+      .addField('Inactive Trackers', inactiveTrackerList || '-');
   }
 
   /**
@@ -309,18 +339,115 @@ class DiscordConnector
    * @param to The message to reply to
    * @param msg The message content
    */
-  public async reply(to: ChatMessage, msg: string): Promise<void> {
+  public async reply(
+    to: ChatMessage,
+    content: Discord.MessageEmbed | TextReply | TrackerListReply,
+  ): Promise<void> {
     const originalMessage = await this.findMessage(
       to.channel.identifier,
       to.identifier,
     );
 
+    const message = (() => {
+      if (content instanceof Discord.MessageEmbed) return content;
+
+      switch (content.type) {
+        case ReplyType.TEXT:
+          return content.message;
+        case ReplyType.TRACKER_LIST:
+          return this.buildTrackerListEmbed(content.items);
+      }
+    })();
+
     if (!originalMessage) {
-      Logger.error('Failed to fetch original message');
+      LoggerService.error(
+        'Failed to fetch original message, using mention instead',
+      );
+      const channel = await this.findTextChannel(to.channel.identifier);
+      if (!channel) {
+        LoggerService.error('Failed to fetch channel');
+        return;
+      }
+
+      if (message instanceof Discord.MessageEmbed) {
+        await channel.send(`<@${to.author.identifier}>`, {
+          embed: message,
+        });
+        return;
+      }
+
+      await channel.send(`<@${to.author.identifier}>\r\n${message}`);
       return;
     }
 
-    await originalMessage.reply(msg);
+    await originalMessage.reply(message);
+  }
+
+  private hasUserAdministrativePermission(user: Discord.GuildMember): boolean {
+    return (
+      user.hasPermission('ADMINISTRATOR') ||
+      ConfigService.discordGlobalAdmins.includes(user.id)
+    );
+  }
+
+  private isBotMention(msg: Discord.Message): boolean {
+    return this.client?.user != null && msg.mentions.has(this.client.user);
+  }
+
+  private async postHelpText(originalMessage: Discord.Message): Promise<void> {
+    if (!this.client) return;
+
+    const embed = new Discord.MessageEmbed()
+      .setTitle('Race Announcer Help')
+      .setColor('#0390fc')
+      .addField(
+        'General Info',
+        `
+        Only users with the 'Administrator' permission on the server can use bot commands.
+
+        Available Providers:
+        - ${SourceConnectorIdentifier.SPEEDRUNSLIVE} (SpeedRunsLive)
+        - ${SourceConnectorIdentifier.RACETIME_GG} (RacetimeGG)
+        `,
+      )
+      .addField(
+        'Help',
+        `
+        \`<@Bot Mention> help\`
+
+        Displays this help message.
+        `,
+      )
+      .addField(
+        'Adding a Tracker',
+        `
+        \`<@Bot Mention> track <provider> <gameid> <#channel mention>\`
+
+        Example usage: 
+        <@${this.client.user?.id}> track SRL sms <#${originalMessage.channel.id}>
+
+        This would add a tracker for Super Mario Sunshine on SRL to <#${originalMessage.channel.id}>. Note that you cannot track the same game in multiple channels.
+        `,
+      )
+      .addField(
+        'Removing a Tracker',
+        `
+        \`<@Bot Mention> untrack <provider> <gameid>\`
+
+        Example usage: 
+        <@${this.client.user?.id}> untrack racetime oot
+
+        This would remove the racetime OOT tracker 
+        `,
+      );
+
+    await this.reply(
+      DiscordCommandParser.transformDiscordMessageToChatMessage(
+        originalMessage,
+        this.client,
+      ),
+      embed,
+    );
   }
 
   /**
@@ -334,11 +461,37 @@ class DiscordConnector
         resolve();
       });
 
-      this.client.on('message', (msg) => {
-        const eventContent = this.transformDiscordMessageToChatMessage(msg);
+      this.client.on('message', async (msg) => {
+        if (
+          !this.client ||
+          !this.isBotMention(msg) ||
+          !msg.member ||
+          !this.hasUserAdministrativePermission(msg.member)
+        )
+          return;
+
+        LoggerService.log(`Received message => ${msg.content}`);
+
+        const commandKey = DiscordCommandParser.parseCommandKey(msg);
+
+        if (!commandKey) {
+          LoggerService.error(`Failed to parse command key`);
+          return;
+        }
+
+        if (commandKey === DiscordCommandKey.HELP) {
+          await this.postHelpText(msg);
+          return;
+        }
+
+        const command = DiscordCommandParser.parseCommand(msg, this.client);
+        if (!command) {
+          LoggerService.error(`Failed to parse command`);
+          return;
+        }
 
         this._eventListeners[DestinationEvent.COMMAND_RECEIVED].forEach((l) =>
-          l(eventContent),
+          l(command),
         );
       });
 
@@ -348,7 +501,7 @@ class DiscordConnector
       });
 
       this.client.on('error', (err) => {
-        Logger.log(`[Discord] error: ${err}`);
+        LoggerService.log(`[Discord] error: ${err}`);
         reject(err);
       });
 

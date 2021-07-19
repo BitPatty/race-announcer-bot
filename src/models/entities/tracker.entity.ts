@@ -19,9 +19,6 @@ class TrackerEntity extends BaseEntity<TrackerEntity> {
   @EntityColumn({ default: false })
   public isActive: boolean;
 
-  @EntityColumn({ nullable: false })
-  public identifier: string;
-
   @ManyToOne(() => CommunicationChannelEntity, {
     nullable: false,
   })

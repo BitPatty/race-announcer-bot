@@ -1,6 +1,6 @@
 enum SourceConnectorIdentifier {
-  SPEEDRUNSLIVE = 'speedrunslive',
-  RACETIME_GG = 'racetimegg',
+  SPEEDRUNSLIVE = 'SRL',
+  RACETIME_GG = 'racetime',
 }
 
 export default SourceConnectorIdentifier;
