@@ -23,7 +23,7 @@
     "pino-pretty": "^5.1.2",
     "redis": "^3.1.2",
     "tsc-watch": "^4.4.0",
-    "typeorm": "^0.2.34",
+    "typeorm": "^0.2.35",
     "uuid": "^8.3.2",
     "wtfnode": "^0.9.1"
   },
