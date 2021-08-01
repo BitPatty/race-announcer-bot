@@ -1,7 +1,10 @@
 import { Entrant, Game, Race, SourceConnector } from '../../models/interfaces';
+
+import RaceTimeCategory from './interfaces/racetime-category.interface';
+import RaceTimeCategoryList from './interfaces/racetime-category-list.interface';
 import RaceTimeEntrant from './interfaces/racetime-entrant.interface';
 import RaceTimeRace from './interfaces/racetime-race.interface';
-import RaceTimeRaceDetail from './interfaces/race-time-race-detail.interface';
+import RaceTimeRaceDetail from './interfaces/racetime-race-detail.interface';
 import RaceTimeRaceList from './interfaces/racetime-race-list.interface';
 
 import {
@@ -63,6 +66,14 @@ class RaceTimeGGConnector
     }
   }
 
+  private racetimeCategoryToGame(category: RaceTimeCategory): Game {
+    return {
+      identifier: category.slug,
+      name: category.name,
+      abbreviation: category.short_name,
+    };
+  }
+
   private racetimeRaceToRace(racetimeRace: RaceTimeRace): Promise<Race | null> {
     return this.getRaceById(racetimeRace.name);
   }
@@ -119,8 +130,13 @@ class RaceTimeGGConnector
     return this.getRaceById(race.identifier);
   }
 
-  public listGames(): Promise<Game[]> {
-    return Promise.resolve([]);
+  public async listGames(): Promise<Game[]> {
+    const { data } = await axios.get<RaceTimeCategoryList>(
+      `${this.baseUrl}/categories/data`,
+    );
+    return data.categories
+      .filter((c) => c.name && c.name.length > 0 && c.short_name !== '')
+      .map((c) => this.racetimeCategoryToGame(c));
   }
 }
 

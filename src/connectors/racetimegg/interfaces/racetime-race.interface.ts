@@ -1,3 +1,4 @@
+import RaceTimeCategory from './racetime-category.interface';
 import RaceTimeRaceStatus from '../enums/racetime-race-status.enum';
 
 interface RaceTimeRace {
@@ -19,14 +20,7 @@ interface RaceTimeRace {
   entrants_count_inactive: number;
   opened_at: string;
   started_at: string;
-  category: {
-    name: string;
-    short_name: string;
-    slug: string;
-    url: string;
-    data_url: string;
-    image: string;
-  };
+  category: RaceTimeCategory;
 }
 
 export default RaceTimeRace;
