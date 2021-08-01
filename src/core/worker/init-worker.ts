@@ -63,19 +63,28 @@ const cleanup = async (): Promise<void> => {
   parentPort?.close();
 };
 
-void bootstrap().then(() => {
-  parentPort?.on('message', async (msg) => {
-    LoggerService.log(
-      `[Worker] (${workerName}) Received parent message "${msg}"`,
-    );
-    if (msg === WorkerEgressType.CLEANUP) {
-      try {
-        await cleanup();
-        process.exit(0);
-      } catch (err) {
-        LoggerService.error(err);
-        process.exit(1);
+void bootstrap()
+  .then(() => {
+    parentPort?.on('message', async (msg) => {
+      LoggerService.log(
+        `[Worker] (${workerName}) Received parent message "${msg}"`,
+      );
+      if (msg === WorkerEgressType.CLEANUP) {
+        try {
+          await cleanup();
+          process.exit(0);
+        } catch (err) {
+          LoggerService.error(err);
+          process.exit(1);
+        }
       }
+    });
+  })
+  .catch(async (err) => {
+    try {
+      LoggerService.error(`Failed bootstrap`, err);
+      await cleanup();
+    } finally {
+      process.exit(1);
     }
   });
-});
