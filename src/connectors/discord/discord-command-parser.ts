@@ -27,9 +27,9 @@ class DiscordCommandParser {
    */
   public static parseChannelType(msg: Discord.Message): MessageChannelType {
     switch (msg.channel.type) {
-      case 'dm':
+      case 'DM':
         return MessageChannelType.DIRECT_MESSAGE;
-      case 'text':
+      case 'GUILD_TEXT':
         return MessageChannelType.TEXT_CHANNEL;
       default:
         return MessageChannelType.OTHER;
@@ -48,7 +48,7 @@ class DiscordCommandParser {
     return {
       identifier: msg.id,
       channel: {
-        name: msg.channel.type !== 'dm' ? msg.channel.name : undefined,
+        name: msg.channel.type !== 'DM' ? msg.channel.name : undefined,
         identifier: msg.channel.id,
         serverIdentifier: msg.guild?.id ?? null,
         type: this.parseChannelType(msg),

@@ -217,7 +217,11 @@ class DiscordConnector
   private buildRaceEmbed(race: RaceInformation): Discord.MessageEmbed {
     let embed = new Discord.MessageEmbed()
       .setTitle(`Race room: ${race.identifier}`)
-      .setColor(MessageBuilderUtils.getRaceStatusIndicatorColor(race.status))
+      .setColor(
+        MessageBuilderUtils.getRaceStatusIndicatorColor(
+          race.status,
+        ) as Discord.HexColorString,
+      )
       .addField('Game', MessageBuilderUtils.getGameText(race))
       .addField('Goal', MessageBuilderUtils.getGoalText(race))
       .setFooter(MessageBuilderUtils.getRaceStatusIndicatorText(race.status))
@@ -289,7 +293,9 @@ class DiscordConnector
     }
 
     const embed = this.buildRaceEmbed(race);
-    const msg = await discordChannel.send(embed);
+    const msg = await discordChannel.send({
+      embeds: [embed],
+    });
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
       msg,
       this.client,
@@ -317,7 +323,9 @@ class DiscordConnector
     }
 
     const embed = this.buildRaceEmbed(race);
-    const msg = await originalMessage.edit(embed);
+    const msg = await originalMessage.edit({
+      embeds: [embed],
+    });
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
       msg,
       this.client,
@@ -381,22 +389,35 @@ class DiscordConnector
       }
 
       if (message instanceof Discord.MessageEmbed) {
-        await channel.send(`<@${to.author.identifier}>`, {
-          embed: message,
+        await channel.send({
+          content: `<@${to.author.identifier}>`,
+          embeds: [message],
         });
         return;
       }
 
-      await channel.send(`<@${to.author.identifier}>\r\n${message}`);
+      await channel.send({
+        content: `<@${to.author.identifier}>\r\n${message}`,
+      });
       return;
     }
 
-    await originalMessage.reply(message);
+    if (message instanceof Discord.MessageEmbed) {
+      await originalMessage.reply({
+        content: `<@${to.author.identifier}>`,
+        embeds: [message],
+      });
+      return;
+    }
+
+    await originalMessage.reply({
+      content: `<@${to.author.identifier}>\r\n${message}`,
+    });
   }
 
   private hasUserAdministrativePermission(user: Discord.GuildMember): boolean {
     return (
-      user.hasPermission('ADMINISTRATOR') ||
+      user.permissions.has('ADMINISTRATOR') ||
       ConfigService.discordGlobalAdmins.includes(user.id)
     );
   }
@@ -473,7 +494,14 @@ class DiscordConnector
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.client = new Discord.Client();
+      this.client = new Discord.Client({
+        intents: [
+          Discord.Intents.FLAGS.GUILD_MESSAGES,
+          Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+          Discord.Intents.FLAGS.DIRECT_MESSAGES,
+          Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+        ],
+      });
       this.client.on('ready', () => {
         this._isReady = true;
         resolve();
