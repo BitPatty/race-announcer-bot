@@ -83,6 +83,10 @@ class ConfigService {
     return this.environmentConfiguration.GAME_SYNC_INTERVAL;
   }
 
+  public static get announcementSyncInterval(): string {
+    return this.environmentConfiguration.ANNOUNCEMENT_SYNC_INTERVAL;
+  }
+
   public static get logLevel(): LogLevel {
     return this.environmentConfiguration.LOG_LEVEL as LogLevel;
   }
@@ -121,7 +125,8 @@ class ConfigService {
       DISCORD_BOT_TOKEN: Joi.string().required(),
       SRL_BASE_URL: Joi.string().uri().default('https://speedrunslive.com'),
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
-      RACE_SYNC_INTERVAL: Joi.string().default('*/30 * * * * *'),
+      ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('5/15 * * * * *'),
+      RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       LOG_LEVEL: Joi.string().default(LogLevel.DEBUG),
       WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),

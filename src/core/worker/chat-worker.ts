@@ -3,6 +3,7 @@ import { Connection, Like } from 'typeorm';
 import {
   AddTrackerCommand,
   DestinationConnector,
+  HelpCommand,
   ListTrackersCommand,
   RemoveTrackerCommand,
 } from '../../models/interfaces';
@@ -11,6 +12,7 @@ import {
   DestinationConnectorIdentifier,
   DestinationEvent,
   ReplyType,
+  TaskIdentifier,
 } from '../../models/enums';
 import {
   CommunicationChannelEntity,
@@ -18,9 +20,11 @@ import {
   TrackerEntity,
 } from '../../models/entities';
 
+import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database-service';
 import DiscordConnector from '../../connectors/discord/discord.connector';
 import LoggerService from '../logger/logger.service';
+import RedisService from '../redis/redis-service';
 import TrackerService from '../tracker/tracker.service';
 import Worker from './worker.interface';
 
@@ -87,6 +91,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
           connector: this.connector.connectorType,
           permissionCheckSuccessful: hasPermissions,
           isActive: true,
+          type: channel.type,
         }),
         ...(existingDatabaseChannel ?? {}),
       });
@@ -125,7 +130,11 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
   }
 
   private async runCommand(
-    cmd: AddTrackerCommand | RemoveTrackerCommand | ListTrackersCommand,
+    cmd:
+      | AddTrackerCommand
+      | RemoveTrackerCommand
+      | ListTrackersCommand
+      | HelpCommand,
   ): Promise<void> {
     switch (cmd.type) {
       case CommandType.ADD_TRACKER: {
@@ -157,6 +166,11 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
           type: ReplyType.TRACKER_LIST,
           items: trackers,
         });
+        break;
+      }
+      case CommandType.HELP: {
+        await this.connector.postHelpMessage(cmd.message);
+        break;
       }
     }
   }
@@ -172,7 +186,14 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       DestinationEvent.COMMAND_RECEIVED,
       async (msg) => {
         LoggerService.log(`Received message: ${msg.message.content}`);
-        await this.runCommand(msg);
+        const reservedForCurrentInstance = await RedisService.tryReserveTask(
+          TaskIdentifier.MESSAGE_HANDLER,
+          msg.message.identifier,
+          ConfigService.instanceUuid,
+          3600,
+        );
+
+        if (reservedForCurrentInstance) await this.runCommand(msg);
       },
     );
     return this.connector.connect();

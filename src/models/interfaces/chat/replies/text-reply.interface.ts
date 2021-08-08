@@ -1,4 +1,4 @@
-import { ReplyType } from '../enums';
+import { ReplyType } from '../../../enums';
 
 interface TextReply {
   type: ReplyType.TEXT;

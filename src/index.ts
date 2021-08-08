@@ -7,10 +7,19 @@ import {
   SourceConnectorIdentifier,
   WorkerType,
 } from './models/enums';
+
+import ConfigService from './core/config/config.service';
 import LoggerService from './core/logger/logger.service';
 import WorkerService from './core/worker/worker.service';
 
-import ConfigService from './core/config/config.service';
+process.on('rejectionHandled', (promise) => {
+  `Promise rejeciton handled: ${promise}`;
+});
+
+process.on('uncaughtException', (err, origin) => {
+  `Uncaught exception: ${err} at ${origin}`;
+  process.exit(1);
+});
 
 // Register all connectors that should be enabled
 const workers = [
@@ -25,6 +34,10 @@ const workers = [
   {
     type: WorkerType.SOURCE_SYNC,
     connector: SourceConnectorIdentifier.RACETIME_GG,
+  },
+  {
+    type: WorkerType.ANNOUNCER,
+    connector: DestinationConnectorIdentifier.DISCORD,
   },
 ];
 
@@ -114,7 +127,7 @@ const bootstrap = async (): Promise<void> => {
   }
 };
 
-// Actually start the applicaiton
+// Actually start the application
 void bootstrap().then(() => {
   healthCheck.start();
   LoggerService.log(':)');

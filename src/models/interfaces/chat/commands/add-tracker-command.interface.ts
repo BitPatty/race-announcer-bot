@@ -1,5 +1,5 @@
-import { CommandType, SourceConnectorIdentifier } from '../enums';
-import ChatMessage from './chat-message.interface';
+import { CommandType, SourceConnectorIdentifier } from '../../../enums';
+import ChatMessage from '../chat-message.interface';
 
 interface AddTrackerCommand {
   type: CommandType.ADD_TRACKER;

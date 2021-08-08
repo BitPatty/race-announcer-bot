@@ -1,5 +1,5 @@
-import { CommandType } from '../enums';
-import ChatMessage from './chat-message.interface';
+import { CommandType } from '../../../enums';
+import ChatMessage from '../chat-message.interface';
 
 interface ListTrackersCommand {
   type: CommandType.LIST_TRACKERS;

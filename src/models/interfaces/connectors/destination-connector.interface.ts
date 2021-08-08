@@ -1,11 +1,13 @@
-import { DestinationConnectorIdentifier, DestinationEvent } from '../enums';
-import ChatChannel from './chat-channel.interface';
-import ChatMessage from './chat-message.interface';
-import ChatServer from './chat-server.interface';
+import { DestinationConnectorIdentifier, DestinationEvent } from '../../enums';
 import DestinationEventListenerMap from './destination-event-listener-map.interface';
-import Race from './race.interface';
-import TextReply from './text-reply.interface';
-import TrackerListReply from './tracker-list-reply.interface';
+
+import {
+  ChatChannel,
+  ChatMessage,
+  RaceInformation,
+  TextReply,
+  TrackerListReply,
+} from '..';
 
 interface DestinationConnector<T extends DestinationConnectorIdentifier> {
   get connectorType(): T;
@@ -15,14 +17,13 @@ interface DestinationConnector<T extends DestinationConnectorIdentifier> {
   reply(to: ChatMessage, content: TextReply | TrackerListReply): Promise<void>;
 
   postRaceMessage(
-    server: ChatServer,
     channel: ChatChannel,
-    race: Race,
+    race: RaceInformation,
   ): Promise<ChatMessage | null>;
 
   updateRaceMessage(
     originalMessage: ChatMessage,
-    race: Race,
+    race: RaceInformation,
   ): Promise<ChatMessage | null>;
 
   getListeners<TEvent extends DestinationEvent>(
@@ -40,6 +41,8 @@ interface DestinationConnector<T extends DestinationConnectorIdentifier> {
   ): void;
 
   findChannel(channelIdentifier: string): Promise<ChatChannel | null>;
+
+  postHelpMessage(originalMessage: ChatMessage): Promise<void>;
 
   botHasRequiredPermissions(channel: ChatChannel): Promise<boolean>;
 

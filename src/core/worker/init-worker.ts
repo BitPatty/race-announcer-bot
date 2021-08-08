@@ -1,7 +1,5 @@
 import { parentPort } from 'worker_threads';
 
-import Worker from './worker.interface';
-
 import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
@@ -10,10 +8,12 @@ import {
 } from '../../models/enums';
 import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
+import AnnouncementWorker from './announcement-worker';
+import LoggerService from '../logger/logger.service';
+
 import ChatWorker from './chat-worker';
 import SourceWorker from './source-worker';
-
-import LoggerService from '../logger/logger.service';
+import Worker from './worker.interface';
 
 const processArgs = process.argv;
 LoggerService.log(`Starting worker with args => ${processArgs}`);
@@ -36,6 +36,10 @@ const workerInstance: Worker = (() => {
       return new ChatWorker(providerArg as DestinationConnectorIdentifier);
     case WorkerType.SOURCE_SYNC:
       return new SourceWorker(providerArg as SourceConnectorIdentifier);
+    case WorkerType.ANNOUNCER:
+      return new AnnouncementWorker(
+        providerArg as DestinationConnectorIdentifier,
+      );
     default:
       throw new Error(`Unsupported worker type ${selectedWorkerType}`);
   }

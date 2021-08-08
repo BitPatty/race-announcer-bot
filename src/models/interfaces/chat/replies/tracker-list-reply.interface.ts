@@ -1,5 +1,5 @@
-import { TrackerEntity } from '../entities';
-import ReplyType from '../enums/reply-type.enum';
+import { TrackerEntity } from '../../../entities';
+import ReplyType from '../../../enums/reply-type.enum';
 
 interface TrackerListReply {
   type: ReplyType.TRACKER_LIST;

@@ -12,7 +12,7 @@
   "extensions": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "formulahendry.vscode-mysql",
+    "cweijan.vscode-mysql-client2",
     "grapecity.gc-excelviewer",
     "mechatroner.rainbow-csv",
     "mikestead.dotenv",

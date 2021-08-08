@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-import { Entrant, Game, Race, SourceConnector } from '../../models/interfaces';
+import {
+  EntrantInformation,
+  GameInformation,
+  RaceInformation,
+  SourceConnector,
+} from '../../models/interfaces';
 import SRLEntrant from './interfaces/srl-entrant.interface';
 import SRLGame from './interfaces/srl-game.interface';
 import SRLGameList from './interfaces/srl-game-list.interface';
@@ -58,7 +63,7 @@ class SpeedRunsLiveConnector
     }
   };
 
-  private srlEntrantToEntrant(srlEntrant: SRLEntrant): Entrant {
+  private srlEntrantToEntrant(srlEntrant: SRLEntrant): EntrantInformation {
     return {
       displayName: srlEntrant.displayname,
       status: this.numericEntrantStateToStatus(srlEntrant.time),
@@ -66,7 +71,7 @@ class SpeedRunsLiveConnector
     };
   }
 
-  private srlRaceToRace(srlRace: SRLRace): Race {
+  private srlRaceToRace(srlRace: SRLRace): RaceInformation {
     return {
       identifier: srlRace.id.toString(),
       url: `${ConfigService.speedRunsLiveBaseUrl}/race/?id=${srlRace.id}`,
@@ -83,7 +88,7 @@ class SpeedRunsLiveConnector
     };
   }
 
-  private srlGameToGame(srlGame: SRLGame): Game {
+  private srlGameToGame(srlGame: SRLGame): GameInformation {
     return {
       identifier: srlGame.id.toString(),
       name: srlGame.name,
@@ -91,19 +96,19 @@ class SpeedRunsLiveConnector
     };
   }
 
-  public async getActiveRaces(): Promise<Race[]> {
+  public async getActiveRaces(): Promise<RaceInformation[]> {
     const { data } = await axios.get<SRLRaceList>(`${this.baseUrl}/races`);
     return data.races.map((r) => this.srlRaceToRace(r));
   }
 
-  public async getRace(race: Race): Promise<Race | null> {
+  public async getRace(race: RaceInformation): Promise<RaceInformation | null> {
     const { data } = await axios.get<SRLRace>(
       `${this.baseUrl}/races/${race.identifier}`,
     );
     return data && data.id ? this.srlRaceToRace(data) : null;
   }
 
-  public async listGames(): Promise<Game[]> {
+  public async listGames(): Promise<GameInformation[]> {
     const { data } = await axios.get<SRLGameList>(`${this.baseUrl}/games`);
     return data.games
       .filter((g) => g.name && g.name.length > 0 && g.abbrev !== 'newgame')

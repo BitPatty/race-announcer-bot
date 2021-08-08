@@ -1,4 +1,4 @@
-import { Entrant, Race } from '../models/interfaces';
+import { EntrantInformation, RaceInformation } from '../models/interfaces';
 import { EntrantStatus, RaceStatus } from '../models/enums';
 
 class MessageBuilderUtils {
@@ -45,19 +45,11 @@ class MessageBuilderUtils {
     return this.raceStatusIndicatorText[status];
   }
 
-  public static getGoalTitle(): string {
-    return 'Goal';
-  }
-
-  public static getGoalText(race: Race): string {
+  public static getGoalText(race: RaceInformation): string {
     return race.goal && race.goal.trim().length > 0 ? race.goal : '-';
   }
 
-  public static getEntrantsTitle(): string {
-    return 'Entrants';
-  }
-
-  private static formatFinalTime(timeInSeconds: number): string {
+  public static formatFinalTime(timeInSeconds: number): string {
     const seconds = Math.floor(timeInSeconds % 60);
     const minutes = Math.floor((timeInSeconds / 60) % 60);
     const hours = Math.floor((timeInSeconds / 3600) % 60);
@@ -65,8 +57,10 @@ class MessageBuilderUtils {
     return `${hours}:${pad(minutes)}:${pad(seconds)}`;
   }
 
-  public static sortEntrants(entrants: Entrant[]): Entrant[] {
-    const entrantList: Entrant[] = [];
+  public static sortEntrants(
+    entrants: EntrantInformation[],
+  ): EntrantInformation[] {
+    const entrantList: EntrantInformation[] = [];
 
     entrantList.push(
       ...entrants
@@ -83,7 +77,7 @@ class MessageBuilderUtils {
     return entrantList;
   }
 
-  public static getEntrantStatusText(entrant: Entrant): string {
+  public static getEntrantStatusText(entrant: EntrantInformation): string {
     const additionalContext =
       entrant.status === EntrantStatus.DONE
         ? ` (${this.formatFinalTime(entrant.finalTime ?? 0)})`
@@ -94,11 +88,7 @@ class MessageBuilderUtils {
     }${additionalContext}`;
   }
 
-  public static getGameTitle(): string {
-    return 'Game';
-  }
-
-  public static getGameText(race: Race): string {
+  public static getGameText(race: RaceInformation): string {
     return `${race.game.name}`;
   }
 }

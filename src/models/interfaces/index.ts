@@ -1,33 +1,36 @@
-import ChatChannel from './chat-channel.interface';
-import ChatServer from './chat-server.interface';
-import ChatUser from './chat-user.interface';
-import DestinationConnector from './destination-connector.interface';
-import Entrant from './entrant.interface';
-import Game from './game.interface';
-import Race from './race.interface';
-import SourceConnector from './source-connector.interface';
-import TrackerList from './tracker-list.interface';
+import {
+  AddTrackerCommand,
+  ChatChannel,
+  ChatMessage,
+  ChatUser,
+  HelpCommand,
+  ListTrackersCommand,
+  RemoveTrackerCommand,
+  TextReply,
+  TrackerListReply,
+} from './chat';
 
-import AddTrackerCommand from './add-tracker-command.interface';
-import ListTrackersCommand from './list-trackers-command.interface';
-import RemoveTrackerCommand from './remove-tracker-command.interface';
+import { DestinationConnector, SourceConnector } from './connectors';
 
-import TextReply from './text-reply.interface';
-import TrackerListReply from './tracker-list-reply.interface';
+import {
+  EntrantInformation,
+  GameInformation,
+  RaceInformation,
+} from './raceinfo';
 
 export {
   ChatChannel,
-  ChatServer,
+  ChatMessage,
   ChatUser,
   DestinationConnector,
-  Entrant,
-  Game,
-  Race,
+  EntrantInformation,
+  GameInformation,
+  RaceInformation,
   SourceConnector,
   AddTrackerCommand,
+  HelpCommand,
   ListTrackersCommand,
   RemoveTrackerCommand,
-  TrackerList,
   TextReply,
   TrackerListReply,
 };

@@ -1,6 +1,7 @@
 import {
   DatabaseAttributeType,
   DestinationConnectorIdentifier,
+  MessageChannelType,
 } from '../enums';
 import { Entity } from 'typeorm';
 import { EntityColumn } from '../decorators';
@@ -32,7 +33,19 @@ class CommunicationChannelEntity extends BaseEntity<CommunicationChannelEntity> 
     length: 255,
     nullable: true,
   })
+  public name?: string;
+
+  @EntityColumn({
+    type: DatabaseAttributeType.VARCHAR,
+    length: 255,
+    nullable: true,
+  })
   public serverIdentifier: string | null;
+
+  @EntityColumn({
+    enum: MessageChannelType,
+  })
+  public type: MessageChannelType;
 
   @EntityColumn({
     default: false,

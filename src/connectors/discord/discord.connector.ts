@@ -1,11 +1,13 @@
 import {
   ChatChannel,
-  ChatServer,
+  ChatMessage,
   DestinationConnector,
-  Race,
+  EntrantInformation,
+  RaceInformation,
   TextReply,
   TrackerListReply,
 } from '../../models/interfaces';
+
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
@@ -17,12 +19,10 @@ import {
 import * as Discord from 'discord.js';
 import * as Joi from 'joi';
 
-import ChatMessage from '../../models/interfaces/chat-message.interface';
-import DestinationEventListenerMap from '../../models/interfaces/destination-event-listener-map.interface';
+import DestinationEventListenerMap from '../../models/interfaces/connectors/destination-event-listener-map.interface';
 
 import { TrackerEntity } from '../../models/entities';
 import ConfigService from '../../core/config/config.service';
-import DiscordCommandKey from './discord-command-key.enum';
 import DiscordCommandParser from './discord-command-parser';
 import LoggerService from '../../core/logger/logger.service';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
@@ -32,6 +32,9 @@ class DiscordConnector
 {
   private client?: Discord.Client;
   private _isReady = false;
+
+  private readonly entrantDisplayLimitTrigger = 15;
+  private readonly entrantDisplayLimitVariance = 2;
 
   /**
    * The event listeners mapped to this connector
@@ -136,21 +139,22 @@ class DiscordConnector
     channelId: string,
     messageId: string,
   ): Promise<Discord.Message | null> {
+    LoggerService.log(
+      `Looking up message ${messageId} in channel ${channelId}`,
+    );
     if (!this.client) return null;
     const channel = await this.findTextChannel(channelId);
-    if (!channel) return null;
+    if (!channel) {
+      LoggerService.error(
+        `Failed to fetch channel when looking up message ${messageId} in ${channelId}`,
+      );
+      return null;
+    }
 
-    LoggerService.log(channelId);
-    LoggerService.log(messageId);
+    LoggerService.debug(`Found channel ${channelId} for message ${messageId}`);
 
-    const matches = await channel.messages.fetch({
-      around: messageId,
-      limit: 1,
-    });
-
-    if (matches.size !== 1) return null;
-
-    const [[, originalMessage]] = matches;
+    const originalMessage = await channel.messages.fetch(messageId);
+    LoggerService.log(JSON.stringify(originalMessage));
 
     if (
       !originalMessage ||
@@ -210,18 +214,12 @@ class DiscordConnector
    * @param race The race
    * @returns The embed
    */
-  private buildRaceEmbed(race: Race): Discord.MessageEmbed {
+  private buildRaceEmbed(race: RaceInformation): Discord.MessageEmbed {
     let embed = new Discord.MessageEmbed()
       .setTitle(`Race room: ${race.identifier}`)
       .setColor(MessageBuilderUtils.getRaceStatusIndicatorColor(race.status))
-      .addField(
-        MessageBuilderUtils.getGameTitle(),
-        MessageBuilderUtils.getGameText(race),
-      )
-      .addField(
-        MessageBuilderUtils.getGoalTitle(),
-        MessageBuilderUtils.getGoalText(race),
-      )
+      .addField('Game', MessageBuilderUtils.getGameText(race))
+      .addField('Goal', MessageBuilderUtils.getGoalText(race))
       .setFooter(MessageBuilderUtils.getRaceStatusIndicatorText(race.status))
       .setTimestamp();
 
@@ -237,24 +235,38 @@ class DiscordConnector
       embed = embed.setThumbnail(race.game.imageUrl);
 
     // List the entrants
-    const entrantString =
-      race.entrants.length === 0
-        ? '-'
-        : MessageBuilderUtils.sortEntrants(race.entrants ?? [])
-            .map((e) =>
-              MessageBuilderUtils.getEntrantStatusText(e).replace(
-                e.displayName,
-                `**${e.displayName}**`,
-              ),
-            )
-            .join('\r\n');
+    const entrantString = this.generateEmbedEntrantList(race.entrants);
 
-    embed = embed.addField(
-      MessageBuilderUtils.getEntrantsTitle(),
-      entrantString,
-    );
-
+    embed = embed.addField('Entrants', entrantString);
     return embed;
+  }
+
+  private generateEmbedEntrantList(entrants: EntrantInformation[]): string {
+    if (entrants.length === 0) return '-';
+    const sortedEntrants = MessageBuilderUtils.sortEntrants(entrants);
+    const totalEntrants = sortedEntrants.length;
+
+    const hiddenEntrantCount =
+      totalEntrants -
+      this.entrantDisplayLimitVariance -
+      this.entrantDisplayLimitTrigger;
+
+    const entrantList = sortedEntrants
+      .map((e, idx) => {
+        if (
+          hiddenEntrantCount > 0 &&
+          idx > totalEntrants - this.entrantDisplayLimitTrigger
+        )
+          return '';
+
+        const statusText = MessageBuilderUtils.getEntrantStatusText(e);
+        return `**${e.displayName}**: ${statusText}`;
+      })
+      .join('\r\n');
+
+    return hiddenEntrantCount < 0
+      ? entrantList
+      : `\r\n*+ ${hiddenEntrantCount} more..*`;
   }
 
   /**
@@ -264,16 +276,16 @@ class DiscordConnector
    * @returns The posted message
    */
   public async postRaceMessage(
-    _: ChatServer,
     channel: ChatChannel,
-    race: Race,
+    race: RaceInformation,
   ): Promise<ChatMessage | null> {
     if (!this.client) return null;
 
     const discordChannel = await this.findTextChannel(channel.identifier);
     if (!discordChannel) {
-      LoggerService.error(`Failed to fetch channel => ${discordChannel}`);
-      return null;
+      throw new Error(
+        `Failed to fetch channel ${channel.identifier} => ${discordChannel}`,
+      );
     }
 
     const embed = this.buildRaceEmbed(race);
@@ -292,7 +304,7 @@ class DiscordConnector
    */
   public async updateRaceMessage(
     originalPost: ChatMessage,
-    race: Race,
+    race: RaceInformation,
   ): Promise<ChatMessage | null> {
     if (!this.client) return null;
     const originalMessage = await this.findMessage(
@@ -301,8 +313,7 @@ class DiscordConnector
     );
 
     if (!originalMessage) {
-      LoggerService.error('Failed to fetch original message');
-      return null;
+      throw new Error('Failed to fetch original message');
     }
 
     const embed = this.buildRaceEmbed(race);
@@ -394,8 +405,15 @@ class DiscordConnector
     return this.client?.user != null && msg.mentions.has(this.client.user);
   }
 
-  private async postHelpText(originalMessage: Discord.Message): Promise<void> {
+  public async postHelpMessage(replyTo: ChatMessage): Promise<void> {
     if (!this.client) return;
+
+    const originalMessage = await this.findMessage(
+      replyTo.channel.identifier,
+      replyTo.identifier,
+    );
+
+    if (!originalMessage) return;
 
     const embed = new Discord.MessageEmbed()
       .setTitle('Race Announcer Help')
@@ -461,7 +479,7 @@ class DiscordConnector
         resolve();
       });
 
-      this.client.on('message', async (msg) => {
+      this.client.on('message', (msg) => {
         if (
           !this.client ||
           !this.isBotMention(msg) ||
@@ -476,11 +494,6 @@ class DiscordConnector
 
         if (!commandKey) {
           LoggerService.error(`Failed to parse command key`);
-          return;
-        }
-
-        if (commandKey === DiscordCommandKey.HELP) {
-          await this.postHelpText(msg);
           return;
         }
 

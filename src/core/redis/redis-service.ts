@@ -15,7 +15,7 @@ class RedisService {
    * @param postfix The postfix which is appended to the task identifier to
    * uniquely identify the task
    * @param instanceUuid The current instance UUID
-   * @param ttl The time to live for the reservation
+   * @param ttl The time to live for the reservation (in seconds)
    * @returns True if the reservation was successful
    */
   public static tryReserveTask(
@@ -24,7 +24,7 @@ class RedisService {
     instanceUuid: string,
     ttl: number,
   ): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       LoggerService.debug(
         `Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`,
       );
@@ -37,6 +37,7 @@ class RedisService {
         (err, reply) => {
           if (err) {
             LoggerService.error(JSON.stringify(err));
+            reject();
           }
           resolve(reply === 'OK');
         },
@@ -44,11 +45,25 @@ class RedisService {
     });
   }
 
-  public static freeTask(
+  public static async freeTask(
     taskIdentifier: TaskIdentifier,
     postfix: string,
+    instanceUuid: string,
   ): Promise<void> {
     LoggerService.debug(`Removing key ${taskIdentifier}_${postfix}`);
+
+    const existingValue = await new Promise<string>((resolve, reject) =>
+      this.client.get(`${taskIdentifier}_${postfix}`, (err, data) => {
+        if (err) {
+          LoggerService.error('Something went wrong', err);
+          return;
+        }
+
+        resolve(data as string);
+      }),
+    );
+
+    if (existingValue !== instanceUuid) return;
 
     return new Promise((resolve) => {
       this.client.del(`${taskIdentifier}_${postfix}`, () => {

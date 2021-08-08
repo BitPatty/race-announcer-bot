@@ -1,4 +1,4 @@
-import { MessageChannelType } from '../enums';
+import { MessageChannelType } from '../../enums';
 
 interface ChatChannel {
   identifier: string;

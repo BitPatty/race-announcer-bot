@@ -2,16 +2,19 @@ import * as Discord from 'discord.js';
 
 import {
   AddTrackerCommand,
+  ChatMessage,
+  HelpCommand,
   ListTrackersCommand,
   RemoveTrackerCommand,
 } from '../../models/interfaces';
+
 import {
   CommandType,
   MessageChannelType,
   SourceConnectorIdentifier,
 } from '../../models/enums';
+
 import { parseEnumValue } from '../../utils/enum.utils';
-import ChatMessage from '../../models/interfaces/chat-message.interface';
 import DiscordCommandKey from './discord-command-key.enum';
 import LoggerService from '../../core/logger/logger.service';
 
@@ -44,10 +47,6 @@ class DiscordCommandParser {
   ): ChatMessage {
     return {
       identifier: msg.id,
-      server: {
-        identifier: msg.guild?.id,
-        name: msg.guild?.name,
-      },
       channel: {
         name: msg.channel.type !== 'dm' ? msg.channel.name : undefined,
         identifier: msg.channel.id,
@@ -176,14 +175,31 @@ class DiscordCommandParser {
     return cmd;
   }
 
+  private static parseHelpCommand(
+    msg: Discord.Message,
+    client: Discord.Client,
+  ): HelpCommand {
+    return {
+      type: CommandType.HELP,
+      message: this.transformDiscordMessageToChatMessage(msg, client),
+    };
+  }
+
   public static parseCommand(
     msg: Discord.Message,
     client: Discord.Client,
-  ): AddTrackerCommand | RemoveTrackerCommand | ListTrackersCommand | null {
+  ):
+    | AddTrackerCommand
+    | RemoveTrackerCommand
+    | ListTrackersCommand
+    | HelpCommand
+    | null {
     const commandKey = this.parseCommandKey(msg);
     LoggerService.log(`Parsing ${commandKey}`);
 
     switch (commandKey) {
+      case DiscordCommandKey.HELP:
+        return this.parseHelpCommand(msg, client);
       case DiscordCommandKey.ADD_TRACKER:
         return this.parseAddTrackerCommand(msg, client);
       case DiscordCommandKey.REMOVE_TRACKER:

@@ -1,7 +1,7 @@
-interface Game {
+interface GameInformation {
   identifier: string;
   name: string;
   abbreviation?: string;
 }
 
-export default Game;
+export default GameInformation;

@@ -57,10 +57,9 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   public lastSyncAt?: Date;
 
   @EntityColumn({
-    type: DatabaseAttributeType.DATETIME,
-    nullable: true,
+    type: DatabaseAttributeType.INTEGER,
   })
-  public lastChangeAt?: Date;
+  public changeCounter: number;
 
   @ManyToOne(() => GameEntity, {
     nullable: false,

@@ -5,7 +5,6 @@ import {
   GameEntity,
   TrackerEntity,
 } from '../../models/entities';
-import LoggerService from '../logger/logger.service';
 
 class TrackerService {
   private readonly trackerRepository: Repository<TrackerEntity>;
@@ -43,13 +42,6 @@ class TrackerService {
       },
     });
 
-    LoggerService.log(JSON.stringify(tracker));
-    LoggerService.log('CHANNEL');
-    LoggerService.log(JSON.stringify(channel.id));
-    LoggerService.log('GAME');
-
-    LoggerService.log(JSON.stringify(game.id));
-
     return tracker ?? null;
   }
 
@@ -75,12 +67,8 @@ class TrackerService {
         return serverTrackers.find((t) => t.game.id === game.id) ?? null;
       })();
 
-    LoggerService.log(`${JSON.stringify(existingTrackerOnSameServer)}`);
-
     // Add/Update the tracker
     const existingTrackerOnSameChannel = await this.findTracker(channel, game);
-    LoggerService.log(`${JSON.stringify(existingTrackerOnSameChannel)}`);
-
     const tracker = (await this.trackerRepository.save({
       ...(existingTrackerOnSameChannel ?? {}),
       channel,

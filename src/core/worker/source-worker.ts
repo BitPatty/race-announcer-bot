@@ -1,7 +1,8 @@
 import { Connection, In } from 'typeorm';
 import { CronJob } from 'cron';
 
-import { Entrant, SourceConnector } from '../../models/interfaces';
+import { EntrantInformation, SourceConnector } from '../../models/interfaces';
+
 import {
   EntrantEntity,
   GameEntity,
@@ -10,12 +11,10 @@ import {
 } from '../../models/entities';
 import { SourceConnectorIdentifier, TaskIdentifier } from '../../models/enums';
 
-import RedisService from '../redis/redis-service';
-
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database-service';
-
 import LoggerService from '../logger/logger.service';
+import RedisService from '../redis/redis-service';
 
 import RaceTimeGGConnector from '../../connectors/racetimegg/racetimegg.connector';
 import SpeedRunsLiveConnector from '../../connectors/speedrunslive/speedrunslive.connector';
@@ -25,7 +24,6 @@ import Worker from './worker.interface';
 class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   private readonly connector: SourceConnector<T>;
   private databaseConnection: Connection;
-
   private gameSyncJob: CronJob;
   private raceSyncJob: CronJob;
 
@@ -48,12 +46,15 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     LoggerService.log('Synchronizing races');
     const syncTimeStamp = new Date();
 
+    const [raceRepository, gameRepository, entrantRepository, racerRepository] =
+      [
+        this.databaseConnection.getRepository(RaceEntity),
+        this.databaseConnection.getRepository(GameEntity),
+        this.databaseConnection.getRepository(EntrantEntity),
+        this.databaseConnection.getRepository(RacerEntity),
+      ];
+
     const raceList = await this.connector.getActiveRaces();
-    const raceRepository = this.databaseConnection.getRepository(RaceEntity);
-    const gameRepository = this.databaseConnection.getRepository(GameEntity);
-    const entrantRepository =
-      this.databaseConnection.getRepository(EntrantEntity);
-    const racerRepository = this.databaseConnection.getRepository(RacerEntity);
 
     LoggerService.log(`Found ${raceList.length} races to sync`);
     for (const race of raceList) {
@@ -65,6 +66,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           },
         });
 
+        // We only care about registered games
         if (!game) continue;
 
         const racers: RacerEntity[] = [];
@@ -92,6 +94,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         }
 
         // Update the race itself
+        // @TODO: dupe identifiers
         const existingRace = await raceRepository.findOne({
           where: {
             identifier: race.identifier,
@@ -107,6 +110,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
             connector: this.connector.connectorType,
             status: race.status,
             game,
+            changeCounter: existingRace?.changeCounter ?? 0,
           }),
         });
 
@@ -131,7 +135,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
 
           const entrantData = race.entrants.find(
             (e) => e.displayName === racer.displayName,
-          ) as Entrant;
+          ) as EntrantInformation;
 
           const updatedEntrant = await entrantRepository.save({
             ...(existingEntrant ?? {}),
@@ -170,16 +174,20 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         const hasRaceChanges =
           updatedRace.updatedAt !== existingRace?.updatedAt;
 
-        if (hasRaceChanges)
-          LoggerService.log(`Race change detected: ${race.identifier}`);
+        if (hasRaceChanges || hasEntrantChanges) {
+          updatedRace.changeCounter++;
+          LoggerService.log(
+            `Race change detected: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
+          );
+        } else {
+          LoggerService.log(
+            `Unchanged race: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
+          );
+        }
 
         await raceRepository.save({
           ...updatedRace,
           lastSyncAt: syncTimeStamp,
-          lastChangeAt:
-            hasEntrantChanges || hasRaceChanges
-              ? new Date()
-              : updatedRace.lastChangeAt,
         });
       } catch (err) {
         LoggerService.error('Failed to sync race', err);
@@ -199,16 +207,21 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
 
     for (const [idx, game] of gameList.entries()) {
       LoggerService.log(`Updating ${idx}/${gameCount}: ${game.name}`);
-      const existingGame = await gameRepository.find({
+      const existingGame = await gameRepository.findOne({
         where: {
           identifier: game.identifier,
           connector: this.connector.connectorType,
         },
       });
 
+      LoggerService.log(
+        `Found existing entry: ${JSON.stringify(existingGame)}`,
+      );
+
       await gameRepository.save({
         ...(existingGame ?? {}),
         ...game,
+        connector: this.connector.connectorType,
       });
     }
   }

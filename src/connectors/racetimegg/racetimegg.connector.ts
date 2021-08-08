@@ -1,4 +1,9 @@
-import { Entrant, Game, Race, SourceConnector } from '../../models/interfaces';
+import {
+  EntrantInformation,
+  GameInformation,
+  RaceInformation,
+  SourceConnector,
+} from '../../models/interfaces';
 
 import RaceTimeCategory from './interfaces/racetime-category.interface';
 import RaceTimeCategoryList from './interfaces/racetime-category-list.interface';
@@ -66,7 +71,7 @@ class RaceTimeGGConnector
     }
   }
 
-  private racetimeCategoryToGame(category: RaceTimeCategory): Game {
+  private racetimeCategoryToGame(category: RaceTimeCategory): GameInformation {
     return {
       identifier: category.slug,
       name: category.name,
@@ -74,11 +79,15 @@ class RaceTimeGGConnector
     };
   }
 
-  private racetimeRaceToRace(racetimeRace: RaceTimeRace): Promise<Race | null> {
+  private racetimeRaceToRace(
+    racetimeRace: RaceTimeRace,
+  ): Promise<RaceInformation | null> {
     return this.getRaceById(racetimeRace.name);
   }
 
-  private racetimeEntrantToEntrant(racetimeEntrant: RaceTimeEntrant): Entrant {
+  private racetimeEntrantToEntrant(
+    racetimeEntrant: RaceTimeEntrant,
+  ): EntrantInformation {
     return {
       displayName: racetimeEntrant.user.name,
       status: this.raceTimeEntrantStateToStatus(racetimeEntrant.status.value),
@@ -88,7 +97,9 @@ class RaceTimeGGConnector
     };
   }
 
-  private raceTimeRaceDetailToRace(racetimeRace: RaceTimeRaceDetail): Race {
+  private raceTimeRaceDetailToRace(
+    racetimeRace: RaceTimeRaceDetail,
+  ): RaceInformation {
     return {
       identifier: racetimeRace.name,
       goal: racetimeRace.goal?.name,
@@ -106,7 +117,9 @@ class RaceTimeGGConnector
     };
   }
 
-  private async getRaceById(raceIdentifier: string): Promise<Race | null> {
+  private async getRaceById(
+    raceIdentifier: string,
+  ): Promise<RaceInformation | null> {
     const { data } = await axios.get<RaceTimeRaceDetail>(
       `${this.baseUrl}/${raceIdentifier}/data`,
     );
@@ -114,7 +127,7 @@ class RaceTimeGGConnector
     return this.raceTimeRaceDetailToRace(data);
   }
 
-  public async getActiveRaces(): Promise<Race[]> {
+  public async getActiveRaces(): Promise<RaceInformation[]> {
     const { data } = await axios.get<RaceTimeRaceList>(
       `${this.baseUrl}/races/data`,
     );
@@ -123,14 +136,14 @@ class RaceTimeGGConnector
       data.races.map((r) => this.racetimeRaceToRace(r)),
     );
 
-    return res.filter((r) => r != null) as Race[];
+    return res.filter((r) => r != null) as RaceInformation[];
   }
 
-  public getRace(race: Race): Promise<Race | null> {
+  public getRace(race: RaceInformation): Promise<RaceInformation | null> {
     return this.getRaceById(race.identifier);
   }
 
-  public async listGames(): Promise<Game[]> {
+  public async listGames(): Promise<GameInformation[]> {
     const { data } = await axios.get<RaceTimeCategoryList>(
       `${this.baseUrl}/categories/data`,
     );
