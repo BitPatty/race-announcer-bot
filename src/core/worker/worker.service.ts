@@ -6,17 +6,36 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
+  WorkerEgressType,
   WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
+
 import LoggerService from '../logger/logger.service';
-import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
 class WorkerService<T extends WorkerType> {
+  /**
+   * The name of the script file used to start new wokrers
+   *
+   * Use the transpiled name here since that's the one
+   * available to the execution context
+   */
   private readonly scriptFileIdentifier = 'init-worker.js';
+
+  /**
+   * The worker thread instance
+   */
   private worker: WorkerThread;
 
+  /**
+   * True if the worker thread has received
+   * the exit signal
+   */
   private isExiting: boolean;
+
+  /**
+   * True if the process has exited
+   */
   private hasExited: boolean;
 
   public readonly identifier: string = uuidv4();
@@ -49,6 +68,9 @@ class WorkerService<T extends WorkerType> {
     });
   }
 
+  /**
+   * Returns true if the process has not exited
+   */
   public get IsHealthy(): boolean {
     return !this.hasExited;
   }

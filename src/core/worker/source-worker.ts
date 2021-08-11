@@ -1,14 +1,13 @@
 import { Connection, In } from 'typeorm';
 import { CronJob } from 'cron';
 
-import { EntrantInformation, SourceConnector } from '../../models/interfaces';
-
 import {
   EntrantEntity,
   GameEntity,
   RaceEntity,
   RacerEntity,
 } from '../../models/entities';
+import { EntrantInformation, SourceConnector } from '../../models/interfaces';
 import { SourceConnectorIdentifier, TaskIdentifier } from '../../models/enums';
 
 import ConfigService from '../config/config.service';
@@ -42,6 +41,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
   }
 
+  /**
+   * Updates the providers race data to the local database
+   */
   private async syncRaces(): Promise<void> {
     LoggerService.log('Synchronizing races');
     const syncTimeStamp = new Date();
@@ -55,8 +57,8 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       ];
 
     const raceList = await this.connector.getActiveRaces();
-
     LoggerService.log(`Found ${raceList.length} races to sync`);
+
     for (const race of raceList) {
       try {
         const game = await gameRepository.findOne({
@@ -197,6 +199,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     LoggerService.log('Synchronization finished');
   }
 
+  /**
+   * Syncs the game of the provider to the locaal database
+   */
   private async syncGames(): Promise<void> {
     LoggerService.log('Fetching game list');
     const gameList = await this.connector.listGames();
@@ -206,17 +211,13 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     const gameRepository = this.databaseConnection.getRepository(GameEntity);
 
     for (const [idx, game] of gameList.entries()) {
-      LoggerService.log(`Updating ${idx}/${gameCount}: ${game.name}`);
+      LoggerService.log(`Updating ${idx + 1}/${gameCount}: ${game.name}`);
       const existingGame = await gameRepository.findOne({
         where: {
           identifier: game.identifier,
           connector: this.connector.connectorType,
         },
       });
-
-      LoggerService.log(
-        `Found existing entry: ${JSON.stringify(existingGame)}`,
-      );
 
       await gameRepository.save({
         ...(existingGame ?? {}),
@@ -226,7 +227,12 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
   }
 
-  private initRaceSyncJob(): void {
+  /**
+   * Sets up the race sync job
+   *
+   * @param lockTimeInSeconds The duration of which the job should be reserved
+   */
+  private initRaceSyncJob(lockTimeInSeconds = 10): void {
     this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
       try {
         LoggerService.log('Attempting to reserve race sync job');
@@ -234,18 +240,29 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           TaskIdentifier.RACE_SYNC,
           this.connector.connectorType,
           ConfigService.instanceUuid,
-          10,
+          lockTimeInSeconds,
         );
 
-        if (reservedByCurrentInstance) await this.syncRaces();
-        else LoggerService.log(`Could not reserve race sync job`);
+        if (!reservedByCurrentInstance) {
+          LoggerService.log(`Could not reserve race sync job`);
+          return;
+        }
+
+        LoggerService.log(`Successfully reserved race sync job`);
+        await this.syncRaces();
+        LoggerService.log(`Finished races sync`);
       } catch (err) {
         LoggerService.error('Failed to sync races', err);
       }
     });
   }
 
-  private initGameSyncJob(): void {
+  /**
+   * Sets up the game sync job
+   *
+   * @param lockTimeInSeconds The duration of which the job should be reserved
+   */
+  private initGameSyncJob(lockTimeInSeconds = 60 * 60): void {
     this.gameSyncJob = new CronJob(
       ConfigService.gameSyncInterval,
       async () => {
@@ -255,7 +272,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
             TaskIdentifier.GAME_SYNC,
             this.connector.connectorType,
             ConfigService.instanceUuid,
-            60 * 60,
+            lockTimeInSeconds,
           );
 
           if (reservedByCurrentInstance) await this.syncGames();
@@ -272,6 +289,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     );
   }
 
+  /**
+   * Start the workers routine
+   */
   public async start(): Promise<void> {
     this.databaseConnection = await DatabaseService.getConnection();
     this.initRaceSyncJob();
@@ -280,6 +300,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     this.raceSyncJob.start();
   }
 
+  /**
+   * Cleans up used resources
+   */
   public async dispose(): Promise<void> {
     LoggerService.log('Stopping Game Sync');
     this.gameSyncJob.stop();

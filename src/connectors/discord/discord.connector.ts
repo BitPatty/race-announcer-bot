@@ -297,6 +297,7 @@ class DiscordConnector
     const msg = await discordChannel.send({
       embeds: [embed],
     });
+
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
       msg,
       this.client,
@@ -327,6 +328,7 @@ class DiscordConnector
     const msg = await originalMessage.edit({
       embeds: [embed],
     });
+
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
       msg,
       this.client,
@@ -428,6 +430,7 @@ class DiscordConnector
   }
 
   public async postHelpMessage(replyTo: ChatMessage): Promise<void> {
+    LoggerService.debug(`Replying to ${JSON.stringify(replyTo)}`);
     if (!this.client) return;
 
     const originalMessage = await this.findMessage(
@@ -495,20 +498,33 @@ class DiscordConnector
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
+      const intents = [
+        Discord.Intents.FLAGS.GUILDS,
+        Discord.Intents.FLAGS.GUILD_MESSAGES,
+        Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        Discord.Intents.FLAGS.DIRECT_MESSAGES,
+        Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+      ];
+
+      LoggerService.debug(`Using intents: ${JSON.stringify(intents)}`);
+
       this.client = new Discord.Client({
-        intents: [
-          Discord.Intents.FLAGS.GUILD_MESSAGES,
-          Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-          Discord.Intents.FLAGS.DIRECT_MESSAGES,
-          Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-        ],
+        intents,
       });
+
+      this.client.on('debug', (msg) => {
+        LoggerService.debug(`[Discord] Debug: ${msg}`);
+      });
+
       this.client.on('ready', () => {
+        LoggerService.log('[Discord] Ready');
         this._isReady = true;
         resolve();
       });
 
       this.client.on('message', (msg) => {
+        LoggerService.debug('[Discord] Received message');
+        LoggerService.debug(msg.content);
         if (
           !this.client ||
           !this.isBotMention(msg) ||
@@ -518,7 +534,6 @@ class DiscordConnector
           return;
 
         LoggerService.log(`Received message => ${msg.content}`);
-
         const commandKey = DiscordCommandParser.parseCommandKey(msg);
 
         if (!commandKey) {
@@ -538,12 +553,17 @@ class DiscordConnector
       });
 
       this.client.on('disconnect', () => {
+        LoggerService.log('[Discord] Disconnected');
         this._isReady = false;
         this._eventListeners[DestinationEvent.DISCONNECTED].forEach((l) => l());
       });
 
+      this.client.on('warn', (msg) => {
+        LoggerService.debug(`[Discord] warning: ${msg}`);
+      });
+
       this.client.on('error', (err) => {
-        LoggerService.log(`[Discord] error: ${err}`);
+        LoggerService.error(`[Discord] error: ${err}`);
         reject(err);
       });
 

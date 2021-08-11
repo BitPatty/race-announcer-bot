@@ -13,11 +13,11 @@ import LoggerService from './core/logger/logger.service';
 import WorkerService from './core/worker/worker.service';
 
 process.on('rejectionHandled', (promise) => {
-  `Promise rejeciton handled: ${promise}`;
+  LoggerService.debug(`Promise rejection handled: ${promise}`);
 });
 
 process.on('uncaughtException', (err, origin) => {
-  `Uncaught exception: ${err} at ${origin}`;
+  LoggerService.error(`Uncaught exception: ${err} at ${origin}`);
   process.exit(1);
 });
 
