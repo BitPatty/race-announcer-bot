@@ -155,7 +155,9 @@ class DiscordConnector
     LoggerService.debug(`Found channel ${channelId} for message ${messageId}`);
 
     const originalMessage = await channel.messages.fetch(messageId);
-    LoggerService.log(JSON.stringify(originalMessage));
+    LoggerService.debug(
+      `Found original message: ${JSON.stringify(originalMessage)}`,
+    );
 
     if (
       !originalMessage ||
