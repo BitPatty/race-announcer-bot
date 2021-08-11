@@ -127,7 +127,10 @@ class WorkerService<T extends WorkerType> {
 
     // Clean up the worker on SIGTERM and SIGINT
     const disposeAndShutdown = (): void => {
-      if (this.isExiting) return;
+      if (this.isExiting) {
+        LoggerService.log('Thread already exiting');
+        return;
+      }
       this.isExiting = true;
       this.dispose().finally(() => {
         LoggerService.log(`Shutdown successful for ${connector}`);

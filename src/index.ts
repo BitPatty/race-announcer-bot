@@ -5,12 +5,14 @@ import {
   DestinationConnectorIdentifier,
   LogLevel,
   SourceConnectorIdentifier,
+  TaskIdentifier,
   WorkerType,
 } from './models/enums';
 
 import ConfigService from './core/config/config.service';
 import DatabaseService from './core/database/database-service';
 import LoggerService from './core/logger/logger.service';
+import RedisService from './core/redis/redis-service';
 import WorkerService from './core/worker/worker.service';
 
 process.on('rejectionHandled', (promise) => {
@@ -123,12 +125,26 @@ for (const worker of workers) {
 
 // Bootstrap the application routine
 const bootstrap = async (): Promise<void> => {
-  // Migrate the database
-  LoggerService.log(`Migrating database`);
-  const databaseConnection = await DatabaseService.getConnection();
-  await databaseConnection.runMigrations();
-  await DatabaseService.closeConnection();
-  LoggerService.log(`Database migrated`);
+  const migrationTask = await RedisService.tryReserveTask(
+    TaskIdentifier.MIGRATE_DATABASE,
+    'init',
+    ConfigService.instanceUuid,
+    30,
+  );
+
+  if (migrationTask) {
+    // Migrate the database
+    LoggerService.log(`Migrating database`);
+    const databaseConnection = await DatabaseService.getConnection();
+    await databaseConnection.runMigrations();
+    await DatabaseService.closeConnection();
+    LoggerService.log(`Database migrated`);
+    await RedisService.freeTask(
+      TaskIdentifier.MIGRATE_DATABASE,
+      'init',
+      ConfigService.instanceUuid,
+    );
+  }
 
   for (const workerInstance of workerInstances.values()) {
     await workerInstance.startup();

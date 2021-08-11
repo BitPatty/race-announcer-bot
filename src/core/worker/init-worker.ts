@@ -51,40 +51,38 @@ process.env.WORKER_NAME = `${selectedWorkerType}|${providerArg}`;
  * Start the procedure
  */
 const bootstrap = async (): Promise<void> => {
-  parentPort?.postMessage(`[Worker] (${process.env.WORKER_NAME}) Starting..`);
+  parentPort?.postMessage(`Starting..`);
   await workerInstance.start();
-  parentPort?.postMessage(`[Worker] (${process.env.WORKER_NAME}) Started`);
+  parentPort?.postMessage(`Started`);
 };
 
 /**
  * Clean up the worker and ready for exit
  */
 const cleanup = async (): Promise<void> => {
-  LoggerService.log(`[Worker] (${process.env.WORKER_NAME}) Cleaning up`);
+  LoggerService.log(`Cleaning up`);
   await workerInstance.dispose();
-  LoggerService.log(
-    `[Worker] (${process.env.WORKER_NAME}) Finished cleaning up`,
-  );
+  LoggerService.log(`Finished cleaning up`);
   parentPort?.postMessage(WorkerIngressType.CLEANUP_FINISHED);
   parentPort?.close();
 };
 
+parentPort?.on('message', async (msg) => {
+  LoggerService.log(`Received parent message "${msg}"`);
+  if (msg === WorkerEgressType.CLEANUP) {
+    try {
+      await cleanup();
+      process.exit(0);
+    } catch (err) {
+      LoggerService.error(err);
+      process.exit(1);
+    }
+  }
+});
+
 void bootstrap()
   .then(() => {
-    parentPort?.on('message', async (msg) => {
-      LoggerService.log(
-        `[Worker] (${process.env.WORKER_NAME}) Received parent message "${msg}"`,
-      );
-      if (msg === WorkerEgressType.CLEANUP) {
-        try {
-          await cleanup();
-          process.exit(0);
-        } catch (err) {
-          LoggerService.error(err);
-          process.exit(1);
-        }
-      }
-    });
+    LoggerService.log('Bootstrap finished');
   })
   .catch(async (err) => {
     try {
