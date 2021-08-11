@@ -83,7 +83,7 @@ class MessageBuilderUtils {
         ? ` (${this.formatFinalTime(entrant.finalTime ?? 0)})`
         : '';
 
-    return `${entrant.displayName}: ${
+    return `${
       this.entrantStatusIndicatorText[entrant.status]
     }${additionalContext}`;
   }
