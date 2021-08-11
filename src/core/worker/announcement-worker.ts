@@ -245,7 +245,6 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
                   ConfigService.instanceUuid,
                 );
                 resolve();
-                15000;
               }),
             );
 
