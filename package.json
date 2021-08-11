@@ -9,7 +9,8 @@
     "dev": "export $(cat .env | xargs) && tsc-watch --build --incremental --noClear --compiler ttypescript/bin/tsc --onSuccess \"node ./dist/src/index.js\"",
     "format": "prettier --write \"{src,test}/**/*.ts\" ",
     "lint": "eslint --fix \"{test,src}/**/*.{js,ts}\"",
-    "test": "jest --verbose --runInBand --coverage"
+    "test": "jest --verbose --runInBand --coverage",
+    "migration:generate": "bash ./scripts/generate-migration.sh"
   },
   "dependencies": {
     "@types/uuid": "^8.3.1",

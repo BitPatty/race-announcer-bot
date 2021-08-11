@@ -9,6 +9,7 @@ import {
 } from './models/enums';
 
 import ConfigService from './core/config/config.service';
+import DatabaseService from './core/database/database-service';
 import LoggerService from './core/logger/logger.service';
 import WorkerService from './core/worker/worker.service';
 
@@ -122,6 +123,13 @@ for (const worker of workers) {
 
 // Bootstrap the application routine
 const bootstrap = async (): Promise<void> => {
+  // Migrate the database
+  LoggerService.log(`Migrating database`);
+  const databaseConnection = await DatabaseService.getConnection();
+  await databaseConnection.runMigrations();
+  await DatabaseService.closeConnection();
+  LoggerService.log(`Database migrated`);
+
   for (const workerInstance of workerInstances.values()) {
     await workerInstance.startup();
   }

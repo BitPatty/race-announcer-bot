@@ -37,6 +37,7 @@ class ConfigService {
           '*.entity.{ts,js}',
         ),
       ],
+      migrations: [joinPaths(__dirname, '..', '..', 'migrations', '*.js')],
       logging: this.environmentConfiguration.DATABASE_LOGGING,
     } as ConnectionOptions;
   }
@@ -91,6 +92,10 @@ class ConfigService {
     return this.environmentConfiguration.LOG_LEVEL as LogLevel;
   }
 
+  public static get logPrettyPrint(): boolean {
+    return this.environmentConfiguration.LOG_PRETTY_PRINT as unknown as boolean;
+  }
+
   public static get instanceUuid(): string {
     return this._instanceUuid;
   }
@@ -129,6 +134,7 @@ class ConfigService {
       RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       LOG_LEVEL: Joi.string().default(LogLevel.DEBUG),
+      LOG_PRETTY_PRINT: Joi.boolean().default(false),
       WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),
       REDIS_HOST: Joi.string().required(),
       REDIS_PASSWORD: Joi.string().required(),

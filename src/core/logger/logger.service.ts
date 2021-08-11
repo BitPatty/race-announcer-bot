@@ -8,7 +8,7 @@ import ConfigService from '../config/config.service';
 class LoggerService {
   private static readonly logger = pino({
     level: ConfigService.logLevel,
-    prettyPrint: true,
+    prettyPrint: ConfigService.logPrettyPrint,
   });
 
   private static get logPrefix(): string {
