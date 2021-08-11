@@ -37,6 +37,11 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   })
   public goal: string;
 
+  @EntityColumn({
+    nullable: true,
+  })
+  public url?: string;
+
   @EntityColumn()
   public identifier: string;
 

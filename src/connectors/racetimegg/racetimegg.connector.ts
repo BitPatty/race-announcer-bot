@@ -27,8 +27,6 @@ import axios from 'axios';
 class RaceTimeGGConnector
   implements SourceConnector<SourceConnectorIdentifier.RACETIME_GG>
 {
-  private readonly baseUrl = 'https://racetime.gg';
-
   public get connectorType(): SourceConnectorIdentifier.RACETIME_GG {
     return SourceConnectorIdentifier.RACETIME_GG;
   }
@@ -121,7 +119,7 @@ class RaceTimeGGConnector
     raceIdentifier: string,
   ): Promise<RaceInformation | null> {
     const { data } = await axios.get<RaceTimeRaceDetail>(
-      `${this.baseUrl}/${raceIdentifier}/data`,
+      `${ConfigService.raceTimeBaseUrl}/${raceIdentifier}/data`,
     );
 
     return this.raceTimeRaceDetailToRace(data);
@@ -129,7 +127,7 @@ class RaceTimeGGConnector
 
   public async getActiveRaces(): Promise<RaceInformation[]> {
     const { data } = await axios.get<RaceTimeRaceList>(
-      `${this.baseUrl}/races/data`,
+      `${ConfigService.raceTimeBaseUrl}/races/data`,
     );
 
     const res = await Promise.all(
@@ -145,7 +143,7 @@ class RaceTimeGGConnector
 
   public async listGames(): Promise<GameInformation[]> {
     const { data } = await axios.get<RaceTimeCategoryList>(
-      `${this.baseUrl}/categories/data`,
+      `${ConfigService.raceTimeBaseUrl}/categories/data`,
     );
     return data.categories
       .filter((c) => c.name && c.name.length > 0 && c.short_name !== '')

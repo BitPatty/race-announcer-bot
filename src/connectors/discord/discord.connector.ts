@@ -234,6 +234,8 @@ class DiscordConnector
     if (race.url && Joi.string().uri().validate(race.url).error == null)
       embed = embed.setURL(race.url);
 
+    LoggerService.debug(`${race.url}`);
+
     // Set the cover as thumbnail if it exists
     if (
       race.game.imageUrl &&

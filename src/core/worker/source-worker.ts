@@ -109,6 +109,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           ...new RaceEntity({
             identifier: race.identifier,
             goal: race.goal ?? '-',
+            url: race.url,
             connector: this.connector.connectorType,
             status: race.status,
             game,
