@@ -4,7 +4,6 @@ import EntrantEntity from './entrant.entity';
 import GameEntity from './game.entity';
 import RaceEntity from './race.entity';
 import RacerEntity from './racer.entity';
-import TaskLogEntity from './task-log.entity';
 import TrackerEntity from './tracker.entity';
 
 export {
@@ -14,6 +13,5 @@ export {
   GameEntity,
   RaceEntity,
   RacerEntity,
-  TaskLogEntity,
   TrackerEntity,
 };

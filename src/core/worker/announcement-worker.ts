@@ -121,12 +121,14 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
 
       for (const activeAnnouncement of activeAnnouncements) {
         LoggerService.log(`Synching announcement ${activeAnnouncement.id}`);
+
         if (activeAnnouncement.failedUpdateAttempts > 5) {
           LoggerService.debug(
             'Announcement sync exceeded max failed update attempts',
           );
           continue;
         }
+
         if (activeAnnouncement.changeCounter === activeRace.changeCounter) {
           LoggerService.debug(
             `Change counter unchanged, skipping announcement`,
@@ -139,6 +141,13 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
           const originalMessage: ChatMessage = JSON.parse(
             activeAnnouncement.previousMessage,
           );
+
+          const botHasRequiredPermissions =
+            await this.connector.botHasRequiredPermissions(
+              originalMessage.channel,
+            );
+
+          if (!botHasRequiredPermissions) continue;
 
           const updatedMessage = await this.connector.updateRaceMessage(
             originalMessage,
@@ -178,21 +187,32 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       );
 
       for (const trackerWithoutAnnouncement of trackersWithoutAnnouncements) {
-        const postedAnnouncement = await this.connector.postRaceMessage(
-          trackerWithoutAnnouncement.channel,
-          this.raceEntityToRaceInformation(activeRace, entrants),
-        );
+        try {
+          const botHasRequiredPermissions =
+            await this.connector.botHasRequiredPermissions(
+              trackerWithoutAnnouncement.channel,
+            );
 
-        await this.databaseConnection.getRepository(AnnouncementEntity).save(
-          new AnnouncementEntity({
-            changeCounter: activeRace.changeCounter,
-            tracker: trackerWithoutAnnouncement,
-            previousMessage: JSON.stringify(postedAnnouncement),
-            failedUpdateAttempts: 0,
-            lastUpdated: new Date(),
-            race: activeRace,
-          }),
-        );
+          if (!botHasRequiredPermissions) continue;
+
+          const postedAnnouncement = await this.connector.postRaceMessage(
+            trackerWithoutAnnouncement.channel,
+            this.raceEntityToRaceInformation(activeRace, entrants),
+          );
+
+          await this.databaseConnection.getRepository(AnnouncementEntity).save(
+            new AnnouncementEntity({
+              changeCounter: activeRace.changeCounter,
+              tracker: trackerWithoutAnnouncement,
+              previousMessage: JSON.stringify(postedAnnouncement),
+              failedUpdateAttempts: 0,
+              lastUpdated: new Date(),
+              race: activeRace,
+            }),
+          );
+        } catch (err) {
+          LoggerService.error(err);
+        }
       }
     }
   }

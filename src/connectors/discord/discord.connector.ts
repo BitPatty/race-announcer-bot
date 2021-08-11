@@ -81,6 +81,7 @@ class DiscordConnector
     if (!permissions.has('SEND_MESSAGES')) return false;
     if (!permissions.has('VIEW_CHANNEL')) return false;
     if (!permissions.has('ADD_REACTIONS')) return false;
+    if (!permissions.has('EMBED_LINKS')) return false;
 
     return true;
   }
