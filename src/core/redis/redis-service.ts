@@ -54,7 +54,7 @@ class RedisService {
   ): Promise<void> {
     LoggerService.debug(`Removing key ${taskIdentifier}_${postfix}`);
 
-    const existingValue = await new Promise<string>((resolve, reject) =>
+    const existingValue = await new Promise<string>((resolve) =>
       this.client.get(`${taskIdentifier}_${postfix}`, (err, data) => {
         if (err) {
           LoggerService.error('Something went wrong', err);
