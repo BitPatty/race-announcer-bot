@@ -15,8 +15,9 @@ import {
 } from '../../models/enums';
 
 import { parseEnumValue } from '../../utils/enum.utils';
-import DiscordCommandKey from './discord-command-key.enum';
 import LoggerService from '../../core/logger/logger.service';
+
+import DiscordCommandKey from './discord-command-key.enum';
 
 class DiscordCommandParser {
   /**

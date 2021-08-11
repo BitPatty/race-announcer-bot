@@ -1,3 +1,6 @@
+import * as Discord from 'discord.js';
+import * as Joi from 'joi';
+
 import {
   ChatChannel,
   ChatMessage,
@@ -7,6 +10,7 @@ import {
   TextReply,
   TrackerListReply,
 } from '../../models/interfaces';
+import DestinationEventListenerMap from '../../models/interfaces/connectors/destination-event-listener-map.interface';
 
 import {
   DestinationConnectorIdentifier,
@@ -16,16 +20,13 @@ import {
   SourceConnectorIdentifier,
 } from '../../models/enums';
 
-import * as Discord from 'discord.js';
-import * as Joi from 'joi';
-
-import DestinationEventListenerMap from '../../models/interfaces/connectors/destination-event-listener-map.interface';
-
 import { TrackerEntity } from '../../models/entities';
+
 import ConfigService from '../../core/config/config.service';
-import DiscordCommandParser from './discord-command-parser';
 import LoggerService from '../../core/logger/logger.service';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
+
+import DiscordCommandParser from './discord-command-parser';
 
 class DiscordConnector
   implements DestinationConnector<DestinationConnectorIdentifier.DISCORD>

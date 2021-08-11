@@ -6,6 +6,7 @@ import {
   RaceInformation,
   SourceConnector,
 } from '../../models/interfaces';
+
 import SRLEntrant from './interfaces/srl-entrant.interface';
 import SRLGame from './interfaces/srl-game.interface';
 import SRLGameList from './interfaces/srl-game-list.interface';

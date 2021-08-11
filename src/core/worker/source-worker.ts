@@ -7,7 +7,9 @@ import {
   RaceEntity,
   RacerEntity,
 } from '../../models/entities';
+
 import { EntrantInformation, SourceConnector } from '../../models/interfaces';
+
 import { SourceConnectorIdentifier, TaskIdentifier } from '../../models/enums';
 
 import ConfigService from '../config/config.service';

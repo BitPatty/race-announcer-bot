@@ -3,10 +3,10 @@ import { parentPort } from 'worker_threads';
 import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
+  WorkerEgressType,
   WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
-import WorkerEgressType from '../../models/enums/worker-egress-type.enum';
 
 import AnnouncementWorker from './announcement-worker';
 import LoggerService from '../logger/logger.service';

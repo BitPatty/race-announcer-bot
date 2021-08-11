@@ -1,3 +1,6 @@
+import { Connection, MoreThan } from 'typeorm';
+import { CronJob } from 'cron';
+
 import {
   AnnouncementEntity,
   EntrantEntity,
@@ -5,25 +8,28 @@ import {
   RaceEntity,
   TrackerEntity,
 } from '../../models/entities';
+
 import {
   ChatMessage,
   DestinationConnector,
   RaceInformation,
 } from '../../models/interfaces';
-import { Connection, MoreThan } from 'typeorm';
-import { CronJob } from 'cron';
+
 import {
   DestinationConnectorIdentifier,
   RaceStatus,
   TaskIdentifier,
 } from '../../models/enums';
+
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database-service';
-import DateTimeUtils from '../../utils/date-time.utils';
-import DiscordConnector from '../../connectors/discord/discord.connector';
 import LoggerService from '../logger/logger.service';
 import RedisService from '../redis/redis-service';
 import TrackerService from '../tracker/tracker.service';
+
+import DateTimeUtils from '../../utils/date-time.utils';
+import DiscordConnector from '../../connectors/discord/discord.connector';
+
 import Worker from './worker.interface';
 
 class AnnouncementWorker<T extends DestinationConnectorIdentifier>

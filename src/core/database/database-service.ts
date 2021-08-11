@@ -1,6 +1,8 @@
 import { Connection, createConnection } from 'typeorm';
 import { Lock } from 'lock';
+
 import { LockIdentifier } from '../../models/enums';
+
 import ConfigService from '../config/config.service';
 import LoggerService from '../logger/logger.service';
 

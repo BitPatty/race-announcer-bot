@@ -1,5 +1,7 @@
 import * as redis from 'redis';
+
 import { TaskIdentifier } from '../../models/enums';
+
 import ConfigService from '../config/config.service';
 import LoggerService from '../logger/logger.service';
 

@@ -17,6 +17,7 @@ import {
   RaceStatus,
   SourceConnectorIdentifier,
 } from '../../models/enums';
+
 import RaceTimeEntrantStatus from './enums/racetime-entrant-status.enum';
 import RaceTimeRaceStatus from './enums/racetime-race-status.enum';
 

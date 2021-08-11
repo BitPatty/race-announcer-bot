@@ -7,6 +7,7 @@ import {
   ListTrackersCommand,
   RemoveTrackerCommand,
 } from '../../models/interfaces';
+
 import {
   CommandType,
   DestinationConnectorIdentifier,
@@ -14,6 +15,7 @@ import {
   ReplyType,
   TaskIdentifier,
 } from '../../models/enums';
+
 import {
   CommunicationChannelEntity,
   GameEntity,
@@ -22,10 +24,12 @@ import {
 
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database-service';
-import DiscordConnector from '../../connectors/discord/discord.connector';
 import LoggerService from '../logger/logger.service';
 import RedisService from '../redis/redis-service';
 import TrackerService from '../tracker/tracker.service';
+
+import DiscordConnector from '../../connectors/discord/discord.connector';
+
 import Worker from './worker.interface';
 
 class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
