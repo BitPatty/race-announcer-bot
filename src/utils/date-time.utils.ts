@@ -5,7 +5,7 @@ class DateTimeUtils {
     timespan: string | null,
   ): number | null {
     if (!timespan) return null;
-    return moment.duration(timespan).asSeconds();
+    return Math.floor(moment.duration(timespan).asSeconds());
   }
 
   public static subtractHours(date: Date, hours: number): Date {
