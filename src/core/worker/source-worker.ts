@@ -102,7 +102,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         // Dupe identifiers are technically possible on SRL,
         // maybe even on RaceTime. Filtering 1 week old races
         // should avoid any collisions.
-        createdAt: LessThan(DateTimeUtils.subtractHours(new Date(), 24 * 7)),
+        createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 24 * 7)),
         identifier: race.identifier,
         connector: this.connector.connectorType,
       },
