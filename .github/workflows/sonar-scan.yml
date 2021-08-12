@@ -9,13 +9,15 @@ on:
 jobs:
   sonarcloud:
     name: SonarCloud
+    if: ${{ github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    environment: 'sonar-scan'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
