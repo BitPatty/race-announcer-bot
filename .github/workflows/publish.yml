@@ -17,9 +17,11 @@ jobs:
       - name: Extract version info
         run: |
           PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\", ]//g')
-          echo "IMAGE_VERSION=bitpatty/raceannouncerbot:${PACKAGE_VERSION}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=ghcr.io/bitpatty/race-announcer-bot:${PACKAGE_VERSION}" >> $GITHUB_ENV
           echo "Using Version: ${PACKAGE_VERSION}"
       - name: Create a new build
-        run: docker build -t "${{ env.IMAGE_VERSION }}" -f ./dockerfiles/Production.Dockerfile .
+        run: docker build -t "${{ env.IMAGE_NAME }}" -f ./dockerfiles/Production.Dockerfile .
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }}
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push Image to registry
+        run: docker push ${{ env.IMAGE_NAME }}
