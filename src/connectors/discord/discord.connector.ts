@@ -443,7 +443,6 @@ class DiscordConnector
 
     if (message instanceof Discord.MessageEmbed) {
       await originalMessage.reply({
-        content: `<@${to.author.identifier}>`,
         embeds: [message],
       });
       return;
