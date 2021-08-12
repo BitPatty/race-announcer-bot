@@ -74,7 +74,7 @@ class RaceTimeGGConnector
     return {
       identifier: category.slug,
       name: category.name,
-      abbreviation: category.short_name,
+      abbreviation: category.slug,
     };
   }
 
