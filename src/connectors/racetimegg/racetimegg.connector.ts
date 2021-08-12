@@ -65,6 +65,8 @@ class RaceTimeGGConnector
         return RaceStatus.ENTRY_OPEN;
       case RaceTimeRaceStatus.PENDING:
         return RaceStatus.ENTRY_CLOSED;
+      case RaceTimeRaceStatus.INVITATIONAL:
+        return RaceStatus.INVITATIONAL;
       default:
         return RaceStatus.UNKNOWN;
     }

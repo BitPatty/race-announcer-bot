@@ -12,6 +12,7 @@ class MessageBuilderUtils {
     [RaceStatus.FINISHED]: '#FF0000',
     [RaceStatus.OVER]: '#FF0000',
     [RaceStatus.CANCELLED]: '#FF0000',
+    [RaceStatus.INVITATIONAL]: '#0092A6',
   };
 
   private static readonly raceStatusIndicatorText: {
@@ -24,6 +25,7 @@ class MessageBuilderUtils {
     [RaceStatus.FINISHED]: 'Finished',
     [RaceStatus.OVER]: 'Over',
     [RaceStatus.CANCELLED]: 'Cancelled',
+    [RaceStatus.INVITATIONAL]: 'Invitational',
   };
 
   private static readonly entrantStatusIndicatorText: {

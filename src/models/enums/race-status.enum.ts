@@ -6,6 +6,7 @@ enum RaceStatus {
   FINISHED = 'finished',
   OVER = 'over',
   CANCELLED = 'cancelled',
+  INVITATIONAL = 'invitational',
 }
 
 export default RaceStatus;
