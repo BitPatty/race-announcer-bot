@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/develop' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
     permissions:
       packages: write
       contents: read
