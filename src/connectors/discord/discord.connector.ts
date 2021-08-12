@@ -369,6 +369,18 @@ class DiscordConnector
     message: Discord.Message,
     reactionType: ReactionType,
   ): Promise<void> {
+    switch (reactionType) {
+      case ReactionType.POSITIVE:
+        await message.react(DiscordEmoji.WHITE_CHECKMARK);
+        break;
+      case ReactionType.NEGATIVE:
+        await message.react(DiscordEmoji.RED_X);
+        break;
+      case ReactionType.UNKNOWN_ACTION:
+        await message.react(DiscordEmoji.RED_QUESTIONMARK);
+        break;
+    }
+
     if (reactionType === ReactionType.POSITIVE)
       await message.react(DiscordEmoji.WHITE_CHECKMARK);
     else await message.react(DiscordEmoji.RED_X);
@@ -553,7 +565,7 @@ class DiscordConnector
         resolve();
       });
 
-      this.client.on('message', (msg) => {
+      this.client.on('message', async (msg) => {
         LoggerService.debug('[Discord] Received message');
         LoggerService.debug(msg.content);
 
@@ -570,6 +582,7 @@ class DiscordConnector
 
         if (!commandKey) {
           LoggerService.error(`Failed to parse command key`);
+          await this.react(msg, ReactionType.UNKNOWN_ACTION);
           return;
         }
 

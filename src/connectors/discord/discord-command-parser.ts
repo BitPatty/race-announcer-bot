@@ -110,6 +110,10 @@ class DiscordCommandParser {
     if (msg.mentions.channels.size !== 1) return null;
     const channelMention = msg.mentions.channels.first() as Discord.TextChannel;
 
+    // Make sure people can't add trackers to different servers
+    // than the one the command was posted
+    if (channelMention.guildId !== msg.guildId) return null;
+
     const messageWithoutMentions = this.removeMentions(msg.content);
     if (messageWithoutMentions.split(' ').length !== 3) return null;
 
