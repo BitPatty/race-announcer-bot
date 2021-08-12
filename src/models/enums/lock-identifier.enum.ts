@@ -1,5 +1,5 @@
 enum LockIdentifier {
-  DATABASE_CONNECTION = 'DATABASE_CONNECTION',
+  DATABASE_CONNECTION = 'database_connection',
 }
 
 export default LockIdentifier;

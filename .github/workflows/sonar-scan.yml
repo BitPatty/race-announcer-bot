@@ -1,11 +1,8 @@
 name: Sonar Scan
 on:
-  push:
-    branches:
-      - master
-      - develop
-  pull_request:
-    types: [opened, synchronize, reopened]
+  - push
+  - pull_request:
+      types: [opened, synchronize, reopened]
 jobs:
   sonarcloud:
     name: SonarCloud

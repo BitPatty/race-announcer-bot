@@ -8,13 +8,17 @@ import {
   TextReply,
   TrackerListReply,
 } from '..';
+import { ReactionReply } from '../chat';
 
 interface DestinationConnector<T extends DestinationConnectorIdentifier> {
   get connectorType(): T;
 
   get isReady(): boolean;
 
-  reply(to: ChatMessage, content: TextReply | TrackerListReply): Promise<void>;
+  reply(
+    to: ChatMessage,
+    content: TextReply | TrackerListReply | ReactionReply,
+  ): Promise<void>;
 
   postRaceMessage(
     channel: ChatChannel,

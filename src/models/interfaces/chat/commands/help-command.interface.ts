@@ -1,8 +1,8 @@
-import { CommandType } from '../../../enums';
+import { BotCommandType } from '../../../enums';
 import ChatMessage from '../chat-message.interface';
 
 interface HelpCommand {
-  type: CommandType.HELP;
+  type: BotCommandType.HELP;
   message: ChatMessage;
 }
 

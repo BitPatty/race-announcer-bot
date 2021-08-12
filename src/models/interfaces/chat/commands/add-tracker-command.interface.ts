@@ -1,8 +1,8 @@
-import { CommandType, SourceConnectorIdentifier } from '../../../enums';
+import { BotCommandType, SourceConnectorIdentifier } from '../../../enums';
 import ChatMessage from '../chat-message.interface';
 
 interface AddTrackerCommand {
-  type: CommandType.ADD_TRACKER;
+  type: BotCommandType.ADD_TRACKER;
   sourceIdentifier: SourceConnectorIdentifier;
   gameIdentifier: string;
   targetChannelIdentifier: string;

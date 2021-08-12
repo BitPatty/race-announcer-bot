@@ -159,23 +159,6 @@ class TrackerService {
         isActive: false,
       });
   }
-
-  /**
-   * Find trackers for the specified game
-   * @param game The game
-   * @returns The trackers mapped to this game
-   */
-  public findTrackersByGame(game: GameEntity): Promise<TrackerEntity[]> {
-    return this.trackerRepository.find({
-      relations: [
-        nameof<TrackerEntity>((t) => t.game),
-        nameof<TrackerEntity>((t) => t.channel),
-      ],
-      where: {
-        game,
-      },
-    });
-  }
 }
 
 export default TrackerService;

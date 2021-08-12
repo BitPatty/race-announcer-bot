@@ -1,8 +1,8 @@
-import { CommandType, SourceConnectorIdentifier } from '../../../enums';
+import { BotCommandType, SourceConnectorIdentifier } from '../../../enums';
 import ChatMessage from '../chat-message.interface';
 
 interface RemoveTrackerCommand {
-  type: CommandType.REMOVE_TRACKER;
+  type: BotCommandType.REMOVE_TRACKER;
   sourceIdentifier: SourceConnectorIdentifier;
   channelIdentifier: string;
   serverIdentifier: string | null;

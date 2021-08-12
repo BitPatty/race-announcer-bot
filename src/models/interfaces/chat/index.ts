@@ -2,7 +2,7 @@ import ChatChannel from './chat-channel.interface';
 import ChatMessage from './chat-message.interface';
 import ChatUser from './chat-user.interface';
 
-import { TextReply, TrackerListReply } from './replies';
+import { ReactionReply, TextReply, TrackerListReply } from './replies';
 
 import {
   AddTrackerCommand,
@@ -15,6 +15,7 @@ export {
   ChatChannel,
   ChatMessage,
   ChatUser,
+  ReactionReply,
   TextReply,
   TrackerListReply,
   AddTrackerCommand,

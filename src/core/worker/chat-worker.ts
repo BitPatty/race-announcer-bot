@@ -9,9 +9,10 @@ import {
 } from '../../models/interfaces';
 
 import {
-  CommandType,
+  BotCommandType,
   DestinationConnectorIdentifier,
   DestinationEvent,
+  ReactionType,
   ReplyType,
   TaskIdentifier,
 } from '../../models/enums';
@@ -64,18 +65,12 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
           connector: Like(cmd.sourceIdentifier),
         },
       });
-
     if (!game) return null;
 
     const channel = await this.connector.findChannel(
       cmd.targetChannelIdentifier,
     );
-
     if (!channel) return null;
-
-    const hasPermissions = await this.connector.botHasRequiredPermissions(
-      channel,
-    );
 
     const existingDatabaseChannel = await this.databaseConnection
       .getRepository(CommunicationChannelEntity)
@@ -90,10 +85,10 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       .getRepository(CommunicationChannelEntity)
       .save({
         ...new CommunicationChannelEntity({
+          name: channel.name ?? null,
           identifier: channel.identifier,
           serverIdentifier: channel.serverIdentifier,
           connector: this.connector.connectorType,
-          permissionCheckSuccessful: hasPermissions,
           isActive: true,
           type: channel.type,
         }),
@@ -141,26 +136,24 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       | HelpCommand,
   ): Promise<void> {
     switch (cmd.type) {
-      case CommandType.ADD_TRACKER: {
+      case BotCommandType.ADD_TRACKER: {
         const tracker = await this.addTracker(cmd);
         await this.connector.reply(cmd.message, {
-          type: ReplyType.TEXT,
-          message:
-            tracker == null
-              ? 'Oops'
-              : `Added a tracker for ${tracker.game.name}`,
+          type: ReplyType.REACTION,
+          reaction:
+            tracker == null ? ReactionType.NEGATIVE : ReactionType.POSITIVE,
         });
         break;
       }
-      case CommandType.REMOVE_TRACKER: {
+      case BotCommandType.REMOVE_TRACKER: {
         await this.removeTracker(cmd);
         await this.connector.reply(cmd.message, {
-          type: ReplyType.TEXT,
-          message: 'ok',
+          type: ReplyType.REACTION,
+          reaction: ReactionType.POSITIVE,
         });
         break;
       }
-      case CommandType.LIST_TRACKERS: {
+      case BotCommandType.LIST_TRACKERS: {
         const trackers = cmd.serverIdentifier
           ? await this.trackerService.findTrackersByServer(cmd.serverIdentifier)
           : await this.trackerService.findTrackersByChannel(
@@ -172,7 +165,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
         });
         break;
       }
-      case CommandType.HELP: {
+      case BotCommandType.HELP: {
         await this.connector.postHelpMessage(cmd.message);
         break;
       }
