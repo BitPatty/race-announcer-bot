@@ -253,7 +253,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
                   ConfigService.instanceUuid,
                 );
                 resolve();
-              }),
+              }, 10000),
             );
 
             throw err;
