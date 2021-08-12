@@ -73,7 +73,7 @@ class DiscordCommandParser {
    */
   private static removeMentions(msg: string): string {
     return msg
-      .replace(/<(?:@!|#)[0-9]+>/g, '')
+      .replace(/<(?:@!|@|#)[0-9]+>/g, '')
       .replace(/\s+/g, ' ')
       .trim();
   }
