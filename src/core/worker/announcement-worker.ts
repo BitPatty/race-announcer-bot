@@ -245,6 +245,8 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
             await this.updateAnnouncements();
           } catch (err) {
             LoggerService.error(err);
+            throw err;
+          } finally {
             await new Promise<void>((resolve) =>
               setTimeout(async () => {
                 await RedisService.freeTask(
@@ -255,8 +257,6 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
                 resolve();
               }, 10000),
             );
-
-            throw err;
           }
         } catch (err) {
           LoggerService.error(`Failed to sync announcements`, err);
