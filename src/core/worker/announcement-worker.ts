@@ -236,8 +236,10 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
             60,
           );
 
-          if (!reservedByCurrentInstance)
+          if (!reservedByCurrentInstance) {
             LoggerService.log(`Could not reserve annoucement sync job`);
+            return;
+          }
 
           try {
             await this.updateAnnouncements();
