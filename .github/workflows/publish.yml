@@ -1,0 +1,25 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - 'develop'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Extract version info
+        run: |
+          PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\", ]//g')
+          echo "IMAGE_VERSION=BitPatty/RaceAnnouncerBot:${PACKAGE_VERSION}" >> $GITHUB_ENV
+          echo "Using Version: ${PACKAGE_VERSION}"
+      - name: Create a new build
+        run: docker build -t "${{ env.IMAGE_VERSION }}" -f ./dockerfiles/Production.Dockerfile .
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }}

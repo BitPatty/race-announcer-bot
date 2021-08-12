@@ -31,5 +31,15 @@ RUN npm ci
 # Create a new build
 RUN npm run build
 
-# Run the linter
-RUN npm run lint
+# Replace dependencies with prod dependencies
+RUN rm -rf node_modules
+ENV NODE_ENV="production"
+RUN npm ci --production
+
+FROM node:16.6.0-alpine3.14 as final
+
+WORKDIR /app
+COPY --from=install /app/dist/src /app
+COPY --from=install /app/node_modules /app/node_modules
+
+CMD [ "node", "index.js" ]
