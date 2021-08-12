@@ -72,6 +72,8 @@ class DiscordCommandParser {
    * @returns The message without mentions
    */
   private static removeMentions(msg: string): string {
+    // User mentions can have the format of <@!123...> or <@123...>
+    // Channel mentions start with a #
     return msg
       .replace(/<(?:@!|@|#)[0-9]+>/g, '')
       .replace(/\s+/g, ' ')
@@ -106,7 +108,6 @@ class DiscordCommandParser {
     client: Discord.Client,
   ): AddTrackerCommand | null {
     if (msg.mentions.channels.size !== 1) return null;
-
     const channelMention = msg.mentions.channels.first() as Discord.TextChannel;
 
     const messageWithoutMentions = this.removeMentions(msg.content);
