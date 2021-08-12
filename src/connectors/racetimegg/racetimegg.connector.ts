@@ -99,9 +99,13 @@ class RaceTimeGGConnector
   private raceTimeRaceDetailToRace(
     racetimeRace: RaceTimeRaceDetail,
   ): RaceInformation {
+    const raceGoal = [racetimeRace.goal?.name, racetimeRace.info]
+      .filter((g) => g != null && g.trim().length > 0)
+      .join(' | ');
+
     return {
       identifier: racetimeRace.name,
-      goal: racetimeRace.goal?.name,
+      goal: raceGoal,
       url: `${ConfigService.raceTimeBaseUrl}${racetimeRace.url}`,
       game: {
         identifier: racetimeRace.category.slug,
