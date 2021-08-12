@@ -52,7 +52,6 @@
     "**/node_modules": true,
     "**/tmp": true
   },
-  "telemetry.enableCrashReporter": false,
   "todohighlight.keywords": [
     "@TODO"
   ],

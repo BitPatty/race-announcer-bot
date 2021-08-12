@@ -1,4 +1,4 @@
-import { Connection, In, MoreThan, Not, Repository } from 'typeorm';
+import { Connection, In, LessThan, MoreThan, Not, Repository } from 'typeorm';
 import { CronJob } from 'cron';
 
 import {
@@ -97,9 +97,12 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
 
     // Update the race itself
-    // @TODO: dupe identifiers are possible
     const existingRace = await raceRepository.findOne({
       where: {
+        // Dupe identifiers are technically possible on SRL,
+        // maybe even on RaceTime. Filtering 1 week old races
+        // should avoid any collisions.
+        createdAt: LessThan(DateTimeUtils.subtractHours(new Date(), 24 * 7)),
         identifier: race.identifier,
         connector: this.connector.connectorType,
       },

@@ -351,17 +351,13 @@ class DiscordConnector
 
     const activeTrackerList = items
       .filter((i) => i.isActive)
-      .map((i) => `${i.game.name} in <#${i.channel.identifier}>`)
+      .map(
+        (i) =>
+          `${i.game.name} (${i.game.connector}) in <#${i.channel.identifier}>`,
+      )
       .join('\r\n');
 
-    const inactiveTrackerList = items
-      .filter((i) => !i.isActive)
-      .map((i) => `${i.game.name} in <#${i.channel.identifier}>`)
-      .join('\r\n');
-
-    return embed
-      .addField('Active Trackers', activeTrackerList || '-')
-      .addField('Inactive Trackers', inactiveTrackerList || '-');
+    return embed.addField('Active Trackers', activeTrackerList || '-');
   }
 
   /**

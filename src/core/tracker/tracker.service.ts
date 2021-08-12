@@ -68,26 +68,14 @@ class TrackerService {
       })();
 
     // Add/Update the tracker
-    const existingTrackerOnSameChannel = await this.findTracker(channel, game);
+    const existingTrackerOnSameChannel =
+      existingTrackerOnSameServer ?? (await this.findTracker(channel, game));
     const tracker = (await this.trackerRepository.save({
       ...(existingTrackerOnSameChannel ?? {}),
       channel,
       game,
       isActive: true,
     })) as TrackerEntity;
-
-    // Remove the previous tracker if it exists
-    // @TODO: Can still cause the same tracker to be active in multiple channels
-    // (deactivate, add, restore)
-    if (
-      existingTrackerOnSameServer &&
-      tracker.id !== existingTrackerOnSameServer.id
-    ) {
-      await this.trackerRepository.save({
-        ...existingTrackerOnSameServer,
-        isActive: false,
-      });
-    }
 
     return this.trackerRepository.findOne(tracker.id, {
       relations: this.commonRelations,
@@ -141,7 +129,9 @@ class TrackerService {
     return this.trackerRepository.find({
       relations: this.commonRelations,
       where: {
-        channel: In(channels.map((c) => c.id)),
+        channel: {
+          id: In(channels.map((c) => c.id)),
+        },
       },
     });
   }
