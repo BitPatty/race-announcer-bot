@@ -380,10 +380,6 @@ class DiscordConnector
         await message.react(DiscordEmoji.RED_QUESTIONMARK);
         break;
     }
-
-    if (reactionType === ReactionType.POSITIVE)
-      await message.react(DiscordEmoji.WHITE_CHECKMARK);
-    else await message.react(DiscordEmoji.RED_X);
   }
 
   /**
