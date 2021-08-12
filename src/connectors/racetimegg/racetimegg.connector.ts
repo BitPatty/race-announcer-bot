@@ -116,11 +116,11 @@ class RaceTimeGGConnector
     };
   }
 
-  private async getRaceById(
-    raceIdentifier: string,
+  public async getRaceById(
+    identifier: string,
   ): Promise<RaceInformation | null> {
     const { data } = await axios.get<RaceTimeRaceDetail>(
-      `${ConfigService.raceTimeBaseUrl}/${raceIdentifier}/data`,
+      `${ConfigService.raceTimeBaseUrl}/${identifier}/data`,
     );
 
     return this.raceTimeRaceDetailToRace(data);
@@ -136,10 +136,6 @@ class RaceTimeGGConnector
     );
 
     return res.filter((r) => r != null) as RaceInformation[];
-  }
-
-  public getRace(race: RaceInformation): Promise<RaceInformation | null> {
-    return this.getRaceById(race.identifier);
   }
 
   public async listGames(): Promise<GameInformation[]> {

@@ -72,6 +72,10 @@ class ConfigService {
     return this.environmentConfiguration.SRL_BASE_URL;
   }
 
+  public static get speedRunsLiveApiBaseUrl(): string {
+    return this.environmentConfiguration.SRL_API_BASE_URL;
+  }
+
   public static get raceTimeBaseUrl(): string {
     return this.environmentConfiguration.RACETIME_BASE_URL;
   }
@@ -129,6 +133,9 @@ class ConfigService {
         .default(false),
       DISCORD_BOT_TOKEN: Joi.string().required(),
       SRL_BASE_URL: Joi.string().uri().default('https://speedrunslive.com'),
+      SRL_API_BASE_URL: Joi.string()
+        .uri()
+        .default('https://api.speedrunslive.com'),
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
       ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('5/15 * * * * *'),
       RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),

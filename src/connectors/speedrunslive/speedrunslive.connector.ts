@@ -24,8 +24,6 @@ import ConfigService from '../../core/config/config.service';
 class SpeedRunsLiveConnector
   implements SourceConnector<SourceConnectorIdentifier.SPEEDRUNSLIVE>
 {
-  private readonly baseUrl = 'https://api.speedrunslive.com';
-
   public get connectorType(): SourceConnectorIdentifier.SPEEDRUNSLIVE {
     return SourceConnectorIdentifier.SPEEDRUNSLIVE;
   }
@@ -98,19 +96,28 @@ class SpeedRunsLiveConnector
   }
 
   public async getActiveRaces(): Promise<RaceInformation[]> {
-    const { data } = await axios.get<SRLRaceList>(`${this.baseUrl}/races`);
+    const { data } = await axios.get<SRLRaceList>(
+      `${ConfigService.speedRunsLiveApiBaseUrl}/races`,
+    );
     return data.races.map((r) => this.srlRaceToRace(r));
   }
 
-  public async getRace(race: RaceInformation): Promise<RaceInformation | null> {
+  public async getRaceById(
+    identifier: string,
+  ): Promise<RaceInformation | null> {
     const { data } = await axios.get<SRLRace>(
-      `${this.baseUrl}/races/${race.identifier}`,
+      `${ConfigService.speedRunsLiveApiBaseUrl}/races/${identifier}`,
     );
+
+    // SRL returns an empty object ({}) on races that
+    // that are no longer listed
     return data && data.id ? this.srlRaceToRace(data) : null;
   }
 
   public async listGames(): Promise<GameInformation[]> {
-    const { data } = await axios.get<SRLGameList>(`${this.baseUrl}/games`);
+    const { data } = await axios.get<SRLGameList>(
+      `${ConfigService.speedRunsLiveApiBaseUrl}/games`,
+    );
     return data.games
       .filter((g) => g.name && g.name.length > 0 && g.abbrev !== 'newgame')
       .map((g) => this.srlGameToGame(g));

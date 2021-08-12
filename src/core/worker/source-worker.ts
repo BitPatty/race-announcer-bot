@@ -1,4 +1,4 @@
-import { Connection, In } from 'typeorm';
+import { Connection, In, MoreThan, Not, Repository } from 'typeorm';
 import { CronJob } from 'cron';
 
 import {
@@ -8,9 +8,17 @@ import {
   RacerEntity,
 } from '../../models/entities';
 
-import { EntrantInformation, SourceConnector } from '../../models/interfaces';
+import {
+  EntrantInformation,
+  RaceInformation,
+  SourceConnector,
+} from '../../models/interfaces';
 
-import { SourceConnectorIdentifier, TaskIdentifier } from '../../models/enums';
+import {
+  RaceStatus,
+  SourceConnectorIdentifier,
+  TaskIdentifier,
+} from '../../models/enums';
 
 import ConfigService from '../config/config.service';
 import DatabaseService from '../database/database-service';
@@ -19,6 +27,8 @@ import RedisService from '../redis/redis-service';
 
 import RaceTimeGGConnector from '../../connectors/racetimegg/racetimegg.connector';
 import SpeedRunsLiveConnector from '../../connectors/speedrunslive/speedrunslive.connector';
+
+import DateTimeUtils from '../../utils/date-time.utils';
 
 import Worker from './worker.interface';
 
@@ -43,6 +53,147 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     }
   }
 
+  private async syncRace(
+    race: RaceInformation,
+    syncTimeStamp: Date,
+    entrantRepository: Repository<EntrantEntity>,
+    gameRepository: Repository<GameEntity>,
+    raceRepository: Repository<RaceEntity>,
+    racerRepository: Repository<RacerEntity>,
+  ): Promise<void> {
+    const game = await gameRepository.findOne({
+      where: {
+        identifier: race.game.identifier,
+        connector: this.connector.connectorType,
+      },
+    });
+
+    // We only care about registered games since
+    // other games cannot be tracked anyways
+    if (!game) return;
+
+    const racers: RacerEntity[] = [];
+
+    // Update racer entities
+    for (const entrant of race.entrants) {
+      const existingRacer = await racerRepository.findOne({
+        where: {
+          identifier: entrant.displayName.toLowerCase(),
+          connector: this.connector.connectorType,
+        },
+      });
+
+      const updatePayload: RacerEntity = {
+        ...(existingRacer ?? {}),
+        ...new RacerEntity({
+          identifier: entrant.displayName.toLowerCase(),
+          displayName: entrant.displayName,
+          connector: this.connector.connectorType,
+        }),
+      };
+
+      const updatedRacer = await racerRepository.save(updatePayload);
+      racers.push(updatedRacer);
+    }
+
+    // Update the race itself
+    // @TODO: dupe identifiers are possible
+    const existingRace = await raceRepository.findOne({
+      where: {
+        identifier: race.identifier,
+        connector: this.connector.connectorType,
+      },
+    });
+
+    const updatedRace = await raceRepository.save({
+      ...(existingRace ?? {}),
+      ...new RaceEntity({
+        identifier: race.identifier,
+        goal: race.goal ?? '-',
+        url: race.url,
+        connector: this.connector.connectorType,
+        status: race.status,
+        game,
+        changeCounter: existingRace?.changeCounter ?? 0,
+      }),
+    });
+
+    // Update the entrant list
+    const existingEntrants = await entrantRepository.find({
+      relations: [
+        nameof<EntrantEntity>((e) => e.racer),
+        nameof<EntrantEntity>((e) => e.race),
+      ],
+      where: {
+        race: updatedRace,
+      },
+    });
+
+    const updatedEntrants: EntrantEntity[] = [];
+
+    // Add / Update entrants
+    for (const racer of racers) {
+      const existingEntrant = existingEntrants.find(
+        (e) => e.racer.id === racer.id,
+      );
+
+      const entrantData = race.entrants.find(
+        (e) => e.displayName === racer.displayName,
+      ) as EntrantInformation;
+
+      const updatedEntrant = await entrantRepository.save({
+        ...(existingEntrant ?? {}),
+        ...new EntrantEntity({
+          race: updatedRace,
+          racer,
+          status: entrantData.status,
+          finalTime: entrantData.finalTime,
+        }),
+      });
+
+      updatedEntrants.push(updatedEntrant);
+    }
+
+    // Remove entrants that have left
+    const removedEntrantIds = existingEntrants
+      .filter((e) => !updatedEntrants.some((u) => u.id === e.id))
+      .map((e) => e.id);
+
+    if (removedEntrantIds.length > 0)
+      await entrantRepository.delete({
+        race: updatedRace,
+        id: In(removedEntrantIds),
+      });
+
+    // Update the tracker timestamps
+    const hasEntrantChanges =
+      removedEntrantIds.length > 0 ||
+      existingEntrants.length !== race.entrants.length ||
+      updatedEntrants.some(
+        (e) =>
+          existingEntrants.find((x) => x.id === e.id)?.updatedAt !==
+          e.updatedAt,
+      );
+
+    const hasRaceChanges = updatedRace.updatedAt !== existingRace?.updatedAt;
+
+    if (hasRaceChanges || hasEntrantChanges) {
+      updatedRace.changeCounter++;
+      LoggerService.log(
+        `Race change detected: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
+      );
+    } else {
+      LoggerService.log(
+        `Unchanged race: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
+      );
+    }
+
+    await raceRepository.save({
+      ...updatedRace,
+      lastSyncAt: syncTimeStamp,
+    });
+  }
+
   /**
    * Updates the providers race data to the local database
    */
@@ -58,144 +209,54 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         this.databaseConnection.getRepository(RacerEntity),
       ];
 
+    const syncToLocal = async (race: RaceInformation): Promise<void> => {
+      try {
+        await this.syncRace(
+          race,
+          syncTimeStamp,
+          entrantRepository,
+          gameRepository,
+          raceRepository,
+          racerRepository,
+        );
+      } catch (err) {
+        LoggerService.error(`Failed to sync race: ${err}`);
+      }
+    };
+
     const raceList = await this.connector.getActiveRaces();
     LoggerService.log(`Found ${raceList.length} races to sync`);
 
     for (const race of raceList) {
+      await syncToLocal(race);
+    }
+
+    // RaceTime drops races that are in the finished state
+    // SRL drops races if they exceed the thershold of 200 active races
+    // We fetch the data for those races manually in hopes to
+    // be able to sync them
+    LoggerService.log(`Syncing dropped races`);
+    const unsyncedRaces = await raceRepository.find({
+      where: {
+        status: Not(In([RaceStatus.FINISHED, RaceStatus.OVER])),
+        createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 24)),
+        connector: this.connector.connectorType,
+      },
+    });
+
+    // Running sequentially to avoid spamming the provider
+    // with potentially invalid requests
+    for (const unsyncedRace of unsyncedRaces) {
       try {
-        const game = await gameRepository.findOne({
-          where: {
-            identifier: race.game.identifier,
-            connector: this.connector.connectorType,
-          },
-        });
+        LoggerService.log(`Syncing dead race: ${unsyncedRace.id}`);
+        const raceData = await this.connector.getRaceById(
+          unsyncedRace.identifier,
+        );
 
-        // We only care about registered games
-        if (!game) continue;
-
-        const racers: RacerEntity[] = [];
-
-        // Update racer entities
-        for (const entrant of race.entrants) {
-          const existingRacer = await racerRepository.findOne({
-            where: {
-              identifier: entrant.displayName.toLowerCase(),
-              connector: this.connector.connectorType,
-            },
-          });
-
-          const updatePayload: RacerEntity = {
-            ...(existingRacer ?? {}),
-            ...new RacerEntity({
-              identifier: entrant.displayName.toLowerCase(),
-              displayName: entrant.displayName,
-              connector: this.connector.connectorType,
-            }),
-          };
-
-          const updatedRacer = await racerRepository.save(updatePayload);
-          racers.push(updatedRacer);
-        }
-
-        // Update the race itself
-        // @TODO: dupe identifiers are possible
-        const existingRace = await raceRepository.findOne({
-          where: {
-            identifier: race.identifier,
-            connector: this.connector.connectorType,
-          },
-        });
-
-        const updatedRace = await raceRepository.save({
-          ...(existingRace ?? {}),
-          ...new RaceEntity({
-            identifier: race.identifier,
-            goal: race.goal ?? '-',
-            url: race.url,
-            connector: this.connector.connectorType,
-            status: race.status,
-            game,
-            changeCounter: existingRace?.changeCounter ?? 0,
-          }),
-        });
-
-        // Update the entrant list
-        const existingEntrants = await entrantRepository.find({
-          relations: [
-            nameof<EntrantEntity>((e) => e.racer),
-            nameof<EntrantEntity>((e) => e.race),
-          ],
-          where: {
-            race: updatedRace,
-          },
-        });
-
-        const updatedEntrants: EntrantEntity[] = [];
-
-        // Add / Update entrants
-        for (const racer of racers) {
-          const existingEntrant = existingEntrants.find(
-            (e) => e.racer.id === racer.id,
-          );
-
-          const entrantData = race.entrants.find(
-            (e) => e.displayName === racer.displayName,
-          ) as EntrantInformation;
-
-          const updatedEntrant = await entrantRepository.save({
-            ...(existingEntrant ?? {}),
-            ...new EntrantEntity({
-              race: updatedRace,
-              racer,
-              status: entrantData.status,
-              finalTime: entrantData.finalTime,
-            }),
-          });
-
-          updatedEntrants.push(updatedEntrant);
-        }
-
-        // Remove entrants that have left
-        const removedEntrantIds = existingEntrants
-          .filter((e) => !updatedEntrants.some((u) => u.id === e.id))
-          .map((e) => e.id);
-
-        if (removedEntrantIds.length > 0)
-          await entrantRepository.delete({
-            race: updatedRace,
-            id: In(removedEntrantIds),
-          });
-
-        // Update the tracker timestamps
-        const hasEntrantChanges =
-          removedEntrantIds.length > 0 ||
-          existingEntrants.length !== race.entrants.length ||
-          updatedEntrants.some(
-            (e) =>
-              existingEntrants.find((x) => x.id === e.id)?.updatedAt !==
-              e.updatedAt,
-          );
-
-        const hasRaceChanges =
-          updatedRace.updatedAt !== existingRace?.updatedAt;
-
-        if (hasRaceChanges || hasEntrantChanges) {
-          updatedRace.changeCounter++;
-          LoggerService.log(
-            `Race change detected: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
-          );
-        } else {
-          LoggerService.log(
-            `Unchanged race: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
-          );
-        }
-
-        await raceRepository.save({
-          ...updatedRace,
-          lastSyncAt: syncTimeStamp,
-        });
+        if (raceData) await syncToLocal(raceData);
+        else LoggerService.warn(`Dropped race not found: ${unsyncedRace.id}`);
       } catch (err) {
-        LoggerService.error('Failed to sync race', err);
+        LoggerService.log(`Failed to sync dead race: ${unsyncedRace.id}`);
       }
     }
 
