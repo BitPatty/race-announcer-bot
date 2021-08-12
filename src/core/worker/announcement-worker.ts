@@ -96,10 +96,13 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
     });
   }
 
-  private findTrackersForGame(game: GameEntity): Promise<TrackerEntity[]> {
+  private findActiveTrackersForGame(
+    game: GameEntity,
+  ): Promise<TrackerEntity[]> {
     return this.databaseConnection.getRepository(TrackerEntity).find({
       relations: [nameof<TrackerEntity>((e) => e.channel)],
       where: {
+        isActive: true,
         game,
         channel: {
           connector: this.connector.connectorType,
@@ -187,7 +190,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
         continue;
       if (activeRace.changeCounter > 3) continue;
 
-      const trackers = await this.findTrackersForGame(activeRace.game);
+      const trackers = await this.findActiveTrackersForGame(activeRace.game);
       const trackersWithoutAnnouncements = trackers.filter(
         (t) => !activeAnnouncements.some((a) => a.tracker.id === t.id),
       );
