@@ -98,7 +98,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         }
 
         // Update the race itself
-        // @TODO: dupe identifiers
+        // @TODO: dupe identifiers are possible
         const existingRace = await raceRepository.findOne({
           where: {
             identifier: race.identifier,

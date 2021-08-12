@@ -9,7 +9,7 @@ import {
 } from '../../models/interfaces';
 
 import {
-  CommandType,
+  BotCommandType,
   MessageChannelType,
   SourceConnectorIdentifier,
 } from '../../models/enums';
@@ -49,7 +49,7 @@ class DiscordCommandParser {
     return {
       identifier: msg.id,
       channel: {
-        name: msg.channel.type !== 'DM' ? msg.channel.name : undefined,
+        name: msg.channel.type !== 'DM' ? msg.channel.name : null,
         identifier: msg.channel.id,
         serverIdentifier: msg.guild?.id ?? null,
         type: this.parseChannelType(msg),
@@ -123,7 +123,7 @@ class DiscordCommandParser {
     if (!sourceIdentifier) return null;
 
     const cmd: AddTrackerCommand = {
-      type: CommandType.ADD_TRACKER,
+      type: BotCommandType.ADD_TRACKER,
       gameIdentifier,
       sourceIdentifier: sourceIdentifier as SourceConnectorIdentifier,
       targetChannelIdentifier: channelMention.id,
@@ -151,7 +151,7 @@ class DiscordCommandParser {
     if (!sourceIdentifier) return null;
 
     const cmd: RemoveTrackerCommand = {
-      type: CommandType.REMOVE_TRACKER,
+      type: BotCommandType.REMOVE_TRACKER,
       gameIdentifier,
       sourceIdentifier: sourceIdentifier as SourceConnectorIdentifier,
       message: this.transformDiscordMessageToChatMessage(msg, client),
@@ -167,7 +167,7 @@ class DiscordCommandParser {
     client: Discord.Client,
   ): ListTrackersCommand | null {
     const cmd: ListTrackersCommand = {
-      type: CommandType.LIST_TRACKERS,
+      type: BotCommandType.LIST_TRACKERS,
       message: this.transformDiscordMessageToChatMessage(msg, client),
       channelIdentifier: msg.channel.id,
       serverIdentifier: msg.guild?.id ?? null,
@@ -181,7 +181,7 @@ class DiscordCommandParser {
     client: Discord.Client,
   ): HelpCommand {
     return {
-      type: CommandType.HELP,
+      type: BotCommandType.HELP,
       message: this.transformDiscordMessageToChatMessage(msg, client),
     };
   }

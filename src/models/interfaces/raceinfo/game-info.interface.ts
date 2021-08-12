@@ -1,7 +1,7 @@
 interface GameInformation {
   identifier: string;
   name: string;
-  abbreviation?: string;
+  abbreviation: string;
 }
 
 export default GameInformation;

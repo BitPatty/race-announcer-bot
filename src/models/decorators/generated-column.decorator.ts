@@ -8,6 +8,7 @@ import {
 import { EntityColumn } from './entity-column.decorator';
 import TransformerUtils from '../../utils/transformer.utils';
 
+// Allow the type 'Object' to be used
 /* eslint-disable @typescript-eslint/ban-types */
 
 enum GeneratedColumnType {
@@ -18,6 +19,10 @@ enum GeneratedColumnType {
   DELETED_AT = 'deleted_at',
 }
 
+/**
+ * Decorator override for typeorm generated columns
+ * @param type The generation strategy
+ */
 const GeneratedColumn = (type: GeneratedColumnType): PropertyDecorator => {
   return (target: Object, propertyKey: string | symbol): void => {
     const columnName = TransformerUtils.toAttributeName(propertyKey as string);

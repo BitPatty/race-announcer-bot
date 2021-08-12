@@ -7,6 +7,7 @@ import {
   DestinationConnector,
   EntrantInformation,
   RaceInformation,
+  ReactionReply,
   TextReply,
   TrackerListReply,
 } from '../../models/interfaces';
@@ -16,6 +17,7 @@ import {
   DestinationConnectorIdentifier,
   DestinationEvent,
   MessageChannelType,
+  ReactionType,
   ReplyType,
   SourceConnectorIdentifier,
 } from '../../models/enums';
@@ -27,6 +29,7 @@ import LoggerService from '../../core/logger/logger.service';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
 
 import DiscordCommandParser from './discord-command-parser';
+import DiscordEmoji from './discord-emoji.enum';
 
 class DiscordConnector
   implements DestinationConnector<DestinationConnectorIdentifier.DISCORD>
@@ -362,18 +365,46 @@ class DiscordConnector
   }
 
   /**
+   * Adds a reaction to the specified message
+   * @param message The message
+   * @param reactionType The reaction type
+   */
+  private async react(
+    message: Discord.Message,
+    reactionType: ReactionType,
+  ): Promise<void> {
+    if (reactionType === ReactionType.POSITIVE)
+      await message.react(DiscordEmoji.WHITE_CHECKMARK);
+    else await message.react(DiscordEmoji.RED_X);
+  }
+
+  /**
    * Reply to the specified chat message
    * @param to The message to reply to
    * @param msg The message content
    */
   public async reply(
     to: ChatMessage,
-    content: Discord.MessageEmbed | TextReply | TrackerListReply,
+    content:
+      | Discord.MessageEmbed
+      | TextReply
+      | TrackerListReply
+      | ReactionReply,
   ): Promise<void> {
     const originalMessage = await this.findMessage(
       to.channel.identifier,
       to.identifier,
     );
+
+    if (
+      !(content instanceof Discord.MessageEmbed) &&
+      content.type === ReplyType.REACTION
+    ) {
+      if (!originalMessage)
+        LoggerService.error('Cannot react, original message not found');
+      else await this.react(originalMessage, content.reaction);
+      return;
+    }
 
     const message = (() => {
       if (content instanceof Discord.MessageEmbed) return content;
@@ -499,7 +530,7 @@ class DiscordConnector
   }
 
   /**
-   * Connect the bot to the discord chat
+   * Connect the bot to the discord chati
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -530,6 +561,7 @@ class DiscordConnector
       this.client.on('message', (msg) => {
         LoggerService.debug('[Discord] Received message');
         LoggerService.debug(msg.content);
+
         if (
           !this.client ||
           !this.isBotMention(msg) ||
@@ -564,7 +596,7 @@ class DiscordConnector
       });
 
       this.client.on('warn', (msg) => {
-        LoggerService.debug(`[Discord] warning: ${msg}`);
+        LoggerService.warn(`[Discord] warning: ${msg}`);
       });
 
       this.client.on('error', (err) => {

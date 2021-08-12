@@ -5,6 +5,7 @@ import {
   ChatUser,
   HelpCommand,
   ListTrackersCommand,
+  ReactionReply,
   RemoveTrackerCommand,
   TextReply,
   TrackerListReply,
@@ -31,6 +32,7 @@ export {
   HelpCommand,
   ListTrackersCommand,
   RemoveTrackerCommand,
+  ReactionReply,
   TextReply,
   TrackerListReply,
 };
