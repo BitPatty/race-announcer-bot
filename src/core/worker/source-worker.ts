@@ -1,4 +1,4 @@
-import { Connection, In, LessThan, MoreThan, Not, Repository } from 'typeorm';
+import { Connection, In, MoreThan, Not, Repository } from 'typeorm';
 import { CronJob } from 'cron';
 
 import {
