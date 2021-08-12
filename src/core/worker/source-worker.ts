@@ -238,6 +238,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     LoggerService.log(`Syncing dropped races`);
     const unsyncedRaces = await raceRepository.find({
       where: {
+        identifier: Not(In(raceList.map((r) => r.identifier))),
         status: Not(In([RaceStatus.FINISHED, RaceStatus.OVER])),
         createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 24)),
         connector: this.connector.connectorType,
