@@ -450,7 +450,7 @@ class DiscordConnector
     }
 
     await originalMessage.reply({
-      content: `<@${to.author.identifier}>\r\n${message}`,
+      content: message,
     });
   }
 
