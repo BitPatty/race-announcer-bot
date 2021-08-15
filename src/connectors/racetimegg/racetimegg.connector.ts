@@ -113,7 +113,6 @@ class RaceTimeGGConnector
         identifier: racetimeRace.category.slug,
         name: racetimeRace.category.name,
         abbreviation: racetimeRace.category.short_name,
-        imageUrl: racetimeRace.category.image,
       },
       status: this.raceTimeRaceStateToStatus(racetimeRace.status.value),
       entrants: racetimeRace.entrants.map((e) =>

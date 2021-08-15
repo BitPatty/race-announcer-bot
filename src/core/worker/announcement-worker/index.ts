@@ -7,30 +7,30 @@ import {
   GameEntity,
   RaceEntity,
   TrackerEntity,
-} from '../../models/entities';
+} from '../../../models/entities';
 
 import {
   ChatMessage,
   DestinationConnector,
   RaceInformation,
-} from '../../models/interfaces';
+} from '../../../models/interfaces';
 
 import {
   DestinationConnectorIdentifier,
   RaceStatus,
   TaskIdentifier,
   WorkerType,
-} from '../../models/enums';
+} from '../../../models/enums';
 
-import ConfigService from '../config/config.service';
-import DatabaseService from '../database/database-service';
-import LoggerService from '../logger/logger.service';
-import RedisService from '../redis/redis-service';
+import ConfigService from '../../config/config.service';
+import DatabaseService from '../../database/database-service';
+import LoggerService from '../../logger/logger.service';
+import RedisService from '../../redis/redis-service';
 
-import DateTimeUtils from '../../utils/date-time.utils';
+import DateTimeUtils from '../../../utils/date-time.utils';
 
-import Worker from './worker.interface';
-import enabledWorkers from '../../enabled-workers';
+import Worker from '../worker.interface';
+import enabledWorkers from '../../../enabled-workers';
 
 class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   implements Worker

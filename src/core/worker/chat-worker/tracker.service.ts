@@ -4,7 +4,7 @@ import {
   CommunicationChannelEntity,
   GameEntity,
   TrackerEntity,
-} from '../../models/entities';
+} from '../../../models/entities';
 
 class TrackerService {
   private readonly trackerRepository: Repository<TrackerEntity>;

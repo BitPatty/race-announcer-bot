@@ -5,8 +5,10 @@ import {
   DestinationConnector,
   HelpCommand,
   ListTrackersCommand,
+  ReactionReply,
   RemoveTrackerCommand,
-} from '../../models/interfaces';
+  TrackerListReply,
+} from '../../../models/interfaces';
 
 import {
   BotCommandType,
@@ -16,22 +18,22 @@ import {
   ReplyType,
   TaskIdentifier,
   WorkerType,
-} from '../../models/enums';
+} from '../../../models/enums';
 
 import {
   CommunicationChannelEntity,
   GameEntity,
   TrackerEntity,
-} from '../../models/entities';
+} from '../../../models/entities';
 
-import ConfigService from '../config/config.service';
-import DatabaseService from '../database/database-service';
-import LoggerService from '../logger/logger.service';
-import RedisService from '../redis/redis-service';
-import TrackerService from '../tracker/tracker.service';
+import ConfigService from '../../config/config.service';
+import DatabaseService from '../../database/database-service';
+import LoggerService from '../../logger/logger.service';
+import RedisService from '../../redis/redis-service';
+import TrackerService from './tracker.service';
 
-import Worker from './worker.interface';
-import enabledWorkers from '../../enabled-workers';
+import Worker from '../worker.interface';
+import enabledWorkers from '../../../enabled-workers';
 
 class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
   private readonly connector: DestinationConnector<T>;
@@ -133,41 +135,44 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       | ListTrackersCommand
       | HelpCommand,
   ): Promise<void> {
-    switch (cmd.type) {
-      case BotCommandType.ADD_TRACKER: {
-        const tracker = await this.addTracker(cmd);
-        await this.connector.reply(cmd.message, {
-          type: ReplyType.REACTION,
-          reaction:
-            tracker == null ? ReactionType.NEGATIVE : ReactionType.POSITIVE,
-        });
-        break;
+    const reply = await (async () => {
+      switch (cmd.type) {
+        case BotCommandType.ADD_TRACKER: {
+          const tracker = await this.addTracker(cmd);
+          return {
+            type: ReplyType.REACTION,
+            reaction:
+              tracker == null ? ReactionType.NEGATIVE : ReactionType.POSITIVE,
+          } as ReactionReply;
+        }
+        case BotCommandType.REMOVE_TRACKER: {
+          await this.removeTracker(cmd);
+          return {
+            type: ReplyType.REACTION,
+            reaction: ReactionType.POSITIVE,
+          } as ReactionReply;
+        }
+        case BotCommandType.LIST_TRACKERS: {
+          const trackers = cmd.serverIdentifier
+            ? await this.trackerService.findTrackersByServer(
+                cmd.serverIdentifier,
+              )
+            : await this.trackerService.findTrackersByChannel(
+                cmd.channelIdentifier,
+              );
+          return {
+            type: ReplyType.TRACKER_LIST,
+            items: trackers,
+          } as TrackerListReply;
+        }
+        case BotCommandType.HELP: {
+          await this.connector.postHelpMessage(cmd.message);
+          break;
+        }
       }
-      case BotCommandType.REMOVE_TRACKER: {
-        await this.removeTracker(cmd);
-        await this.connector.reply(cmd.message, {
-          type: ReplyType.REACTION,
-          reaction: ReactionType.POSITIVE,
-        });
-        break;
-      }
-      case BotCommandType.LIST_TRACKERS: {
-        const trackers = cmd.serverIdentifier
-          ? await this.trackerService.findTrackersByServer(cmd.serverIdentifier)
-          : await this.trackerService.findTrackersByChannel(
-              cmd.channelIdentifier,
-            );
-        await this.connector.reply(cmd.message, {
-          type: ReplyType.TRACKER_LIST,
-          items: trackers,
-        });
-        break;
-      }
-      case BotCommandType.HELP: {
-        await this.connector.postHelpMessage(cmd.message);
-        break;
-      }
-    }
+    })();
+
+    if (reply) await this.connector.reply(cmd.message, reply);
   }
 
   /**
