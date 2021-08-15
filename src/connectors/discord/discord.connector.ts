@@ -43,7 +43,7 @@ class DiscordConnector
   /**
    * The event listeners mapped to this connector
    */
-  private _eventListeners: {
+  private eventListeners: {
     [key in keyof DestinationEventListenerMap]: DestinationEventListenerMap[key][];
   } = this.removeAllEventListeners();
 
@@ -54,13 +54,12 @@ class DiscordConnector
   private removeAllEventListeners(): {
     [key in keyof DestinationEventListenerMap]: DestinationEventListenerMap[key][];
   } {
-    this._eventListeners = {
+    this.eventListeners = {
       [DestinationEvent.DISCONNECTED]: [],
       [DestinationEvent.COMMAND_RECEIVED]: [],
-      [DestinationEvent.ERROR]: [],
     };
 
-    return this._eventListeners;
+    return this.eventListeners;
   }
 
   public get isReady(): boolean {
@@ -71,6 +70,12 @@ class DiscordConnector
     return DestinationConnectorIdentifier.DISCORD;
   }
 
+  /**
+   * Checks if the bot has the necessary permissions
+   * to post messages in the specified channel
+   * @param channel The channel
+   * @returns True if the bot has the permissions
+   */
   public async botHasRequiredPermissions(
     channel: ChatChannel,
   ): Promise<boolean> {
@@ -91,6 +96,28 @@ class DiscordConnector
   }
 
   /**
+   * Checks if the user has the permissions to use
+   * bot commands in their guild
+   * @param user The guild member
+   * @returns True if the user has administrative permission
+   */
+  private canUseBotCommands(user: Discord.GuildMember): boolean {
+    return (
+      user.permissions.has('ADMINISTRATOR') ||
+      ConfigService.discordGlobalAdmins.includes(user.id)
+    );
+  }
+
+  /**
+   * Checks whether the message mentions the bot
+   * @param msg The message
+   * @returns True if the bot is mentioned
+   */
+  private isBotMention(msg: Discord.Message): boolean {
+    return this.client?.user != null && msg.mentions.has(this.client.user);
+  }
+
+  /**
    * Gets the listeners for the specified event type
    * @param type The event type
    * @returns The listeners mapped to the specified event
@@ -98,7 +125,7 @@ class DiscordConnector
   public getListeners<TEvent extends DestinationEvent>(
     type: TEvent,
   ): DestinationEventListenerMap[TEvent][] {
-    return this._eventListeners[type] as DestinationEventListenerMap[TEvent][];
+    return this.eventListeners[type] as DestinationEventListenerMap[TEvent][];
   }
 
   /**
@@ -124,7 +151,7 @@ class DiscordConnector
     listener?: DestinationEventListenerMap[TEvent],
   ): void {
     if (!listener) {
-      this._eventListeners[type] = [];
+      this.eventListeners[type] = [];
       return;
     }
 
@@ -237,13 +264,41 @@ class DiscordConnector
       embed = embed.setURL(race.url);
 
     // List the entrants
-    const entrantString = this.generateEmbedEntrantList(race.entrants);
+    const entrantString = this.buildEntrantList(race.entrants);
     embed = embed.addField('Entrants', entrantString);
 
     return embed;
   }
 
-  private generateEmbedEntrantList(entrants: EntrantInformation[]): string {
+  /**
+   * Builds the embed displaying the tracker list
+   * @param items The tracker list
+   * @returns The embed containing the tracker list
+   */
+  private buildTrackerListEmbed(items: TrackerEntity[]): Discord.MessageEmbed {
+    const embed = new Discord.MessageEmbed().setTitle('Active Trackers');
+
+    if (items.length === 0)
+      return embed.setDescription('No tracker registered');
+
+    const activeTrackerList = items
+      .filter((i) => i.isActive)
+      .map(
+        (i) =>
+          `${i.game.name} (${i.game.connector}) in <#${i.channel.identifier}>`,
+      )
+      .sort((prev, next) => (prev < next ? -1 : 1))
+      .join('\r\n');
+
+    // Avoid hitting the embed limits
+    // @TODO Find a better solution
+    if (activeTrackerList.length > 4000)
+      return embed.setDescription('Too many trackers to display');
+
+    return embed.setDescription(activeTrackerList);
+  }
+
+  private buildEntrantList(entrants: EntrantInformation[]): string {
     if (entrants.length === 0) return '-';
 
     const sortedEntrants = MessageBuilderUtils.sortEntrants(entrants);
@@ -351,34 +406,6 @@ class DiscordConnector
   }
 
   /**
-   * Builds the embed displaying the tracker list
-   * @param items The tracker list
-   * @returns The embed containing the tracker list
-   */
-  private buildTrackerListEmbed(items: TrackerEntity[]): Discord.MessageEmbed {
-    const embed = new Discord.MessageEmbed().setTitle('Active Trackers');
-
-    if (items.length === 0)
-      return embed.setDescription('No tracker registered');
-
-    const activeTrackerList = items
-      .filter((i) => i.isActive)
-      .map(
-        (i) =>
-          `${i.game.name} (${i.game.connector}) in <#${i.channel.identifier}>`,
-      )
-      .sort((prev, next) => (prev < next ? -1 : 1))
-      .join('\r\n');
-
-    // Avoid hitting the embed limits
-    // @TODO Find a better solution
-    if (activeTrackerList.length > 4000)
-      return embed.setDescription('Too many trackers to display');
-
-    return embed.setDescription(activeTrackerList);
-  }
-
-  /**
    * Adds a reaction to the specified message
    * @param message The message
    * @param reactionType The reaction type
@@ -468,17 +495,10 @@ class DiscordConnector
     });
   }
 
-  private hasUserAdministrativePermission(user: Discord.GuildMember): boolean {
-    return (
-      user.permissions.has('ADMINISTRATOR') ||
-      ConfigService.discordGlobalAdmins.includes(user.id)
-    );
-  }
-
-  private isBotMention(msg: Discord.Message): boolean {
-    return this.client?.user != null && msg.mentions.has(this.client.user);
-  }
-
+  /**
+   * Posts the help text as reply to the specified message
+   * @param replyTo The original message
+   */
   public async postHelpMessage(replyTo: ChatMessage): Promise<void> {
     LoggerService.debug(`Replying to ${JSON.stringify(replyTo)}`);
     if (!this.client) return;
@@ -580,7 +600,7 @@ class DiscordConnector
           !this.client ||
           !this.isBotMention(msg) ||
           !msg.member ||
-          !this.hasUserAdministrativePermission(msg.member)
+          !this.canUseBotCommands(msg.member)
         )
           return;
 
@@ -600,7 +620,7 @@ class DiscordConnector
           return;
         }
 
-        this._eventListeners[DestinationEvent.COMMAND_RECEIVED].forEach((l) =>
+        this.eventListeners[DestinationEvent.COMMAND_RECEIVED].forEach((l) =>
           l(command),
         );
       });
@@ -608,7 +628,7 @@ class DiscordConnector
       this.client.on('disconnect', () => {
         LoggerService.log('[Discord] Disconnected');
         this._isReady = false;
-        this._eventListeners[DestinationEvent.DISCONNECTED].forEach((l) => l());
+        this.eventListeners[DestinationEvent.DISCONNECTED].forEach((l) => l());
       });
 
       this.client.on('warn', (msg) => {

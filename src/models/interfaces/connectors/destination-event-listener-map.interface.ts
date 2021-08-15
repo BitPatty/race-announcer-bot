@@ -16,7 +16,6 @@ interface DestinationEventListenerMap {
       | HelpCommand,
   ) => void;
   [DestinationEvent.DISCONNECTED]: () => void;
-  [DestinationEvent.ERROR]: (msg: string) => void;
 }
 
 export default DestinationEventListenerMap;
