@@ -127,15 +127,13 @@ class DiscordCommandParser {
 
     if (!sourceIdentifier) return null;
 
-    const cmd: AddTrackerCommand = {
+    return {
       type: BotCommandType.ADD_TRACKER,
       gameIdentifier,
       sourceIdentifier: sourceIdentifier as SourceConnectorIdentifier,
       targetChannelIdentifier: channelMention.id,
       message: this.transformDiscordMessageToChatMessage(msg, client),
     };
-
-    return cmd;
   }
 
   private static parseRemoveTrackerCommand(
@@ -155,7 +153,7 @@ class DiscordCommandParser {
 
     if (!sourceIdentifier) return null;
 
-    const cmd: RemoveTrackerCommand = {
+    return {
       type: BotCommandType.REMOVE_TRACKER,
       gameIdentifier,
       sourceIdentifier: sourceIdentifier as SourceConnectorIdentifier,
@@ -163,22 +161,18 @@ class DiscordCommandParser {
       channelIdentifier: msg.channel.id,
       serverIdentifier: msg.guild?.id ?? null,
     };
-
-    return cmd;
   }
 
   public static parseListTrackersCommand(
     msg: Discord.Message,
     client: Discord.Client,
   ): ListTrackersCommand | null {
-    const cmd: ListTrackersCommand = {
+    return {
       type: BotCommandType.LIST_TRACKERS,
       message: this.transformDiscordMessageToChatMessage(msg, client),
       channelIdentifier: msg.channel.id,
       serverIdentifier: msg.guild?.id ?? null,
     };
-
-    return cmd;
   }
 
   private static parseHelpCommand(

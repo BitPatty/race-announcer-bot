@@ -68,27 +68,22 @@ class MessageBuilderUtils {
       ...entrants
         .filter((e) => e.status === EntrantStatus.DONE && e.finalTime != null)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .sort((a, b) => a.finalTime! - b.finalTime!),
+        .sort((a, b) => a.finalTime! - b.finalTime!), // NOSONAR
     );
+
+    const sortByDisplayName = (prev, next): -1 | 1 =>
+      prev.displayName.toLowerCase() < next.displayName.toLowerCase() ? -1 : 1;
 
     entrantList.push(
       ...entrants
         .filter((e) => e.status === EntrantStatus.READY)
-        .sort((prev, next) =>
-          prev.displayName.toLowerCase() < next.displayName.toLowerCase()
-            ? -1
-            : 1,
-        ),
+        .sort(sortByDisplayName),
     );
 
     entrantList.push(
       ...entrants
         .filter((e) => !entrantList.includes(e))
-        .sort((prev, next) =>
-          prev.displayName.toLowerCase() < next.displayName.toLowerCase()
-            ? -1
-            : 1,
-        ),
+        .sort(sortByDisplayName),
     );
     return entrantList;
   }

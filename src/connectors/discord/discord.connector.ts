@@ -433,7 +433,7 @@ class DiscordConnector
     }
 
     const message = (() => {
-      if (content instanceof Discord.MessageEmbed) return content;
+      if (content instanceof Discord.MessageEmbed) return content; //NOSONAR
 
       switch (content.type) {
         case ReplyType.TEXT:
