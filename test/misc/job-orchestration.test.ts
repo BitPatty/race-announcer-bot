@@ -77,13 +77,13 @@ describe('Job Orchestration', () => {
       TaskIdentifier.ANNOUNCEMENT_SYNC,
       randomPostfix,
       randomInstanceUuid,
-      3,
+      ttl,
     );
 
     expect(reservationSuccessfulA).toBe(true);
 
     await new Promise<void>((resolve) =>
-      setTimeout(() => resolve(), ttl * 1000),
+      setTimeout(() => resolve(), (ttl + 1) * 1000),
     );
 
     const reservationSuccessfulB = await RedisService.tryReserveTask(

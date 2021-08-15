@@ -74,7 +74,7 @@ class DiscordConnector
   public async botHasRequiredPermissions(
     channel: ChatChannel,
   ): Promise<boolean> {
-    if (!this.client?.user) throw new Error('User not set');
+    if (!this.client?.user) throw new Error('Bot user not set');
     const discordChannel = await this.findTextChannel(channel.identifier);
     if (!discordChannel) return false;
 
@@ -144,33 +144,28 @@ class DiscordConnector
     channelId: string,
     messageId: string,
   ): Promise<Discord.Message | null> {
-    LoggerService.log(
-      `Looking up message ${messageId} in channel ${channelId}`,
-    );
+    LoggerService.log(`Looking up message ${messageId} in  ${channelId}`);
     if (!this.client) return null;
+
+    // Find the channel containing the message
     const channel = await this.findTextChannel(channelId);
-    if (!channel) {
-      LoggerService.error(
-        `Failed to fetch channel when looking up message ${messageId} in ${channelId}`,
-      );
-      return null;
-    }
+    if (!channel) return null;
 
-    LoggerService.debug(`Found channel ${channelId} for message ${messageId}`);
-
+    // Find the message in the channel
+    LoggerService.debug(`Fetching message ${messageId}`);
     const originalMessage = await channel.messages.fetch(messageId);
-    LoggerService.debug(
-      `Found original message: ${JSON.stringify(originalMessage)}`,
-    );
 
+    // Check if the response actually matches
     if (
       !originalMessage ||
       originalMessage.id !== messageId ||
       !(originalMessage instanceof Discord.Message)
     ) {
+      LoggerService.error(`Message ${messageId} not found`);
       return null;
     }
 
+    LoggerService.debug(`Found message: ${JSON.stringify(originalMessage)}`);
     return originalMessage;
   }
 
@@ -182,14 +177,17 @@ class DiscordConnector
   private async findTextChannel(
     channelId: string,
   ): Promise<Discord.TextChannel | null> {
+    LoggerService.debug(`Looking up channel ${channelId}`);
     if (!this.client) return null;
     const channel = await this.client.channels.fetch(channelId);
-    if (!channel) return null;
+
+    if (!channel) {
+      LoggerService.error(`Couldn't find channel ${channelId}`);
+      return null;
+    }
 
     if (!(channel instanceof Discord.TextChannel)) {
-      LoggerService.warn(
-        `Found channel ${channelId}, but it is not a text channel`,
-      );
+      LoggerService.warn(`Found channel ${channelId} is not a text channel`);
       return null;
     }
 
@@ -238,25 +236,22 @@ class DiscordConnector
     if (race.url && Joi.string().uri().validate(race.url).error == null)
       embed = embed.setURL(race.url);
 
-    LoggerService.debug(`${race.url}`);
-
-    // Set the cover as thumbnail if it exists
-    if (
-      race.game.imageUrl &&
-      Joi.string().uri().validate(race.game.imageUrl).error == null
-    )
-      embed = embed.setThumbnail(race.game.imageUrl);
-
     // List the entrants
     const entrantString = this.generateEmbedEntrantList(race.entrants);
-
     embed = embed.addField('Entrants', entrantString);
+
     return embed;
   }
 
   private generateEmbedEntrantList(entrants: EntrantInformation[]): string {
     if (entrants.length === 0) return '-';
+
     const sortedEntrants = MessageBuilderUtils.sortEntrants(entrants);
+
+    // Hide entrants to avoid hitting the content
+    // length limit but at the same time stay
+    // consistent with the max number of entrants
+    // being displayed
     const totalEntrants = sortedEntrants.length;
     const hiddenEntrantCount = totalEntrants - this.entrantDisplayLimitTrigger;
 
@@ -292,15 +287,11 @@ class DiscordConnector
     if (!this.client) return null;
 
     const discordChannel = await this.findTextChannel(channel.identifier);
-    if (!discordChannel) {
-      throw new Error(
-        `Failed to fetch channel ${channel.identifier} => ${discordChannel}`,
-      );
-    }
+    if (!discordChannel)
+      throw new Error(`Failed to fetch channel ${channel.identifier}`);
 
-    const embed = this.buildRaceEmbed(race);
     const msg = await discordChannel.send({
-      embeds: [embed],
+      embeds: [this.buildRaceEmbed(race)],
     });
 
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
@@ -323,14 +314,13 @@ class DiscordConnector
     hasGameChanged: boolean,
   ): Promise<ChatMessage | null> {
     if (!this.client) return null;
+
+    // Find the original message
     const originalMessage = await this.findMessage(
       originalPost.channel.identifier,
       originalPost.identifier,
     );
-
-    if (!originalMessage) {
-      throw new Error('Failed to fetch original message');
-    }
+    if (!originalMessage) throw new Error('Failed to fetch original message');
 
     // Dont include the race details if the
     // game is not being tracked by the current tracker
@@ -348,10 +338,10 @@ class DiscordConnector
       );
     }
 
-    const embed = this.buildRaceEmbed(race);
+    // Update the message content
     const msg = await originalMessage.edit({
       content: null,
-      embeds: [embed],
+      embeds: [this.buildRaceEmbed(race)],
     });
 
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
@@ -360,9 +350,13 @@ class DiscordConnector
     );
   }
 
+  /**
+   * Builds the embed displaying the tracker list
+   * @param items The tracker list
+   * @returns The embed containing the tracker list
+   */
   private buildTrackerListEmbed(items: TrackerEntity[]): Discord.MessageEmbed {
-    const embed = new Discord.MessageEmbed();
-    embed.setTitle('Active Trackers');
+    const embed = new Discord.MessageEmbed().setTitle('Active Trackers');
 
     if (items.length === 0)
       return embed.setDescription('No tracker registered');
@@ -373,13 +367,15 @@ class DiscordConnector
         (i) =>
           `${i.game.name} (${i.game.connector}) in <#${i.channel.identifier}>`,
       )
+      .sort((prev, next) => (prev < next ? -1 : 1))
       .join('\r\n');
 
+    // Avoid hitting the embed limits
     // @TODO Find a better solution
     if (activeTrackerList.length > 4000)
       return embed.setDescription('Too many trackers to display');
 
-    return embed.setDescription(activeTrackerList || '-');
+    return embed.setDescription(activeTrackerList);
   }
 
   /**
@@ -432,50 +428,43 @@ class DiscordConnector
       return;
     }
 
-    const message = (() => {
-      if (content instanceof Discord.MessageEmbed) return content; //NOSONAR
-
+    const messageContent = ((): Discord.MessageOptions => {
       switch (content.type) {
         case ReplyType.TEXT:
-          return content.message;
+          return {
+            content: (content as TextReply).message,
+          };
         case ReplyType.TRACKER_LIST:
-          return this.buildTrackerListEmbed(content.items);
+          return {
+            embeds: [
+              this.buildTrackerListEmbed((content as TrackerListReply).items),
+            ],
+          };
+        default:
+          if (content instanceof Discord.MessageEmbed)
+            return {
+              embeds: [content],
+            };
+          throw new Error('Invalid message type');
       }
     })();
 
-    if (!originalMessage) {
-      LoggerService.error(
-        'Failed to fetch original message, using mention instead',
-      );
-      const channel = await this.findTextChannel(to.channel.identifier);
-      if (!channel) {
-        LoggerService.error('Failed to fetch channel');
-        return;
-      }
-
-      if (message instanceof Discord.MessageEmbed) {
-        await channel.send({
-          content: `<@${to.author.identifier}>`,
-          embeds: [message],
-        });
-        return;
-      }
-
-      await channel.send({
-        content: `<@${to.author.identifier}>\r\n${message}`,
-      });
+    if (originalMessage) {
+      LoggerService.debug(`Replying to ${originalMessage.id}`);
+      await originalMessage.reply(messageContent);
       return;
     }
 
-    if (message instanceof Discord.MessageEmbed) {
-      await originalMessage.reply({
-        embeds: [message],
-      });
+    LoggerService.error('Failed to fetch original message => using mention');
+    const channel = await this.findTextChannel(to.channel.identifier);
+    if (!channel) {
+      LoggerService.error('Failed to fetch channel');
       return;
     }
 
-    await originalMessage.reply({
-      content: message,
+    await channel.send({
+      ...messageContent,
+      content: `<@${to.author.identifier}>\r\n${messageContent.content}`,
     });
   }
 
@@ -599,14 +588,15 @@ class DiscordConnector
         const commandKey = DiscordCommandParser.parseCommandKey(msg);
 
         if (!commandKey) {
-          LoggerService.error(`Failed to parse command key`);
+          LoggerService.error(`Failed to parse command key ${msg}`);
           await this.react(msg, ReactionType.UNKNOWN_ACTION);
           return;
         }
 
         const command = DiscordCommandParser.parseCommand(msg, this.client);
         if (!command) {
-          LoggerService.error(`Failed to parse command`);
+          LoggerService.error(`Failed to parse command ${msg}`);
+          await this.react(msg, ReactionType.NEGATIVE);
           return;
         }
 
