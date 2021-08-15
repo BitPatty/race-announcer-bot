@@ -1,9 +1,5 @@
 # Race Announcer Bot
 
-> This is a WIP rewrite. For the version currently in production check out the v2 branch: https://github.com/BitPatty/RaceAnnouncerBot/tree/v2
-
----
-
 ![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/bitpatty/raceannouncerbot/develop)
 [![Development Build](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml/badge.svg?branch=develop)](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml)
 ![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/bitpatty/raceannouncerbot/master)
