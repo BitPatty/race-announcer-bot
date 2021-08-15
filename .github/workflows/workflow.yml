@@ -94,6 +94,10 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Push Image to registry
         run: docker push ${{ env.IMAGE_NAME }}
+      - name: Push as latest
+        run: |
+          docker tag ${{ env.IMAGE_NAME }} ghcr.io/bitpatty/race-announcer-bot-development:latest
+          docker push ghcr.io/bitpatty/race-announcer-bot-development:latest
 
   publish-production-image:
     name: Publish Production Image
