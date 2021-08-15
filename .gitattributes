@@ -1,0 +1,24 @@
+# Common
+*.env eol=lf
+*.example eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.properties eol=lf
+*.sh eol=lf
+*.sql eol=lf
+*.ts text eol=lf
+*.yml text eol=lf
+
+# Dockerfiles
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+
+# Misc files
+.eslintignore eol=lf
+.nvmrc eol=lf
+.prettierignore eol=lf
+.prettierrc eol=lf
+*.gitattributes eol=lf
+*.gitignore eol=lf
+LICENSE eol=lf

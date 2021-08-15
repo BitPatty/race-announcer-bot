@@ -1,0 +1,112 @@
+name: Github Workflow
+
+on:
+  push:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Create Build
+        run: docker build -t build:base -f ./dockerfiles/Build.Dockerfile .
+      - name: Run Tests
+        run: docker build --build-arg BASE_IMAGE=build:base --build-arg DISCORD_BOT_TOKEN=abc -f ./dockerfiles/Test.Dockerfile .
+
+  sonar-scan-pr:
+    name: Sonar Scan (on PR)
+    needs: build-and-test
+    if: ${{ github.event_name == 'pull_request' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    environment: 'sonar-scan'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  sonar-scan-push:
+    name: Sonar Scan (on push)
+    needs: build-and-test
+    if: ${{ github.event_name == 'push' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  publish-development-image:
+    name: Publish Development Image
+    needs: sonar-scan-push
+    if: ${{ github.ref == 'refs/heads/develop' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    environment: 'development'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Add SHORT_SHA env property with commit short sha
+        run: echo "SHORT_SHA=`echo ${{ github.sha }} | cut -c1-8`" >> $GITHUB_ENV
+      - name: Extract version info
+        run: |
+          PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\", ]//g')
+          echo "IMAGE_NAME=ghcr.io/bitpatty/race-announcer-bot-development:${PACKAGE_VERSION}-${{ env.SHORT_SHA }}" >> $GITHUB_ENV
+          echo "Using Version: ${PACKAGE_VERSION}"
+      - name: Create a new build
+        run: docker build -t "${{ env.IMAGE_NAME }}" -f ./dockerfiles/Production.Dockerfile .
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push Image to registry
+        run: docker push ${{ env.IMAGE_NAME }}
+
+  publish-production-image:
+    name: Publish Production Image
+    needs: sonar-scan-push
+    if: ${{ github.ref == 'refs/heads/master' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    environment: 'production'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Extract version info
+        run: |
+          PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\", ]//g')
+          echo "IMAGE_NAME=ghcr.io/bitpatty/race-announcer-bot:${PACKAGE_VERSION}" >> $GITHUB_ENV
+          echo "Using Version: ${PACKAGE_VERSION}"
+      - name: Create a new build
+        run: docker build -t "${{ env.IMAGE_NAME }}" -f ./dockerfiles/Production.Dockerfile .
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push Image to registry
+        run: docker push ${{ env.IMAGE_NAME }}
