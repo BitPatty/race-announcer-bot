@@ -48,6 +48,8 @@ class RaceTimeGGConnector
         return EntrantStatus.FORFEIT;
       case RaceTimeEntrantStatus.DISQUALIFIED:
         return EntrantStatus.DISQUALIFIED;
+      case RaceTimeEntrantStatus.INVITED:
+        return EntrantStatus.INVITED;
       default:
         return EntrantStatus.UNKNOWN;
     }

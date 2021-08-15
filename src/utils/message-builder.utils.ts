@@ -37,6 +37,7 @@ class MessageBuilderUtils {
     [EntrantStatus.FORFEIT]: 'Forfeit',
     [EntrantStatus.DONE]: 'Finished',
     [EntrantStatus.DISQUALIFIED]: 'DQ',
+    [EntrantStatus.INVITED]: 'Invited',
   };
 
   public static getRaceStatusIndicatorColor(status: RaceStatus): string {

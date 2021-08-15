@@ -5,6 +5,7 @@ enum EntrantStatus {
   FORFEIT = 'forfeit',
   DONE = 'done',
   DISQUALIFIED = 'disqualified',
+  INVITED = 'invited',
 }
 
 export default EntrantStatus;
