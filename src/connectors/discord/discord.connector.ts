@@ -394,13 +394,13 @@ class DiscordConnector
     }
 
     // Update the message content
-    const msg = await originalMessage.edit({
+    const updatedMessage = await originalMessage.edit({
       content: null,
       embeds: [this.buildRaceEmbed(race)],
     });
 
     return DiscordCommandParser.transformDiscordMessageToChatMessage(
-      msg,
+      updatedMessage,
       this.client,
     );
   }

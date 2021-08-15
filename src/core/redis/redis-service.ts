@@ -88,7 +88,7 @@ class RedisService {
       }),
     );
 
-    if (existingValue !== instanceUuid) return;
+    if (existingValue !== instanceUuid) return Promise.resolve();
 
     return new Promise((resolve) => {
       this.client.del(`${taskIdentifier}_${postfix}`, () => {
