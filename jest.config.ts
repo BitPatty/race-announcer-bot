@@ -16,7 +16,7 @@ export default (): Config.InitialOptions => {
     verbose: true,
     testMatch: [
       '**/test/connectors/speedrunslive/**/*.test.ts',
-      // '**/test/misc/**/*.test.ts',
+      '**/test/misc/**/*.test.ts',
     ],
   };
 };
