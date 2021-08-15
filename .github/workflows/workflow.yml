@@ -2,6 +2,14 @@ name: Github Workflow
 
 on:
   push:
+    branches:
+      - '*'
+      - '*/*'
+      - '**'
+    tags-ignore:
+      - '*'
+      - '*/*'
+      - '**'
   pull_request:
     types: [assigned, opened, synchronize, reopened]
 
