@@ -29,34 +29,34 @@ The bot follows a stateless design and and requires the following services to be
 
 The following environment variables must be set in order to run the application:
 
-| Name              | Description                                                                                                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DATABASE_TYPE     | `mariadb` or `mysql`, depending on your installation (defaults to `mysql`)                                                                                           |
-| DATABASE_USER     | The user used to connect to the database                                                                                                                             |
-| DATABASE_PASSWORD | The password to the database                                                                                                                                         |
-| DATABASE_PORT     | The port of the database (defaults to `3306`)                                                                                                                        |
-| DATABASE_HOST     | The host address or host name of your database                                                                                                                       |
-| DATABASE_NAME     | The name of the database                                                                                                                                             |
-| REDIS_HOST        | The host address of your Redis instance                                                                                                                              |
-| REDIS_PORT        | The port on which Redis can be accessed                                                                                                                              |
-| REDIS_PASSWORD    | The password of your Redis instance                                                                                                                                  |
-| DISCORD_BOT_TOKEN | The access token of your Discord bot. You can generate one over at the [Discord Developer Portal](https://discord.com/developers/applications) in the `Bot` section. |
+| Name              | Description                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| DATABASE_TYPE     | `mariadb` or `mysql`, depending on your installation (defaults to `mysql`)                                                              |
+| DATABASE_USER     | The user used to connect to the database                                                                                                |
+| DATABASE_PASSWORD | The password to the database                                                                                                            |
+| DATABASE_PORT     | The port of the database (defaults to `3306`)                                                                                           |
+| DATABASE_HOST     | The host address or host name of your database                                                                                          |
+| DATABASE_NAME     | The name of the database                                                                                                                |
+| REDIS_HOST        | The host address of your Redis instance                                                                                                 |
+| REDIS_PORT        | The port on which Redis can be accessed                                                                                                 |
+| REDIS_PASSWORD    | The password of your Redis instance                                                                                                     |
+| DISCORD_BOT_TOKEN | The access token of your Discord bot (See [Discord Developer Portal](https://discord.com/developers/applications) in the `Bot` section) |
 
 The following environment variables can be set optionally:
 
-| Name                         | Description                                                                                  |
-| ---------------------------- | -------------------------------------------------------------------------------------------- |
-| RACETIME_BASE_URL            | The base url to racetime.gg (defaults to `https://racetime.gg`)                              |
-| SRL_BASE_URL                 | The base url to SpeedRunsLive (defaults to `https://speedrunslive.com`)                      |
-| SRL_API_BASE_URL             | The base url of the SpeedRunsLive API (defaults to `https://api.speedrunslive.com`)          |
-| DISCORD_GLOBAL_ADMINS        | Comma-seperated list of user ids which should be considered bot admins on all guilds         |
-| LOG_LEVEL                    | The max log level. Can either be `info` or `debug` (defaults to `info`)                      |
-| LOG_PRETTY_PRINT             | Whether to pretty print logs (useful for devs). One of `true`/`false` (defaults to `false`). |
-| ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format (defaults to `*/10 * * * * *`)          |
-| GAME_SYNC_INTERVAL           | The interval for game database synchronization (defaults to `0 0 * * * * `)                  |
-| WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks (defaults to `*/10 * * * * `)                          |
-| ELASTICSEARCH_URL            | The URL to your elasticsearch instance (if any) which logs will be streamed to               |
-| ELASTICSEARCH_INDEX          | The elasticsearch index name (defaults to `race-announcer-bot`)                              |
+| Name                         | Description                                                                          | Default                         |
+| ---------------------------- | ------------------------------------------------------------------------------------ | ------------------------------- |
+| RACETIME_BASE_URL            | The base url to racetime.gg                                                          | `https://racetime.gg`           |
+| SRL_BASE_URL                 | The base url to SpeedRunsLive                                                        | `https://speedrunslive.com`     |
+| SRL_API_BASE_URL             | The base url of the SpeedRunsLive API                                                | `https://api.speedrunslive.com` |
+| DISCORD_GLOBAL_ADMINS        | Comma-seperated list of user ids which should be considered bot admins on all guilds | ``                              |
+| LOG_LEVEL                    | The max log level. Can either be `info` or `debug`                                   | `info`                          |
+| LOG_PRETTY_PRINT             | Whether to pretty print logs (useful for devs). One of `true`/`false`                | `false`                         |
+| ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format                                 | `*/10 * * * * *`                |
+| GAME_SYNC_INTERVAL           | The interval for game database synchronization                                       | `0 0 * * * * `                  |
+| WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks                                                | `*/10 * * * * `                 |
+| ELASTICSEARCH_URL            | The URL to your elasticsearch instance (if any) which logs will be streamed to       | ``                              |
+| ELASTICSEARCH_INDEX          | The elasticsearch index name                                                         | `race-announcer-bot`            |
 
 ## License
 
