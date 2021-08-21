@@ -4,6 +4,7 @@
 [![Development Build](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml/badge.svg?branch=develop)](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml)
 ![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/bitpatty/raceannouncerbot/master)
 [![Production Build](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml/badge.svg?branch=master)](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot?ref=badge_shield)
 
 A speedrun race announcer bot designed for multi-source and multi-destination usage. It currently supports the following data sources:
 
@@ -67,3 +68,6 @@ This project and all source files in this repository are
 licensed under the GNU Affero General Public License v3
 (see LICENSE).
 ```
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot?ref=badge_large)
