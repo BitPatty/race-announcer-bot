@@ -51,7 +51,7 @@ jobs:
   sonar-scan-push:
     name: Sonar Scan (on push)
     needs: build-and-test
-    if: ${{ github.event_name == 'push' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ github.event_name == 'push' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
