@@ -29,7 +29,7 @@ jobs:
   sonar-scan-pr:
     name: Sonar Scan (on PR)
     needs: build-and-test
-    if: ${{ github.event_name == 'pull_request' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ github.event_name == 'pull_request' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') && github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     environment: 'sonar-scan'
     steps:
@@ -51,7 +51,7 @@ jobs:
   sonar-scan-push:
     name: Sonar Scan (on push)
     needs: build-and-test
-    if: ${{ github.event_name == 'push' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') }}
+    if: ${{ github.event_name == 'push' && github.repository == 'BitPatty/RaceAnnouncerBot' && !contains(github.event.head_commit.message, '[skip ci]') && github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
