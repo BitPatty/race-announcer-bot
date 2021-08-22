@@ -16,6 +16,7 @@ import DestinationEventListenerMap from '../../models/interfaces/connectors/dest
 import {
   DestinationConnectorIdentifier,
   DestinationEvent,
+  EntrantStatus,
   MessageChannelType,
   ReactionType,
   ReplyType,
@@ -319,7 +320,16 @@ class DiscordConnector
           return '';
 
         const statusText = MessageBuilderUtils.getEntrantStatusText(e);
-        return `**${e.displayName}**: ${statusText}`;
+
+        const formattedStatusText = [
+          EntrantStatus.DONE,
+          EntrantStatus.READY,
+          EntrantStatus.ENTERED,
+        ].includes(e.status)
+          ? statusText
+          : `*${statusText}*`;
+
+        return `**${e.displayName}**: ${formattedStatusText}`;
       })
       .join('\r\n')
       .trim();
