@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.0
+
+- Add Thumbnail to Discord Announcements
+- Update identifiers for racetime racers
+
 ## v1.1.2
 
 - Update Discord formatting depending on entrant status
