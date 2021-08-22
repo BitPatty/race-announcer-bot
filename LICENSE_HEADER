@@ -17,11 +17,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import SRLGame from './srl-game.interface';
 
-interface SRLGameList {
-  count: string;
-  games: SRLGame[];
-}
-
-export default SRLGameList;

@@ -22,3 +22,4 @@ Dockerfile text eol=lf
 *.gitattributes eol=lf
 *.gitignore eol=lf
 LICENSE eol=lf
+LICENSE_HEADER eol=lf
