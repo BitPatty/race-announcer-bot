@@ -20,8 +20,8 @@
 import { Entity } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
 
+import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
 import { EntityColumn } from '../decorators';
-import { SourceConnectorIdentifier } from '../enums';
 import TransformerUtils from '../../utils/transformer.utils';
 
 import BaseEntity, { EntityInitializer } from './base.entity';
@@ -53,6 +53,16 @@ class RacerEntity extends BaseEntity<RacerEntity> {
    */
   @EntityColumn({ nullable: false })
   public displayName: string;
+
+  /**
+   * The full name of the racer
+   */
+  @EntityColumn({
+    nullable: true,
+    type: DatabaseAttributeType.VARCHAR,
+    length: 255,
+  })
+  public fullName: string | null;
 
   /**
    * The {@link SourceConnectorIdentifier} this racer

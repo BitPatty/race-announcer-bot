@@ -83,7 +83,9 @@ class SpeedRunsLiveConnector
 
   private srlEntrantToEntrant(srlEntrant: SRLEntrant): EntrantInformation {
     return {
+      identifier: srlEntrant.displayname.toLowerCase(),
       displayName: srlEntrant.displayname,
+      fullName: srlEntrant.displayname,
       status: this.numericEntrantStateToStatus(srlEntrant.time),
       finalTime: srlEntrant.time > 0 ? srlEntrant.time : null,
     };

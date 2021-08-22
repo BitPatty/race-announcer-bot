@@ -91,17 +91,20 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     // Update racer entities
     for (const entrant of race.entrants) {
       const existingRacer = await racerRepository.findOne({
-        where: {
-          identifier: entrant.displayName.toLowerCase(),
-          connector: this.connector.connectorType,
-        },
+        where: [
+          {
+            identifier: entrant.identifier,
+            connector: this.connector.connectorType,
+          },
+        ],
       });
 
       const updatePayload: RacerEntity = {
         ...(existingRacer ?? {}),
         ...new RacerEntity({
-          identifier: entrant.displayName.toLowerCase(),
+          identifier: entrant.identifier,
           displayName: entrant.displayName,
+          fullName: entrant.fullName,
           connector: this.connector.connectorType,
         }),
       };
@@ -155,7 +158,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       );
 
       const entrantData = race.entrants.find(
-        (e) => e.displayName === racer.displayName,
+        (e) => e.identifier === racer.identifier,
       ) as EntrantInformation;
 
       const updatedEntrant = await entrantRepository.save({

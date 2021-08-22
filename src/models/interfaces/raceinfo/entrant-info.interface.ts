@@ -20,7 +20,9 @@
 import { EntrantStatus } from '../../enums';
 
 interface EntrantInformation {
+  identifier: string;
   displayName: string;
+  fullName: string | null;
   status: EntrantStatus;
   finalTime: number | null;
 }

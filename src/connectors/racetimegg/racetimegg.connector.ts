@@ -111,6 +111,8 @@ class RaceTimeGGConnector
     racetimeEntrant: RaceTimeEntrant,
   ): EntrantInformation {
     return {
+      identifier: racetimeEntrant.user.id,
+      fullName: racetimeEntrant.user.full_name,
       displayName: racetimeEntrant.user.name,
       status: this.raceTimeEntrantStateToStatus(racetimeEntrant.status.value),
       finalTime: DateTimeUtils.parseISOTimeSpanToSeconds(

@@ -84,7 +84,9 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       ...race,
       entrants: entrants.map((e) => ({
         ...e,
+        identifier: e.racer.identifier,
         displayName: e.racer.displayName,
+        fullName: e.racer.fullName,
       })),
     };
   }
