@@ -95,11 +95,7 @@ class SpeedRunsLiveConnector
     return {
       identifier: srlRace.id.toString(),
       url: `${ConfigService.speedRunsLiveBaseUrl}/race/?id=${srlRace.id}`,
-      game: {
-        identifier: srlRace.game.id.toString(),
-        name: srlRace.game.name,
-        abbreviation: srlRace.game.abbrev,
-      },
+      game: this.srlGameToGame(srlRace.game),
       goal: srlRace.goal,
       status: this.numericRaceStateToStatus(srlRace.state),
       entrants: Object.values(srlRace.entrants).map((e) =>
@@ -113,6 +109,9 @@ class SpeedRunsLiveConnector
       identifier: srlGame.id.toString(),
       name: srlGame.name,
       abbreviation: srlGame.abbrev,
+      // This is actually how the SRL website builds the URL,
+      // no matter whether the image actually exists
+      imageUrl: `https://cdn.speedrunslive.com/images/games/${srlGame.abbrev}.jpg`,
     };
   }
 

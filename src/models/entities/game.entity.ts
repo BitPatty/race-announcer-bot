@@ -17,9 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
 import { Entity } from 'typeorm';
 import { EntityColumn } from '../decorators';
-import { SourceConnectorIdentifier } from '../enums';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
 import TransformerUtils from '../../utils/transformer.utils';
@@ -43,6 +43,16 @@ class GameEntity extends BaseEntity<GameEntity> {
    */
   @EntityColumn({ nullable: false })
   public name: string;
+
+  /**
+   * The image of the game
+   */
+  @EntityColumn({
+    nullable: true,
+    type: DatabaseAttributeType.VARCHAR,
+    length: 255,
+  })
+  public imageUrl: string | null;
 
   /**
    * The identifier used by the {@link GameEntity.connector}

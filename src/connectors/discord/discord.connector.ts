@@ -19,6 +19,7 @@
 
 import * as Discord from 'discord.js';
 import * as Joi from 'joi';
+import * as path from 'path';
 
 import {
   ChatChannel,
@@ -282,6 +283,18 @@ class DiscordConnector
     // Only add the URL if it's a proper URL
     if (race.url && Joi.string().uri().validate(race.url).error == null)
       embed = embed.setURL(race.url);
+
+    // Only add image if it's a valid image
+    // Note that if the image doesn't exist discord is smart enough
+    // to simply not display it instead of displaying a broken image
+    if (
+      race.game.imageUrl &&
+      Joi.string().uri().validate(race.game.imageUrl) &&
+      ['.jpg', '.jpeg', '.png'].includes(
+        path.extname(race.game.imageUrl).toLowerCase(),
+      )
+    )
+      embed = embed.setThumbnail(race.game.imageUrl);
 
     // List the entrants
     const entrantString = this.buildEntrantList(race.entrants);

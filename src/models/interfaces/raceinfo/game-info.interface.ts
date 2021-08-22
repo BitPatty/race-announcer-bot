@@ -21,6 +21,7 @@ interface GameInformation {
   identifier: string;
   name: string;
   abbreviation: string;
+  imageUrl: string | null;
 }
 
 export default GameInformation;

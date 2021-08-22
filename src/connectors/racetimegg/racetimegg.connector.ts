@@ -98,6 +98,7 @@ class RaceTimeGGConnector
       identifier: category.slug,
       name: category.name,
       abbreviation: category.slug,
+      imageUrl: category.image,
     };
   }
 
@@ -132,11 +133,7 @@ class RaceTimeGGConnector
       identifier: racetimeRace.name,
       goal: raceGoal,
       url: `${ConfigService.raceTimeBaseUrl}${racetimeRace.url}`,
-      game: {
-        identifier: racetimeRace.category.slug,
-        name: racetimeRace.category.name,
-        abbreviation: racetimeRace.category.short_name,
-      },
+      game: this.racetimeCategoryToGame(racetimeRace.category),
       status: this.raceTimeRaceStateToStatus(racetimeRace.status.value),
       entrants: racetimeRace.entrants.map((e) =>
         this.racetimeEntrantToEntrant(e),
