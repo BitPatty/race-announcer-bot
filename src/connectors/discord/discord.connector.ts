@@ -529,11 +529,11 @@ class DiscordConnector
         \`<@Bot Mention> track <provider> <slug> <#channel mention>\`
 
         Example usage: 
-        <@${this.client.user?.id}> track racetime sms <#${originalMessage.channel.id}>
 
-        This would add a tracker for Super Mario Sunshine on racetime to <#${originalMessage.channel.id}>.
-        For SRL simply substitute \`racetime\` with \`srl\`.
-        Note that you cannot track the same game in multiple channels.
+        <@${this.client.user?.id}> track ${SourceConnectorIdentifier.RACETIME_GG} sms <#${originalMessage.channel.id}>
+
+        This would add a tracker for Super Mario Sunshine on racetime.gg to <#${originalMessage.channel.id}>.
+        For SRL simply substitute \`${SourceConnectorIdentifier.RACETIME_GG}\` with \`${SourceConnectorIdentifier.SPEEDRUNSLIVE}\`.
         `,
       )
       .addField(
@@ -542,15 +542,16 @@ class DiscordConnector
         \`<@Bot Mention> untrack <provider> <slug>\`
 
         Example usage: 
-        <@${this.client.user?.id}> untrack racetime oot
 
-        This would remove the racetime OOT tracker 
+        <@${this.client.user?.id}> untrack ${SourceConnectorIdentifier.RACETIME_GG} oot
+
+        This would remove the Ocarina of Time tracker for racetime.gg.
         `,
       )
       .addField(
         'More information',
         `
-        For detailed instructions visit https://github.com/BitPatty/RaceAnnouncerBot/wiki/Race-Announcer-Bot-Wiki.
+        For additional instructions visit https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide.
         `,
       );
 
