@@ -532,8 +532,7 @@ class DiscordConnector
 
         <@${this.client.user?.id}> track ${SourceConnectorIdentifier.RACETIME_GG} sms <#${originalMessage.channel.id}>
 
-        This would add a tracker for Super Mario Sunshine on racetime.gg to <#${originalMessage.channel.id}>.
-        For SRL simply substitute \`${SourceConnectorIdentifier.RACETIME_GG}\` with \`${SourceConnectorIdentifier.SPEEDRUNSLIVE}\`.
+        This would add a tracker for Super Mario Sunshine on racetime.gg to <#${originalMessage.channel.id}>. To use SRL simply substitute \`${SourceConnectorIdentifier.RACETIME_GG}\` with \`${SourceConnectorIdentifier.SPEEDRUNSLIVE}\`.
         `,
       )
       .addField(
@@ -551,7 +550,7 @@ class DiscordConnector
       .addField(
         'More information',
         `
-        For additional instructions visit https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide.
+        For additional instructions visit the [Wiki](https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide).
         `,
       );
 
