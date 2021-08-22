@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { BeforeInsert, BeforeUpdate, Entity } from 'typeorm';
 import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
-import { Entity } from 'typeorm';
 import { EntityColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
 import BaseEntity, { EntityInitializer } from './base.entity';
@@ -72,6 +72,12 @@ class GameEntity extends BaseEntity<GameEntity> {
    */
   @EntityColumn({ nullable: false })
   public abbreviation: string;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  private truncateFields(): void {
+    if (this.imageUrl && this.imageUrl.length > 255) this.imageUrl = null;
+  }
 }
 
 export default GameEntity;

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Entity, ManyToOne } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Entity, ManyToOne } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
 
 import {
@@ -115,6 +115,12 @@ class RaceEntity extends BaseEntity<RaceEntity> {
   })
   @EntityJoinColumn()
   public game: GameEntity;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  private truncateFields(): void {
+    this.goal = TransformerUtils.truncateString(this.goal, 1000);
+  }
 }
 
 export default RaceEntity;

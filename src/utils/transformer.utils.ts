@@ -55,6 +55,27 @@ class TransformerUtils {
   public static toTableName<T>(className: new () => T): string {
     return this.camelCaseToSnakeCase(className.name).replace(/_entity$/, '');
   }
+
+  /**
+   * Truncates the string to the specified number
+   * of characters if necessary
+   * @param str The string
+   * @param length The max length of the string
+   * @returns The truncated string or the original string,
+   * if it already met the constraints
+   */
+  public static truncateString<T extends string | null>(
+    str: T,
+    length: number,
+  ): T {
+    if (!str) return str as T;
+    if (str.length <= length) return str;
+
+    const ff = '[...]';
+    const truncatedString = str.substring(0, length - ff.length - 1).split(' ');
+    truncatedString.pop();
+    return `${truncatedString.join(' ')} ${ff}` as T;
+  }
 }
 
 export default TransformerUtils;
