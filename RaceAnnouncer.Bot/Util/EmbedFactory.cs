@@ -52,7 +52,13 @@ namespace RaceAnnouncer.Bot.Util
                                       .Take(15)
                                       .Select(FormatEntrantStatus))
                                       + $"\r\n *+{entrants.Count - 15} more..*"
-                                }
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                  IsInline = false,
+                                  Name = "Deprecation Notice",
+                                  Value = "Migrate to the new Bot before 09/30/2021 => https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide"
+                                },
                               },
       Footer          /**/ = new EmbedFooterBuilder() { Text = FormatRaceStatus(race) },
       Color           /**/ = GetStatusColor(race),
