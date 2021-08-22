@@ -57,7 +57,7 @@ namespace RaceAnnouncer.Bot.Util
                                 {
                                   IsInline = false,
                                   Name = "Deprecation Notice",
-                                  Value = "Migrate to the new Bot before 09/30/2021 => https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide"
+                                  Value = "Migrate to the new bot before 09/30/2021 => https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide"
                                 },
                               },
       Footer          /**/ = new EmbedFooterBuilder() { Text = FormatRaceStatus(race) },
