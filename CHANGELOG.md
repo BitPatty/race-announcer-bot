@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.2
+
+- Update Discord formatting depending on entrant status
+
 ## v1.1.1
 
 - Update Discord help message
