@@ -173,7 +173,7 @@ class ConfigService {
       RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       LOG_LEVEL: Joi.string()
-        .valid(getEnumValues(LogLevel))
+        .valid(...getEnumValues(LogLevel))
         .default(LogLevel.DEBUG),
       LOG_PRETTY_PRINT: Joi.boolean().default(false),
       WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),
