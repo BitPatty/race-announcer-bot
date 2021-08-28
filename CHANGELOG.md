@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.0
+
+- Switched to Discord Slash commands due to upcoming privilege issues
+
 ## v1.3.0
 
 - Added provider name to Discord embeds
