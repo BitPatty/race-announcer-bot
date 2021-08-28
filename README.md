@@ -6,6 +6,10 @@
 [![Production Build](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml/badge.svg?branch=master)](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot?ref=badge_shield)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/BitPatty/RaceAnnouncerBot/docs/rab_preview.png">
+</p>
+
 A speedrun race announcer bot designed for multi-source and multi-destination usage. It currently supports the following data sources:
 
 - [RaceTimeGG](https://racetime.gg/)

@@ -1,12 +1,12 @@
 # Common
-*.env eol=lf
-*.example eol=lf
+*.env text eol=lf
+*.example text eol=lf
 *.js text eol=lf
 *.json text eol=lf
 *.md text eol=lf
-*.properties eol=lf
-*.sh eol=lf
-*.sql eol=lf
+*.properties text eol=lf
+*.sh text eol=lf
+*.sql text eol=lf
 *.ts text eol=lf
 *.yml text eol=lf
 
@@ -15,11 +15,14 @@ Dockerfile text eol=lf
 *.Dockerfile text eol=lf
 
 # Misc files
-.eslintignore eol=lf
-.nvmrc eol=lf
-.prettierignore eol=lf
-.prettierrc eol=lf
-*.gitattributes eol=lf
-*.gitignore eol=lf
-LICENSE eol=lf
-LICENSE_HEADER eol=lf
+.eslintignore text eol=lf
+.nvmrc text eol=lf
+.prettierignore text eol=lf
+.prettierrc text eol=lf
+*.gitattributes text eol=lf
+*.gitignore text eol=lf
+LICENSE text eol=lf
+LICENSE_HEADER text eol=lf
+
+# Images
+*.png binary
