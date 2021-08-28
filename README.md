@@ -13,7 +13,7 @@ A speedrun race announcer bot designed for multi-source and multi-destination us
 
 As well as the following platforms for announcements:
 
-- [Discord](https://discord.com/)
+- [Discord](https://discord.com/) -> User Guide: [Wiki](https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide)
 
 ## Quickstart (Docker)
 
