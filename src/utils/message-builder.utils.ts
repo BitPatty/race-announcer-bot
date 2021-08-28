@@ -19,6 +19,7 @@
 
 import { EntrantInformation, RaceInformation } from '../models/interfaces';
 import { EntrantStatus, RaceStatus } from '../models/enums';
+import LoggerService from '../core/logger/logger.service';
 
 class MessageBuilderUtils {
   private static readonly raceStatusIndicatorColor: {
@@ -121,6 +122,17 @@ class MessageBuilderUtils {
 
   public static getGameText(race: RaceInformation): string {
     return `${race.game.name}`;
+  }
+
+  public static getDomainName(url: string | null): string | null {
+    if (!url) return null;
+    try {
+      const u = new URL(url);
+      return u.hostname;
+    } catch (e) {
+      LoggerService.warn(`Cannot parse URL ${url}`);
+      return null;
+    }
   }
 }
 

@@ -280,12 +280,25 @@ class DiscordConnector
       )
       .addField('Game', MessageBuilderUtils.getGameText(race))
       .addField('Goal', MessageBuilderUtils.getGoalText(race))
-      .setFooter(MessageBuilderUtils.getRaceStatusIndicatorText(race.status))
       .setTimestamp();
 
     // Only add the URL if it's a proper URL
-    if (race.url && Joi.string().uri().validate(race.url).error == null)
-      embed = embed.setURL(race.url);
+    if (race.url && Joi.string().uri().validate(race.url).error == null) {
+      embed = embed
+        .setURL(race.url)
+        .setFooter(
+          [
+            MessageBuilderUtils.getDomainName(race.url),
+            MessageBuilderUtils.getRaceStatusIndicatorText(race.status),
+          ]
+            .filter((e) => e != null)
+            .join(' | '),
+        );
+    } else {
+      embed = embed.setFooter(
+        MessageBuilderUtils.getRaceStatusIndicatorText(race.status),
+      );
+    }
 
     // Only add image if it's a valid image
     // Note that if the image doesn't exist discord is smart enough
