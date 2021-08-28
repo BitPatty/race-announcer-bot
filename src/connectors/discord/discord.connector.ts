@@ -292,7 +292,7 @@ class DiscordConnector
             MessageBuilderUtils.getRaceStatusIndicatorText(race.status),
           ]
             .filter((e) => e != null)
-            .join(' | '),
+            .join(' • '),
         );
     } else {
       embed = embed.setFooter(
