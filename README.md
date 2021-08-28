@@ -30,18 +30,19 @@ The bot follows a stateless design and and requires the following services to be
 
 The following environment variables must be set in order to run the application:
 
-| Name              | Description                                                                                                                             |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| DATABASE_TYPE     | `mariadb` or `mysql`, depending on your installation (defaults to `mysql`)                                                              |
-| DATABASE_USER     | The user used to connect to the database                                                                                                |
-| DATABASE_PASSWORD | The password to the database                                                                                                            |
-| DATABASE_PORT     | The port of the database (defaults to `3306`)                                                                                           |
-| DATABASE_HOST     | The host address or host name of your database                                                                                          |
-| DATABASE_NAME     | The name of the database                                                                                                                |
-| REDIS_HOST        | The host address of your Redis instance                                                                                                 |
-| REDIS_PORT        | The port on which Redis can be accessed                                                                                                 |
-| REDIS_PASSWORD    | The password of your Redis instance                                                                                                     |
-| DISCORD_BOT_TOKEN | The access token of your Discord bot (See [Discord Developer Portal](https://discord.com/developers/applications) in the `Bot` section) |
+| Name              | Description                                                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| DATABASE_TYPE     | `mariadb` or `mysql`, depending on your installation (defaults to `mysql`)                                                               |
+| DATABASE_USER     | The user used to connect to the database                                                                                                 |
+| DATABASE_PASSWORD | The password to the database                                                                                                             |
+| DATABASE_PORT     | The port of the database (defaults to `3306`)                                                                                            |
+| DATABASE_HOST     | The host address or host name of your database                                                                                           |
+| DATABASE_NAME     | The name of the database                                                                                                                 |
+| REDIS_HOST        | The host address of your Redis instance                                                                                                  |
+| REDIS_PORT        | The port on which Redis can be accessed                                                                                                  |
+| REDIS_PASSWORD    | The password of your Redis instance                                                                                                      |
+| DISCORD_BOT_TOKEN | The access token of your Discord bot (See [Discord Developer Portal](https://discord.com/developers/applications) in the `Bot` section)  |
+| DISCORD_CLIENT_ID | The client id of your Discord bot (See [Discord Developer Portal](https://discord.com/developers/applications) in the `OAuth 2` section) |
 
 The following environment variables can be set optionally:
 
