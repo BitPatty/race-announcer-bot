@@ -116,10 +116,8 @@ class DiscordConnector
     const permissions = discordChannel.permissionsFor(this.client.user);
     if (!permissions) throw new Error('Failed to load permissions');
 
-    if (!permissions.has('READ_MESSAGE_HISTORY')) return false;
     if (!permissions.has('SEND_MESSAGES')) return false;
     if (!permissions.has('VIEW_CHANNEL')) return false;
-    if (!permissions.has('ADD_REACTIONS')) return false;
     if (!permissions.has('EMBED_LINKS')) return false;
 
     return true;
