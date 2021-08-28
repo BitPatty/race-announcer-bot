@@ -43,7 +43,10 @@ const helpCommand = {
   template: new SlashCommandBuilder()
     .setName('help')
     .setDescription('Displays the help text for the bot usage'),
-  prepare: (interaction: Discord.CommandInteraction): Promise<HelpCommand> => {
+  prepare: async (
+    interaction: Discord.CommandInteraction,
+  ): Promise<HelpCommand> => {
+    await interaction.deferReply({ ephemeral: true });
     return Promise.resolve({
       type: BotCommandType.HELP,
       message: transformInteractionToChatMessage(interaction),
@@ -55,9 +58,10 @@ const listTrackersCommand = {
   template: new SlashCommandBuilder()
     .setName('list')
     .setDescription('Lists the trackers registered in the current guild'),
-  prepare: (
+  prepare: async (
     interaction: Discord.CommandInteraction,
   ): Promise<ListTrackersCommand> => {
+    await interaction.deferReply({ ephemeral: true });
     return Promise.resolve({
       type: BotCommandType.LIST_TRACKERS,
       channelIdentifier: interaction.channelId,
@@ -95,7 +99,10 @@ const registerTrackerCommand = {
   ): Promise<AddTrackerCommand | null> => {
     const mentionedChannel = interaction.options.getChannel('channel');
     if (!mentionedChannel) {
-      await interaction.reply('Invalid channel');
+      await interaction.reply({
+        content: 'Invalid channel',
+        ephemeral: true,
+      });
       return null;
     }
 
@@ -107,7 +114,10 @@ const registerTrackerCommand = {
       !mentionedChannelInGuild ||
       mentionedChannelInGuild.type !== 'GUILD_TEXT'
     ) {
-      await interaction.reply('Invalid channel');
+      await interaction.reply({
+        content: 'Invalid channel',
+        ephemeral: true,
+      });
       return null;
     }
 
@@ -117,17 +127,24 @@ const registerTrackerCommand = {
     );
 
     if (!selectedProvider) {
-      await interaction.reply('Invalid Provider');
+      await interaction.reply({
+        content: 'Invalid Provider',
+        ephemeral: true,
+      });
       return null;
     }
 
     const selectedSlug = interaction.options.getString('slug');
 
     if (!selectedSlug) {
-      await interaction.reply('Missing slug');
+      await interaction.reply({
+        content: 'Missing slug',
+        ephemeral: true,
+      });
       return null;
     }
 
+    await interaction.deferReply({ ephemeral: true });
     return {
       type: BotCommandType.ADD_TRACKER,
       sourceIdentifier: selectedProvider as SourceConnectorIdentifier,
@@ -162,17 +179,24 @@ const removeTrackerCommand = {
     );
 
     if (!selectedProvider) {
-      await interaction.reply('Invalid Provider');
+      await interaction.reply({
+        content: 'Invalid Provider',
+        ephemeral: true,
+      });
       return null;
     }
 
     const selectedSlug = interaction.options.getString('slug');
 
     if (!selectedSlug) {
-      await interaction.reply('Missing slug');
+      await interaction.reply({
+        content: 'Missing slug',
+        ephemeral: true,
+      });
       return null;
     }
 
+    await interaction.deferReply({ ephemeral: true });
     return {
       type: BotCommandType.REMOVE_TRACKER,
       sourceIdentifier: selectedProvider as SourceConnectorIdentifier,

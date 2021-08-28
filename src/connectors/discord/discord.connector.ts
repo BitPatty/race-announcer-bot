@@ -41,6 +41,7 @@ import {
   DestinationEvent,
   EntrantStatus,
   MessageChannelType,
+  ReactionType,
   ReplyType,
   SourceConnectorIdentifier,
   TaskIdentifier,
@@ -248,7 +249,8 @@ class DiscordConnector
       );
 
     LoggerService.log('Replying to interaction');
-    await interaction.reply({
+
+    await interaction.editReply({
       embeds: [embed],
     });
   }
@@ -564,6 +566,17 @@ class DiscordConnector
     return this.transformDiscordMessageToChatMessage(updatedMessage);
   }
 
+  private getReactionContent(reaction: ReactionType): string {
+    switch (reaction) {
+      case ReactionType.POSITIVE:
+        return '✅';
+      case ReactionType.NEGATIVE:
+        return '❌';
+      case ReactionType.UNKNOWN_ACTION:
+        return '❓';
+    }
+  }
+
   /**
    * Reply to the specified chat message
    * @param to The message to reply to
@@ -585,33 +598,38 @@ class DiscordConnector
       !(content instanceof Discord.MessageEmbed) &&
       content.type === ReplyType.REACTION
     ) {
-      await originalMessage.reply(content.reaction);
+      await originalMessage.editReply({
+        content: this.getReactionContent(content.reaction),
+      });
       return;
     }
 
-    const messageContent = ((): Discord.MessageOptions => {
+    const messageContent = ((): Discord.InteractionReplyOptions => {
       switch (content.type) {
         case ReplyType.TEXT:
           return {
             content: (content as TextReply).message,
+            ephemeral: true,
           };
         case ReplyType.TRACKER_LIST:
           return {
             embeds: [
               this.buildTrackerListEmbed((content as TrackerListReply).items),
             ],
+            ephemeral: true,
           };
         default:
           if (content instanceof Discord.MessageEmbed)
             return {
               embeds: [content],
+              ephemeral: true,
             };
           throw new Error('Invalid message type');
       }
     })();
 
     LoggerService.debug(`Replying to ${originalMessage.id}`);
-    await originalMessage.reply(messageContent);
+    await originalMessage.editReply(messageContent);
   }
 
   private async registerCommands(): Promise<void> {
@@ -629,32 +647,9 @@ class DiscordConnector
       ConfigService.discordToken,
     );
 
-    LoggerService.log(
-      JSON.stringify(discordSlashCommands.map((s) => s.template.toJSON())),
-    );
-
-    await rest.put(
-      Routes.applicationGuildCommands(
-        ConfigService.discordClientId,
-        '397348825292865551',
-      ),
-      {
-        body: discordSlashCommands.map((s) => s.template.toJSON()),
-      },
-    );
-
-    const registeredCommands = await rest.get(
-      Routes.applicationGuildCommands(
-        ConfigService.discordClientId,
-        '397348825292865551',
-      ),
-    );
-
-    LoggerService.log('Registered commands', registeredCommands);
-
-    // await rest.put(Routes.applicationCommands(ConfigService.discordClientId), {
-    //   body: JSON.stringify(discordSlashCommands.map((s) => s.template.toJSON())),
-    // });
+    await rest.put(Routes.applicationCommands(ConfigService.discordClientId), {
+      body: discordSlashCommands.map((s) => s.template.toJSON()),
+    });
   }
 
   /**
@@ -700,10 +695,24 @@ class DiscordConnector
 
           if (!reservedByCurrentInstance) return;
           if (!interaction.isCommand()) return;
+
+          if (!interaction.inGuild()) {
+            await interaction.reply({
+              content: 'Commands can only be used within guilds',
+              ephemeral: true,
+            });
+            return;
+          }
+
           if (
             !this.canUseBotCommands(interaction.member as Discord.GuildMember)
-          )
+          ) {
+            await interaction.reply({
+              content: 'Only guild administrators can use bot commands',
+              ephemeral: true,
+            });
             return;
+          }
 
           const commandDefinition = discordSlashCommands.find(
             (s) => s.template.name === interaction.commandName,
