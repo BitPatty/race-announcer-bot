@@ -63,19 +63,23 @@ class LoggerService {
   }
 
   public static log(msg: string, ...args: any[]): void {
-    this.logger.info(`${this.logPrefix}${msg}`, ...args);
+    this.logger.info(`${this.logPrefix}${msg}`, args);
   }
 
   public static warn(msg: string, ...args: any[]): void {
-    this.logger.warn(`${this.logPrefix}${msg}`, ...args);
+    this.logger.warn(`${this.logPrefix}${msg}`, args);
   }
 
   public static debug(msg: string, ...args: any[]): void {
-    this.logger.debug(`${this.logPrefix}${msg}`, ...args);
+    this.logger.debug(`${this.logPrefix}${msg}`, args);
+  }
+
+  public static trace(msg: string, ...args: any[]): void {
+    this.logger.trace(`${this.logPrefix}${msg}`, args);
   }
 
   public static error(msg: string, ...args: any[]): void {
-    this.logger.error(`${this.logPrefix}${msg}`, ...args);
+    this.logger.error(`${this.logPrefix}${msg}`, args);
   }
 
   public static fatal(msg: string): void {

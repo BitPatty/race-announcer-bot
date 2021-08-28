@@ -20,6 +20,7 @@
 enum LogLevel {
   INFO = 'info',
   DEBUG = 'debug',
+  TRACE = 'trace',
 }
 
 export default LogLevel;
