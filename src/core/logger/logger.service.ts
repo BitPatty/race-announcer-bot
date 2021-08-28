@@ -37,8 +37,12 @@ class LoggerService {
     },
     ConfigService.elasticsearchUrl
       ? PinoMultiStream.multistream([
-          { stream: process.stdout },
           {
+            level: ConfigService.logLevel,
+            stream: process.stdout,
+          },
+          {
+            level: ConfigService.logLevel,
             stream: pinoElastic({
               index: ConfigService.elasticsearchIndexName,
               consistency: 'one',
