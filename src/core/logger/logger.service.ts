@@ -18,10 +18,10 @@
  */
 
 import * as PinoMultiStream from 'pino-multi-stream';
-import * as ecsFormat from '@elastic/ecs-pino-format';
-import * as pinoElastic from 'pino-elasticsearch';
 
+import ecsFormat from '@elastic/ecs-pino-format';
 import pino from 'pino';
+import pinoElastic from 'pino-elasticsearch';
 
 import ConfigService from '../config/config.service';
 

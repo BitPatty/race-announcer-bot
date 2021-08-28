@@ -1,6 +1,6 @@
 {
   "name": "race-announcer-bot",
-  "version": "1.3.0",
+  "version": "1.3.1-dev",
   "description": "Race announcer bot for speedrunners",
   "license": "AGPL-3.0-or-later",
   "homepage": "https://github.com/BitPatty/RaceAnnouncerBot",

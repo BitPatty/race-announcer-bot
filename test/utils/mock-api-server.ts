@@ -1,5 +1,5 @@
-import * as stoppable from 'stoppable';
 import { Server, createServer } from 'http';
+import stoppable from 'stoppable';
 
 type MockRoute = {
   path: string;

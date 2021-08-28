@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2020",
-    "sourceMap": true,
-    "outDir": "./dist",
     "baseUrl": "./",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
     "incremental": true,
+    "module": "commonjs",
+    "outDir": "./dist",
+    "removeComments": true,
     "resolveJsonModule": true,
+    "sourceMap": true,
     "sourceRoot": "./src",
     "strictNullChecks": true,
+    "target": "es2020",
     // @TODO: Remove once jest is fixed => https://github.com/facebook/jest/issues/11640
     "skipLibCheck": true,
     "plugins": [
