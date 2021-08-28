@@ -29,16 +29,19 @@ import SpeedRunsLiveConnector from './connectors/speedrunslive/speedrunslive.con
 
 const enabledWorkers = [
   {
+    name: 'Discord',
     types: [WorkerType.CHAT, WorkerType.ANNOUNCER],
     connector: DestinationConnectorIdentifier.DISCORD,
     ctor: DiscordConnector,
   },
   {
+    name: 'RaceTimeGG',
     types: [WorkerType.SOURCE_SYNC],
     connector: SourceConnectorIdentifier.RACETIME_GG,
     ctor: RaceTimeGGConnector,
   },
   {
+    name: 'SpeedRunsLive',
     types: [WorkerType.SOURCE_SYNC],
     connector: SourceConnectorIdentifier.SPEEDRUNSLIVE,
     ctor: SpeedRunsLiveConnector,

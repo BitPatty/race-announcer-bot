@@ -21,6 +21,9 @@ import * as Discord from 'discord.js';
 import * as Joi from 'joi';
 import * as path from 'path';
 
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
+
 import {
   ChatChannel,
   ChatMessage,
@@ -38,9 +41,9 @@ import {
   DestinationEvent,
   EntrantStatus,
   MessageChannelType,
-  ReactionType,
   ReplyType,
   SourceConnectorIdentifier,
+  TaskIdentifier,
 } from '../../models/enums';
 
 import { TrackerEntity } from '../../models/entities';
@@ -49,8 +52,8 @@ import ConfigService from '../../core/config/config.service';
 import LoggerService from '../../core/logger/logger.service';
 import MessageBuilderUtils from '../../utils/message-builder.utils';
 
-import DiscordCommandParser from './discord-command-parser';
-import DiscordEmoji from './discord-emoji.enum';
+import RedisService from '../../core/redis/redis-service';
+import discordSlashCommands from './discord-slash-commands';
 
 class DiscordConnector
   implements DestinationConnector<DestinationConnectorIdentifier.DISCORD>
@@ -60,6 +63,11 @@ class DiscordConnector
 
   private readonly entrantDisplayLimitTrigger = 15;
   private readonly entrantDisplayLimitVariance = 2;
+
+  private readonly unhandledInteractions = new Map<
+    string,
+    Discord.CommandInteraction
+  >();
 
   /**
    * The event listeners mapped to this connector
@@ -179,6 +187,108 @@ class DiscordConnector
     const listeners = this.getListeners(type);
     if (listeners.includes(listener)) {
       listeners.splice(listeners.indexOf(listener), 1);
+    }
+  }
+
+  public async postHelpMessage(originalMessage: ChatMessage): Promise<void> {
+    LoggerService.debug('Loading interaction');
+    const interaction = this.unhandledInteractions.get(
+      originalMessage.identifier,
+    );
+
+    if (!interaction) {
+      LoggerService.log('Could not find original interaction');
+      return;
+    }
+    this.unhandledInteractions.delete(originalMessage.identifier);
+
+    LoggerService.log('Preparing embed');
+    const embed = new Discord.MessageEmbed()
+      .setTitle('Race Announcer Help')
+      .setColor('#0390fc')
+      .addField(
+        'General Info',
+        `
+        Only users with the 'Administrator' permission on the server can use bot commands.
+
+        Available Providers:
+        - ${SourceConnectorIdentifier.SPEEDRUNSLIVE} (SpeedRunsLive)
+        - ${SourceConnectorIdentifier.RACETIME_GG} (RacetimeGG)
+        `,
+      )
+      .addField(
+        'Adding a Tracker',
+        `
+        \`<@Bot Mention> track <provider> <slug> <#channel mention>\`
+
+        Example usage: 
+
+        /track ${SourceConnectorIdentifier.RACETIME_GG} sms <#${interaction.channelId}>
+
+        This would add a tracker for Super Mario Sunshine on racetime.gg to <#${interaction.channelId}>. To use SRL simply substitute \`${SourceConnectorIdentifier.RACETIME_GG}\` with \`${SourceConnectorIdentifier.SPEEDRUNSLIVE}\`.
+        `,
+      )
+      .addField(
+        'Removing a Tracker',
+        `
+        \`<@Bot Mention> untrack <provider> <slug>\`
+
+        Example usage: 
+
+        /untrack ${SourceConnectorIdentifier.RACETIME_GG} oot
+
+        This would remove the Ocarina of Time tracker for racetime.gg.
+        `,
+      )
+      .addField(
+        'More information',
+        `
+        For additional instructions visit the [Wiki](https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide).
+        `,
+      );
+
+    LoggerService.log('Replying to interaction');
+    await interaction.reply({
+      embeds: [embed],
+    });
+  }
+
+  /**
+   * Transforms a @see Discord.Message to a @see ChatMessage
+   * @param msg The discord message
+   * @returns The transformed chat message
+   */
+  private transformDiscordMessageToChatMessage(
+    msg: Discord.Message,
+  ): ChatMessage {
+    return {
+      identifier: msg.id,
+      channel: {
+        name: msg.channel.type !== 'DM' ? msg.channel.name : null,
+        identifier: msg.channel.id,
+        serverIdentifier: msg.guild?.id ?? null,
+        type: this.parseChannelType(msg),
+      },
+      author: {
+        identifier: msg.author.id,
+      },
+    };
+  }
+
+  /**
+   * Parse the type of channel in which
+   * the specifie message was posted
+   * @param msg The message
+   * @returns The channel type
+   */
+  private parseChannelType(msg: Discord.Message): MessageChannelType {
+    switch (msg.channel.type) {
+      case 'DM':
+        return MessageChannelType.DIRECT_MESSAGE;
+      case 'GUILD_TEXT':
+        return MessageChannelType.TEXT_CHANNEL;
+      default:
+        return MessageChannelType.OTHER;
     }
   }
 
@@ -407,10 +517,7 @@ class DiscordConnector
       embeds: [this.buildRaceEmbed(race)],
     });
 
-    return DiscordCommandParser.transformDiscordMessageToChatMessage(
-      msg,
-      this.client,
-    );
+    return this.transformDiscordMessageToChatMessage(msg);
   }
 
   /**
@@ -445,10 +552,7 @@ class DiscordConnector
             .setDescription(`*Game changed to ${race.game.name}*`),
         ],
       });
-      return DiscordCommandParser.transformDiscordMessageToChatMessage(
-        msg,
-        this.client,
-      );
+      return this.transformDiscordMessageToChatMessage(msg);
     }
 
     // Update the message content
@@ -457,32 +561,7 @@ class DiscordConnector
       embeds: [this.buildRaceEmbed(race)],
     });
 
-    return DiscordCommandParser.transformDiscordMessageToChatMessage(
-      updatedMessage,
-      this.client,
-    );
-  }
-
-  /**
-   * Adds a reaction to the specified message
-   * @param message The message
-   * @param reactionType The reaction type
-   */
-  private async react(
-    message: Discord.Message,
-    reactionType: ReactionType,
-  ): Promise<void> {
-    switch (reactionType) {
-      case ReactionType.POSITIVE:
-        await message.react(DiscordEmoji.WHITE_CHECKMARK);
-        break;
-      case ReactionType.NEGATIVE:
-        await message.react(DiscordEmoji.RED_X);
-        break;
-      case ReactionType.UNKNOWN_ACTION:
-        await message.react(DiscordEmoji.RED_QUESTIONMARK);
-        break;
-    }
+    return this.transformDiscordMessageToChatMessage(updatedMessage);
   }
 
   /**
@@ -498,18 +577,15 @@ class DiscordConnector
       | TrackerListReply
       | ReactionReply,
   ): Promise<void> {
-    const originalMessage = await this.findMessage(
-      to.channel.identifier,
-      to.identifier,
-    );
+    const originalMessage = await this.unhandledInteractions.get(to.identifier);
+    if (!originalMessage) return;
+    this.unhandledInteractions.delete(to.identifier);
 
     if (
       !(content instanceof Discord.MessageEmbed) &&
       content.type === ReplyType.REACTION
     ) {
-      if (!originalMessage)
-        LoggerService.error('Cannot react, original message not found');
-      else await this.react(originalMessage, content.reaction);
+      await originalMessage.reply(content.reaction);
       return;
     }
 
@@ -534,97 +610,64 @@ class DiscordConnector
       }
     })();
 
-    if (originalMessage) {
-      LoggerService.debug(`Replying to ${originalMessage.id}`);
-      await originalMessage.reply(messageContent);
-      return;
-    }
-
-    LoggerService.error('Failed to fetch original message => using mention');
-    const channel = await this.findTextChannel(to.channel.identifier);
-    if (!channel) {
-      LoggerService.error('Failed to fetch channel');
-      return;
-    }
-
-    await channel.send({
-      ...messageContent,
-      content: `<@${to.author.identifier}>\r\n${messageContent.content}`,
-    });
+    LoggerService.debug(`Replying to ${originalMessage.id}`);
+    await originalMessage.reply(messageContent);
   }
 
-  /**
-   * Posts the help text as reply to the specified message
-   * @param replyTo The original message
-   */
-  public async postHelpMessage(replyTo: ChatMessage): Promise<void> {
-    LoggerService.debug(`Replying to ${JSON.stringify(replyTo)}`);
-    if (!this.client) return;
-
-    const originalMessage = await this.findMessage(
-      replyTo.channel.identifier,
-      replyTo.identifier,
+  private async registerCommands(): Promise<void> {
+    const reservedByCurrentInstance = await RedisService.tryReserveTask(
+      TaskIdentifier.DISCORD_REGISTER_COMMANDS,
+      'init',
+      ConfigService.instanceUuid,
+      60,
     );
 
-    if (!originalMessage) return;
+    if (!reservedByCurrentInstance) return;
 
-    const embed = new Discord.MessageEmbed()
-      .setTitle('Race Announcer Help')
-      .setColor('#0390fc')
-      .addField(
-        'General Info',
-        `
-        Only users with the 'Administrator' permission on the server can use bot commands.
+    LoggerService.debug('Registering Commands');
+    const rest = new REST({ version: '9' }).setToken(
+      ConfigService.discordToken,
+    );
 
-        Available Providers:
-        - ${SourceConnectorIdentifier.SPEEDRUNSLIVE} (SpeedRunsLive)
-        - ${SourceConnectorIdentifier.RACETIME_GG} (RacetimeGG)
-        `,
-      )
-      .addField(
-        'Adding a Tracker',
-        `
-        \`<@Bot Mention> track <provider> <slug> <#channel mention>\`
+    LoggerService.log(
+      JSON.stringify(discordSlashCommands.map((s) => s.template.toJSON())),
+    );
 
-        Example usage: 
-
-        <@${this.client.user?.id}> track ${SourceConnectorIdentifier.RACETIME_GG} sms <#${originalMessage.channel.id}>
-
-        This would add a tracker for Super Mario Sunshine on racetime.gg to <#${originalMessage.channel.id}>. To use SRL simply substitute \`${SourceConnectorIdentifier.RACETIME_GG}\` with \`${SourceConnectorIdentifier.SPEEDRUNSLIVE}\`.
-        `,
-      )
-      .addField(
-        'Removing a Tracker',
-        `
-        \`<@Bot Mention> untrack <provider> <slug>\`
-
-        Example usage: 
-
-        <@${this.client.user?.id}> untrack ${SourceConnectorIdentifier.RACETIME_GG} oot
-
-        This would remove the Ocarina of Time tracker for racetime.gg.
-        `,
-      )
-      .addField(
-        'More information',
-        `
-        For additional instructions visit the [Wiki](https://github.com/BitPatty/RaceAnnouncerBot/wiki/Discord-User-Guide).
-        `,
-      );
-
-    await this.reply(
-      DiscordCommandParser.transformDiscordMessageToChatMessage(
-        originalMessage,
-        this.client,
+    await rest.put(
+      Routes.applicationGuildCommands(
+        ConfigService.discordClientId,
+        '397348825292865551',
       ),
-      embed,
+      {
+        body: discordSlashCommands.map((s) => s.template.toJSON()),
+      },
     );
+
+    const registeredCommands = await rest.get(
+      Routes.applicationGuildCommands(
+        ConfigService.discordClientId,
+        '397348825292865551',
+      ),
+    );
+
+    LoggerService.log('Registered commands', registeredCommands);
+
+    // await rest.put(Routes.applicationCommands(ConfigService.discordClientId), {
+    //   body: JSON.stringify(discordSlashCommands.map((s) => s.template.toJSON())),
+    // });
   }
 
   /**
    * Connect the bot to the discord chati
    */
-  public connect(): Promise<void> {
+  public async connect(isMessageHandler: boolean): Promise<void> {
+    try {
+      await this.registerCommands();
+    } catch (err) {
+      LoggerService.error(err);
+      throw err;
+    }
+
     return new Promise((resolve, reject) => {
       const intents = [
         Discord.Intents.FLAGS.GUILDS,
@@ -644,61 +687,43 @@ class DiscordConnector
         LoggerService.debug(`[Discord] Debug: ${msg}`);
       });
 
+      if (isMessageHandler)
+        this.client.on('interactionCreate', async (interaction) => {
+          const reservedByCurrentInstance = await RedisService.tryReserveTask(
+            TaskIdentifier.DISCORD_HANDLE_INTERACTION,
+            interaction.id,
+            ConfigService.instanceUuid,
+            60,
+          );
+
+          LoggerService.debug('Received interaction', interaction);
+
+          if (!reservedByCurrentInstance) return;
+          if (!interaction.isCommand()) return;
+          if (
+            !this.canUseBotCommands(interaction.member as Discord.GuildMember)
+          )
+            return;
+
+          const commandDefinition = discordSlashCommands.find(
+            (s) => s.template.name === interaction.commandName,
+          );
+          if (!commandDefinition) return;
+
+          this.unhandledInteractions.set(interaction.id, interaction);
+
+          const command = await commandDefinition.prepare(interaction);
+          if (!command) return;
+
+          this.eventListeners[DestinationEvent.COMMAND_RECEIVED].forEach((l) =>
+            l(command),
+          );
+        });
+
       this.client.on('ready', () => {
         LoggerService.log('[Discord] Ready');
         this._isReady = true;
         resolve();
-      });
-
-      this.client.on('message', async (msg) => {
-        LoggerService.debug('[Discord] Received message');
-        LoggerService.trace(msg.content);
-
-        const targetChannel = await this.findChannel(msg.channel.id);
-
-        // Ensure the message is a command
-        if (!this.client || !this.isBotMention(msg) || !msg.member) {
-          return;
-        }
-
-        // Ensure the user is an admin
-        if (!this.canUseBotCommands(msg.member)) {
-          LoggerService.warn(
-            `Can't process command by non admin user `,
-            msg.member,
-            msg.content,
-          );
-          return;
-        }
-
-        // Ensure the bot has access to the channel
-        if (!targetChannel || !this.botHasRequiredPermissions(targetChannel)) {
-          LoggerService.error(
-            `Cannot process command in channel ${msg.channel.id} / missing permission`,
-            targetChannel,
-          );
-          return;
-        }
-
-        LoggerService.log(`Received command => ${msg.content}`);
-        const commandKey = DiscordCommandParser.parseCommandKey(msg);
-
-        if (!commandKey) {
-          LoggerService.error(`Failed to parse command key ${msg}`);
-          await this.react(msg, ReactionType.UNKNOWN_ACTION);
-          return;
-        }
-
-        const command = DiscordCommandParser.parseCommand(msg, this.client);
-        if (!command) {
-          LoggerService.error(`Failed to parse command ${msg}`);
-          await this.react(msg, ReactionType.NEGATIVE);
-          return;
-        }
-
-        this.eventListeners[DestinationEvent.COMMAND_RECEIVED].forEach((l) =>
-          l(command),
-        );
       });
 
       this.client.on('disconnect', () => {

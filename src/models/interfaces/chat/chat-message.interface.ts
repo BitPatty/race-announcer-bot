@@ -24,9 +24,6 @@ interface ChatMessage {
   identifier: string;
   channel: ChatChannel;
   author: ChatUser;
-  isBotMention: boolean;
-  content: string;
-  cleanContent: string;
 }
 
 export default ChatMessage;

@@ -56,8 +56,9 @@ const getEnumValues = <T extends string, TEnumValue extends string>(
  */
 const parseEnumValue = <T extends string, TEnumValue extends string>(
   enumeration: { [key in T]: TEnumValue },
-  value: TEnumValue,
+  value: TEnumValue | null,
 ): TEnumValue | null => {
+  if (!value) return null;
   const enumValues = Object.values(enumeration) as TEnumValue[];
   return (
     enumValues.find((e) => e.toLowerCase() === value.toLowerCase()) ?? null

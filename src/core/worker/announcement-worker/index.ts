@@ -367,7 +367,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
     this.databaseConnection = await DatabaseService.getConnection();
     this.initAnnouncementSyncJob();
     this.announcementSyncJob.start();
-    return this.connector.connect();
+    return this.connector.connect(false);
   }
 
   /**

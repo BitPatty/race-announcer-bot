@@ -81,6 +81,10 @@ class ConfigService {
     return this.environmentConfiguration.DISCORD_BOT_TOKEN;
   }
 
+  public static get discordClientId(): string {
+    return this.environmentConfiguration.DISCORD_CLIENT_ID;
+  }
+
   public static get discordGlobalAdmins(): string[] {
     return (
       (this.environmentConfiguration.DISCORD_GLOBAL_ADMINS as string) ?? ''
@@ -163,14 +167,15 @@ class ConfigService {
         .falsy('', 'false', '0', 0)
         .default(false),
       DISCORD_BOT_TOKEN: Joi.string().required(),
+      DISCORD_CLIENT_ID: Joi.string().required(),
       DISCORD_GLOBAL_ADMINS: Joi.string().default(null),
       SRL_BASE_URL: Joi.string().uri().default('https://speedrunslive.com'),
       SRL_API_BASE_URL: Joi.string()
         .uri()
         .default('https://api.speedrunslive.com'),
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
-      ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('5/15 * * * * *'),
-      RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),
+      ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
+      RACE_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       LOG_LEVEL: Joi.string()
         .valid(...getEnumValues(LogLevel))

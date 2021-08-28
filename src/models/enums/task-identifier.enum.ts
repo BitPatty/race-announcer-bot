@@ -23,6 +23,8 @@ enum TaskIdentifier {
   ANNOUNCEMENT_SYNC = 'announcement_sync',
   MESSAGE_HANDLER = 'message_handler',
   MIGRATE_DATABASE = 'migrate_database',
+  DISCORD_REGISTER_COMMANDS = 'discord_register_commands',
+  DISCORD_HANDLE_INTERACTION = 'discord_handle_interaction',
 }
 
 export default TaskIdentifier;

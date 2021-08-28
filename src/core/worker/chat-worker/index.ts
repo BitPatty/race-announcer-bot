@@ -126,7 +126,9 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     // Get all trackers available in the current context
     const trackers = cmd.serverIdentifier
       ? await this.trackerService.findTrackersByServer(cmd.serverIdentifier)
-      : await this.trackerService.findTrackersByChannel(cmd.channelIdentifier);
+      : await this.trackerService.findTrackersByChannel(
+          cmd.message.channel.identifier,
+        );
 
     // Find a tracker which matches the conditions
     const tracker = trackers.find(
@@ -204,7 +206,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     this.connector.addEventListener(
       DestinationEvent.COMMAND_RECEIVED,
       async (msg) => {
-        LoggerService.log(`Received message: ${msg.message.content}`);
+        LoggerService.log(`Received message: ${JSON.stringify(msg)}`);
         const reservedForCurrentInstance = await RedisService.tryReserveTask(
           TaskIdentifier.MESSAGE_HANDLER,
           `${this.connector.connectorType}_${msg.message.identifier}`,
@@ -215,7 +217,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
         if (reservedForCurrentInstance) await this.runCommand(msg);
       },
     );
-    return this.connector.connect();
+    return this.connector.connect(true);
   }
 
   /**

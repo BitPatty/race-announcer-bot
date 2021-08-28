@@ -70,7 +70,7 @@ interface DestinationConnector<T extends DestinationConnectorIdentifier> {
 
   botHasRequiredPermissions(channel: ChatChannel): Promise<boolean>;
 
-  connect(): Promise<void>;
+  connect(isMessageHandler: boolean): Promise<void>;
 
   dispose(): Promise<void>;
 }
