@@ -174,8 +174,8 @@ class ConfigService {
         .uri()
         .default('https://api.speedrunslive.com'),
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
-      ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
-      RACE_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
+      ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('5/15 * * * * *'),
+      RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
       LOG_LEVEL: Joi.string()
         .valid(...getEnumValues(LogLevel))
