@@ -91,12 +91,17 @@ class SpeedRunsLiveConnector
     };
   }
 
+  private formatGoal(goal: string): string {
+    if (!goal) return '-';
+    return goal.replace(/&amp;/g, '&');
+  }
+
   private srlRaceToRace(srlRace: SRLRace): RaceInformation {
     return {
       identifier: srlRace.id.toString(),
       url: `${ConfigService.speedRunsLiveBaseUrl}/race/?id=${srlRace.id}`,
       game: this.srlGameToGame(srlRace.game),
-      goal: srlRace.goal,
+      goal: this.formatGoal(srlRace.goal),
       status: this.numericRaceStateToStatus(srlRace.state),
       entrants: Object.values(srlRace.entrants).map((e) =>
         this.srlEntrantToEntrant(e),
