@@ -22,6 +22,8 @@ import { ConnectionOptions } from 'typeorm';
 import { join as joinPaths } from 'path';
 import { v4 as uuidV4 } from 'uuid';
 
+import { getEnumValues } from '../../utils/enum.utils';
+
 import LogLevel from '../../models/enums/log-level.enum';
 
 class ConfigService {
@@ -170,7 +172,9 @@ class ConfigService {
       ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('5/15 * * * * *'),
       RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),
       GAME_SYNC_INTERVAL: Joi.string().default('0 0 * * * *'),
-      LOG_LEVEL: Joi.string().default(LogLevel.DEBUG),
+      LOG_LEVEL: Joi.string()
+        .valid(getEnumValues(LogLevel))
+        .default(LogLevel.DEBUG),
       LOG_PRETTY_PRINT: Joi.boolean().default(false),
       WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),
       REDIS_HOST: Joi.string().required(),
