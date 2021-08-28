@@ -639,17 +639,35 @@ class DiscordConnector
 
       this.client.on('message', async (msg) => {
         LoggerService.debug('[Discord] Received message');
-        LoggerService.debug(msg.content);
+        LoggerService.trace(msg.content);
 
-        if (
-          !this.client ||
-          !this.isBotMention(msg) ||
-          !msg.member ||
-          !this.canUseBotCommands(msg.member)
-        )
+        const targetChannel = await this.findChannel(msg.channel.id);
+
+        // Ensure the message is a command
+        if (!this.client || !this.isBotMention(msg) || !msg.member) {
           return;
+        }
 
-        LoggerService.log(`Received message => ${msg.content}`);
+        // Ensure the user is an admin
+        if (!this.canUseBotCommands(msg.member)) {
+          LoggerService.warn(
+            `Can't process command by non admin user `,
+            msg.member,
+            msg.content,
+          );
+          return;
+        }
+
+        // Ensure the bot has access to the channel
+        if (!targetChannel || !this.botHasRequiredPermissions(targetChannel)) {
+          LoggerService.error(
+            `Cannot process command in channel ${msg.channel.id} / missing permission`,
+            targetChannel,
+          );
+          return;
+        }
+
+        LoggerService.log(`Received command => ${msg.content}`);
         const commandKey = DiscordCommandParser.parseCommandKey(msg);
 
         if (!commandKey) {
