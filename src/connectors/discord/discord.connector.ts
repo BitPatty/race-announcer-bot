@@ -222,24 +222,27 @@ class DiscordConnector
    * @param channelId The channel identifier
    * @returns The channel or null if it fails to load the channel
    */
-  private async findTextChannel(
+  private findTextChannel(
     channelId: string,
   ): Promise<Discord.TextChannel | null> {
     LoggerService.debug(`Looking up channel ${channelId}`);
-    if (!this.client) return null;
-    const channel = await this.client.channels.fetch(channelId);
+    if (!this.client) return Promise.resolve(null);
+
+    // The cache should hold all channels of all guilds the bot is a member of
+    // according to https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=channels
+    const channel = this.client.channels.cache.find((c) => c.id === channelId);
 
     if (!channel) {
       LoggerService.error(`Couldn't find channel ${channelId}`);
-      return null;
+      return Promise.resolve(null);
     }
 
     if (!(channel instanceof Discord.TextChannel)) {
       LoggerService.warn(`Found channel ${channelId} is not a text channel`);
-      return null;
+      return Promise.resolve(null);
     }
 
-    return channel;
+    return Promise.resolve(channel);
   }
 
   /**
