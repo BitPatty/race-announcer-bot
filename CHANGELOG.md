@@ -1,17 +1,25 @@
 # Changelog
 
+## v1.3.0
+
+- Added provider name to Discord embeds
+- Fixed `&amp;` not decoding in SRL goals
+- Fixed configured log level being ignored on multistream logs
+- Fixed bot attempting to fetch discord channels it does not have access to
+- Updated dependencies
+
 ## v1.2.0
 
-- Add Thumbnail to Discord Announcements
-- Update identifiers for racetime racers
+- Added Thumbnail to Discord announcements
+- Updated identifiers for racetime racers
 
 ## v1.1.2
 
-- Update Discord formatting depending on entrant status
+- Updated Discord formatting depending on entrant status
 
 ## v1.1.1
 
-- Update Discord help message
+- Updated Discord help message
 
 ## v1.1.0
 
