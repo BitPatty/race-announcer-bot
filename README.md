@@ -30,6 +30,12 @@ The bot follows a stateless design and and requires the following services to be
 - A Maria or MySQL database
 - Redis >= 5
 
+### Developer Setup
+
+The repository is set up to utilize [VSCode Dev Containers](https://code.visualstudio.com/docs/remote/containers) as well as [GitHub Codespaces](https://github.com/features/codespaces). Set up your environment variables (see `/.devcontainer/workspace.env`) and build the dev container to start coding.
+
+You can start the application in watch mode via `npm run dev`. If you change the database models, make sure to create a migration first via `npm run migration:generate`.
+
 ### Environment variables
 
 The following environment variables must be set in order to run the application:
@@ -58,7 +64,7 @@ The following environment variables can be set optionally:
 | DISCORD_GLOBAL_ADMINS        | Comma-seperated list of user ids which should be considered bot admins on all guilds | -                               |
 | LOG_LEVEL                    | The max log level. Can be `info`, `debug` or `trace`                                 | `debug`                         |
 | LOG_PRETTY_PRINT             | Whether to pretty print logs (useful for devs). One of `true`/`false`                | `false`                         |
-| ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format                                 | `*/10 * * * * *`                |
+| ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format                                 | `5/15 * * * * *`                |
 | GAME_SYNC_INTERVAL           | The interval for game database synchronization                                       | `0 0 * * * * `                  |
 | WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks                                                | `*/10 * * * * *`                |
 | ELASTICSEARCH_URL            | The URL to your elasticsearch instance (if any) which logs will be streamed to       | -                               |
