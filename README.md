@@ -1,11 +1,5 @@
 # Race Announcer Bot
 
-![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/bitpatty/raceannouncerbot/develop)
-[![Development Build](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml/badge.svg?branch=develop)](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml)
-![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/bitpatty/raceannouncerbot/master)
-[![Production Build](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml/badge.svg?branch=master)](https://github.com/BitPatty/RaceAnnouncerBot/actions/workflows/workflow.yml)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitPatty%2FRaceAnnouncerBot?ref=badge_shield)
-
 <p align="center">
   <img src="https://github.com/BitPatty/RaceAnnouncerBot/raw/develop/docs/rab_preview.png">
 </p>
