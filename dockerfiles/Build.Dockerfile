@@ -1,4 +1,4 @@
-FROM node:16.6.1-alpine3.14 as install
+FROM node:16.8.0-alpine3.14 as install
 
 # Install build dependencies
 RUN apk --no-cache add shadow \
