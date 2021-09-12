@@ -257,6 +257,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       if (
         ![
           RaceStatus.ENTRY_OPEN,
+          RaceStatus.INVITATIONAL,
           RaceStatus.ENTRY_CLOSED,
           RaceStatus.IN_PROGRESS,
         ].includes(activeRace.status)

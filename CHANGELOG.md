@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.1
+
+- Fixed invitational races not being posted
+- Updated dependencies
+
 ## v2.0.0
 
 - Switched to Discord Slash commands due to upcoming privilege issues
