@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.2
+
+- Increased max lookup threshold for unfinished races from 24h to 48h
+- Updated dependencies
+
 ## v2.0.1
 
 - Fixed invitational races not being posted
