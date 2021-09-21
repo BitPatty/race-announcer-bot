@@ -317,9 +317,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   /**
    * Sets up the race sync job
    *
-   * @param lockTimeInSeconds The duration of which the job should be reserved
+   * @param maxLocktimeInSeconds The max duration of which the job should be reserved
    */
-  private initRaceSyncJob(lockTimeInSeconds = 10): void {
+  private initRaceSyncJob(maxLocktimeInSeconds = 30): void {
     this.raceSyncJob = new CronJob(ConfigService.raceSyncInterval, async () => {
       try {
         LoggerService.log('Attempting to reserve race sync job');
@@ -327,7 +327,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           TaskIdentifier.RACE_SYNC,
           this.connector.connectorType,
           ConfigService.instanceUuid,
-          lockTimeInSeconds,
+          maxLocktimeInSeconds,
         );
 
         if (!reservedByCurrentInstance) {
@@ -340,6 +340,12 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         LoggerService.log(`Finished races sync`);
       } catch (err) {
         LoggerService.error('Failed to sync races', err);
+      } finally {
+        await RedisService.freeTask(
+          TaskIdentifier.RACE_SYNC,
+          this.connector.connectorType,
+          ConfigService.instanceUuid,
+        );
       }
     });
   }
