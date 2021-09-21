@@ -262,7 +262,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       where: {
         identifier: Not(In(raceList.map((r) => r.identifier))),
         status: Not(In([RaceStatus.FINISHED, RaceStatus.OVER])),
-        createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 24)),
+        createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 48)),
         connector: this.connector.connectorType,
       },
     });
