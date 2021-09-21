@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.3
+
+- Increase timeout for race sync job locks to 30 seconds
+
 ## v2.0.2
 
 - Increased max lookup threshold for unfinished races from 24h to 48h
