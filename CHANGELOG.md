@@ -1,8 +1,12 @@
 # Changelog
 
+## v2.0.4
+
+- Updated dependencies
+
 ## v2.0.3
 
-- Increase timeout for race sync job locks to 30 seconds
+- Increased timeout for race sync job locks to 30 seconds
 
 ## v2.0.2
 
