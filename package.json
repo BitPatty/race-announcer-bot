@@ -55,7 +55,7 @@
     "@types/cron": "^1.7.3",
     "@types/jest": "^27.0.2",
     "@types/node": "16.6.1",
-    "@types/pino": "^6.3.11",
+    "@types/pino": "^6.3.12",
     "@types/redis": "^2.8.32",
     "@types/stoppable": "^1.1.1",
     "@types/ts-nameof": "^4.2.1",
