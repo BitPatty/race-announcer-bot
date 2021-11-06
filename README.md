@@ -62,6 +62,7 @@ The following environment variables can be set optionally:
 | WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks                                                | `*/10 * * * * *`                |
 | ELASTICSEARCH_URL            | The URL to your elasticsearch instance (if any) which logs will be streamed to       | -                               |
 | ELASTICSEARCH_INDEX          | The elasticsearch index name                                                         | `race-announcer-bot`            |
+| ELASTICSEARCH_USE_DATASTREAM | Set this to `true` if you use data streams for ES indexing                           | `false`                         |
 
 ## License
 
