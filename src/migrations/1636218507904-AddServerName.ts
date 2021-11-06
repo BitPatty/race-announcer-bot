@@ -17,14 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { MessageChannelType } from '../../enums';
+/* eslint-disable */
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-interface ChatChannel {
-  identifier: string;
-  serverIdentifier: string | null;
-  name: string | null;
-  serverName: string | null;
-  type: MessageChannelType;
+export class AddServerName1636218507904 implements MigrationInterface {
+  name = 'AddServerName1636218507904';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE \`communication_channel\` ADD \`server_name\` varchar(255) NULL`,
+    );
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE \`communication_channel\` DROP COLUMN \`server_name\``,
+    );
+  }
 }
-
-export default ChatChannel;

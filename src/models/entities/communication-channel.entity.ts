@@ -76,6 +76,16 @@ class CommunicationChannelEntity extends BaseEntity<CommunicationChannelEntity> 
   public serverIdentifier: string | null;
 
   /**
+   * The name of the server
+   */
+  @EntityColumn({
+    type: DatabaseAttributeType.VARCHAR,
+    length: 255,
+    nullable: true,
+  })
+  public serverName: string | null;
+
+  /**
    * The type of the channel
    */
   @EntityColumn({

@@ -107,6 +107,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
           name: channel.name ?? null,
           identifier: channel.identifier,
           serverIdentifier: channel.serverIdentifier,
+          serverName: channel.serverName,
           connector: this.connector.connectorType,
           isActive: true,
           type: channel.type,

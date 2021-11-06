@@ -267,6 +267,7 @@ class DiscordConnector
         name: msg.channel.type !== 'DM' ? msg.channel.name : null,
         identifier: msg.channel.id,
         serverIdentifier: msg.guild?.id ?? null,
+        serverName: msg.guild?.name ?? null,
         type: this.parseChannelType(msg),
       },
       author: {
@@ -370,6 +371,7 @@ class DiscordConnector
       identifier: channel.id,
       serverIdentifier: channel.guild.id,
       name: channel.name,
+      serverName: channel.guild.name,
       type: MessageChannelType.TEXT_CHANNEL,
     };
   }
