@@ -19,6 +19,7 @@
 
 import * as PinoMultiStream from 'pino-multi-stream';
 
+import { inspect } from 'util';
 import ecsFormat from '@elastic/ecs-pino-format';
 import pino from 'pino';
 import pinoElastic from 'pino-elasticsearch';
@@ -32,7 +33,6 @@ class LoggerService {
   private static readonly logger = pino(
     {
       level: ConfigService.logLevel,
-      prettyPrint: ConfigService.logPrettyPrint,
       ...(ConfigService.elasticsearchUrl ? ecsFormat() : {}),
     },
     ConfigService.elasticsearchUrl
@@ -62,28 +62,47 @@ class LoggerService {
     return `[${ConfigService.instanceUuid}] ${workerName}`;
   }
 
+  private static stringifyArgs(args: any[]): string {
+    try {
+      if (!args || args.length === 0) return '';
+      return `: ${inspect(args)}`;
+    } catch (err) {
+      return ': <Failed to stringify args>';
+    }
+  }
+
+  private static logInt(
+    logFn: (msg: string) => void,
+    msg: string,
+    args: any[],
+  ): void {
+    logFn.bind(this.logger)(
+      `${this.logPrefix}${msg}${this.stringifyArgs(args)}`,
+    );
+  }
+
   public static log(msg: string, ...args: any[]): void {
-    this.logger.info(`${this.logPrefix}${msg}`, args);
+    this.logInt(this.logger.info, msg, args);
   }
 
   public static warn(msg: string, ...args: any[]): void {
-    this.logger.warn(`${this.logPrefix}${msg}`, args);
+    this.logInt(this.logger.warn, msg, args);
   }
 
   public static debug(msg: string, ...args: any[]): void {
-    this.logger.debug(`${this.logPrefix}${msg}`, args);
+    this.logInt(this.logger.debug, msg, args);
   }
 
   public static trace(msg: string, ...args: any[]): void {
-    this.logger.trace(`${this.logPrefix}${msg}`, args);
+    this.logInt(this.logger.trace, msg, args);
   }
 
   public static error(msg: string, ...args: any[]): void {
-    this.logger.error(`${this.logPrefix}${msg}`, args);
+    this.logInt(this.logger.error, msg, args);
   }
 
   public static fatal(msg: string): void {
-    this.logger.fatal(`${this.logPrefix}${msg}`);
+    this.logInt(this.logger.fatal, msg, []);
   }
 }
 

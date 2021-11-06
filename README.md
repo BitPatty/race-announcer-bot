@@ -57,7 +57,6 @@ The following environment variables can be set optionally:
 | SRL_API_BASE_URL             | The base url of the SpeedRunsLive API                                                | `https://api.speedrunslive.com` |
 | DISCORD_GLOBAL_ADMINS        | Comma-seperated list of user ids which should be considered bot admins on all guilds | -                               |
 | LOG_LEVEL                    | The max log level. Can be `info`, `debug` or `trace`                                 | `debug`                         |
-| LOG_PRETTY_PRINT             | Whether to pretty print logs (useful for devs). One of `true`/`false`                | `false`                         |
 | ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format                                 | `5/15 * * * * *`                |
 | GAME_SYNC_INTERVAL           | The interval for game database synchronization                                       | `0 0 * * * * `                  |
 | WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks                                                | `*/10 * * * * *`                |

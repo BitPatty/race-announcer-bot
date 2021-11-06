@@ -121,10 +121,6 @@ class ConfigService {
     return this.environmentConfiguration.LOG_LEVEL as LogLevel;
   }
 
-  public static get logPrettyPrint(): boolean {
-    return this.environmentConfiguration.LOG_PRETTY_PRINT as unknown as boolean;
-  }
-
   public static get instanceUuid(): string {
     return this._instanceUuid;
   }
@@ -180,7 +176,6 @@ class ConfigService {
       LOG_LEVEL: Joi.string()
         .valid(...getEnumValues(LogLevel))
         .default(LogLevel.DEBUG),
-      LOG_PRETTY_PRINT: Joi.boolean().default(false),
       WORKER_HEALTH_CHECK_INTERVAL: Joi.string().default('*/10 * * * * *'),
       REDIS_HOST: Joi.string().required(),
       REDIS_PASSWORD: Joi.string().required(),
