@@ -50,6 +50,7 @@ const transformInteractionToChatMessage = (
       name: null,
       identifier: interaction.channelId,
       serverIdentifier: interaction.guildId,
+      serverName: interaction.guild?.name ?? null,
       type: MessageChannelType.TEXT_CHANNEL,
     },
     author: {
