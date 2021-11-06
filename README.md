@@ -17,6 +17,8 @@ As well as the following platforms for announcements:
 
 To use the prebuilt docker images head over to [Packages](https://github.com/BitPatty?tab=packages&repo_name=RaceAnnouncerBot). The application can be scaled horizontally as long as they're connected to the same database/redis.
 
+Development images with the latest updates can be pulled from the [race-announcer-bot-development](https://github.com/BitPatty/RaceAnnouncerBot/pkgs/container/race-announcer-bot-development) package.
+
 ### Services
 
 The bot follows a stateless design and and requires the following services to be available on your system:
