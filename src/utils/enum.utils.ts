@@ -40,9 +40,10 @@ const enumContainsValue = <T extends string, TEnumValue extends string>(
  * @param enumeration The enum
  * @returns The values within the enum
  */
-const getEnumValues = <T extends string, TEnumValue extends string>(
-  enumeration: { [key in T]: TEnumValue },
-): TEnumValue[] => {
+const getEnumValues = <
+  T extends string,
+  TEnumValue extends string,
+>(enumeration: { [key in T]: TEnumValue }): TEnumValue[] => {
   return Object.values(enumeration);
 };
 

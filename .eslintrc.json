@@ -17,7 +17,7 @@
     "project": "./tsconfig.json",
     "tsconfigRootDir": "./"
   },
-  "plugins": ["@typescript-eslint", "jest", "prettier", "unused-imports", "sort-imports-es6-autofix"],
+  "plugins": ["@typescript-eslint", "jest", "prettier", "sort-imports-es6-autofix"],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": [
       "error",
@@ -29,6 +29,7 @@
     "@typescript-eslint/no-floating-promises": ["error"],
     "@typescript-eslint/no-shadow": ["error"],
     "@typescript-eslint/explicit-member-accessibility": ["error"],
+    "@typescript-eslint/no-unused-vars": ["error"],
     "no-console": ["error"],
     "no-return-await": ["error"],
     "padding-line-between-statements": ["error", {
@@ -36,7 +37,6 @@
     }],
     "prettier/prettier": ["error", {}, { "usePrettierrc": true }],
     "require-await": ["error"],
-    "unused-imports/no-unused-imports": "error",
     "sort-imports-es6-autofix/sort-imports-es6": [
       2,
       {
