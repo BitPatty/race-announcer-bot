@@ -129,16 +129,23 @@ class ConfigService {
     return this.environmentConfiguration.WORKER_HEALTH_CHECK_INTERVAL;
   }
 
-  public static get elasticsearchUrl(): string | null {
-    return this.environmentConfiguration.ELASTICSEARCH_URL || null;
-  }
-
-  public static get elasticsearchIndexName(): string {
-    return this.environmentConfiguration.ELASTICSEARCH_INDEX;
-  }
-
-  public static get elasticsearchVersion(): number {
-    return +this.environmentConfiguration.ELASTICSEARCH_VERSION;
+  /**
+   * Gets the elasticsearch configuration
+   */
+  public static get elasticsearchConfiguration(): {
+    url: string | null;
+    index: string;
+    version: number;
+    useDataStream: boolean;
+  } {
+    return {
+      url: this.environmentConfiguration.ELASTICSEARCH_URL || null,
+      index: this.environmentConfiguration.ELASTICSEARCH_INDEX,
+      version: +this.environmentConfiguration.ELASTICSEARCH_VERSION,
+      useDataStream: Boolean(
+        this.environmentConfiguration.ELASTICSEARCH_USE_DATASTREAM,
+      ),
+    };
   }
 
   /**
@@ -183,6 +190,7 @@ class ConfigService {
       ELASTICSEARCH_URL: Joi.string().uri().optional(),
       ELASTICSEARCH_INDEX: Joi.string().default('race-announcer-bot'),
       ELASTICSEARCH_VERSION: Joi.number().default(7),
+      ELASTICSEARCH_USE_DATASTREAM: Joi.boolean().default(false),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(

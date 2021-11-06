@@ -33,9 +33,9 @@ class LoggerService {
   private static readonly logger = pino(
     {
       level: ConfigService.logLevel,
-      ...(ConfigService.elasticsearchUrl ? ecsFormat() : {}),
+      ...(ConfigService.elasticsearchConfiguration.url ? ecsFormat() : {}),
     },
-    ConfigService.elasticsearchUrl
+    ConfigService.elasticsearchConfiguration.url
       ? PinoMultiStream.multistream([
           {
             level: ConfigService.logLevel,
@@ -44,11 +44,16 @@ class LoggerService {
           {
             level: ConfigService.logLevel,
             stream: pinoElastic({
-              index: ConfigService.elasticsearchIndexName,
+              index: ConfigService.elasticsearchConfiguration.index,
               consistency: 'one',
-              node: ConfigService.elasticsearchUrl,
-              'es-version': ConfigService.elasticsearchVersion,
+              node: ConfigService.elasticsearchConfiguration.url,
+              'es-version': ConfigService.elasticsearchConfiguration.version,
               'flush-bytes': 1000,
+              ...(ConfigService.elasticsearchConfiguration.useDataStream
+                ? {
+                    op_type: 'create',
+                  }
+                : {}),
             }),
           },
         ])
