@@ -1,4 +1,4 @@
-FROM node:16.10.0-alpine3.14 as install
+FROM node:gallium-alpine as install
 
 # Install build dependencies
 RUN apk --no-cache add shadow \
