@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.2.1
+
+- Updated response on failure to add tracker
+- Minor code cleanup
+- Updated dependencies
+
+## v2.2.0
+
+- Added server name to communication channels
+
+## v2.1.0
+
+- Allow using elasticsearch data streams instead of indexes
+- Updated dependencies
+
 ## v2.0.5
 
 - Updated dependencies
