@@ -176,8 +176,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
 
           return {
             type: ReplyType.TEXT,
-            message:
-              'Could not add a tracker. Verify that the game exists and try again.',
+            message: `Could not add a tracker. Verify that the game with the slug '${cmd.gameIdentifier}' exists and try again.`,
           };
         }
         case BotCommandType.REMOVE_TRACKER: {
