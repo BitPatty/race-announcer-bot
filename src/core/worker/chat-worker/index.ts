@@ -26,6 +26,7 @@ import {
   ListTrackersCommand,
   ReactionReply,
   RemoveTrackerCommand,
+  TextReply,
   TrackerListReply,
 } from '../../../models/interfaces';
 
@@ -159,22 +160,32 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       | ListTrackersCommand
       | HelpCommand,
   ): Promise<void> {
-    const reply = await (async () => {
+    const reply = await (async (): Promise<
+      TextReply | ReactionReply | TrackerListReply | void
+    > => {
       switch (cmd.type) {
         case BotCommandType.ADD_TRACKER: {
           const tracker = await this.addTracker(cmd);
+
+          if (tracker) {
+            return {
+              type: ReplyType.REACTION,
+              reaction: ReactionType.POSITIVE,
+            };
+          }
+
           return {
-            type: ReplyType.REACTION,
-            reaction:
-              tracker == null ? ReactionType.NEGATIVE : ReactionType.POSITIVE,
-          } as ReactionReply;
+            type: ReplyType.TEXT,
+            message:
+              'Could not add a tracker. Verify that the game exists and try again.',
+          };
         }
         case BotCommandType.REMOVE_TRACKER: {
           await this.removeTracker(cmd);
           return {
             type: ReplyType.REACTION,
             reaction: ReactionType.POSITIVE,
-          } as ReactionReply;
+          };
         }
         case BotCommandType.LIST_TRACKERS: {
           const trackers = cmd.serverIdentifier
@@ -184,10 +195,11 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
             : await this.trackerService.findTrackersByChannel(
                 cmd.channelIdentifier,
               );
+
           return {
             type: ReplyType.TRACKER_LIST,
             items: trackers,
-          } as TrackerListReply;
+          };
         }
         case BotCommandType.HELP: {
           await this.connector.postHelpMessage(cmd.message);
