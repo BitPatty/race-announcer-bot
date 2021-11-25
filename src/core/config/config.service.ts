@@ -36,8 +36,7 @@ class ConfigService {
   private static readonly _instanceUuid: string = uuidV4();
 
   /**
-   * Load the database configuration from the
-   * current enviroment
+   * Load the database configuration from the current enviroment
    */
   public static get databaseConfiguration(): ConnectionOptions {
     return {

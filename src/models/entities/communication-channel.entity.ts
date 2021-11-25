@@ -17,16 +17,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Entity } from 'typeorm';
+import { keys } from 'ts-transformer-keys';
+
+import TransformerUtils from '../../utils/transformer.utils';
+
 import {
   DatabaseAttributeType,
   DestinationConnectorIdentifier,
   MessageChannelType,
 } from '../enums';
-import { Entity } from 'typeorm';
+
 import { EntityColumn } from '../decorators';
-import { keys } from 'ts-transformer-keys';
+
 import BaseEntity, { EntityInitializer } from './base.entity';
-import TransformerUtils from '../../utils/transformer.utils';
 
 @Entity(TransformerUtils.toTableName(CommunicationChannelEntity))
 class CommunicationChannelEntity extends BaseEntity<CommunicationChannelEntity> {

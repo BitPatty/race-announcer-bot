@@ -30,9 +30,7 @@ import ReactionType from './reaction-type.enum';
 import ReplyType from './reply-type.enum';
 import SourceConnectorIdentifier from './source-connector-identifier.enum';
 import TaskIdentifier from './task-identifier.enum';
-import TaskStatus from './task-status.enum';
-import WorkerEgressType from './worker-egress-type.enum';
-import WorkerIngressType from './worker-inress-type.enum';
+import WorkerMessageType from './worker-message-type';
 import WorkerType from './worker-type.enum';
 
 export {
@@ -49,8 +47,6 @@ export {
   ReplyType,
   SourceConnectorIdentifier,
   TaskIdentifier,
-  TaskStatus,
-  WorkerEgressType,
-  WorkerIngressType,
+  WorkerMessageType,
   WorkerType,
 };

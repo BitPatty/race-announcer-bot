@@ -22,7 +22,7 @@ import { parentPort } from 'worker_threads';
 import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
-  WorkerEgressType,
+  WorkerMessageType,
   WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
@@ -88,7 +88,7 @@ const cleanup = async (): Promise<void> => {
 
 parentPort?.on('message', async (msg) => {
   LoggerService.log(`Received parent message "${msg}"`);
-  if (msg === WorkerEgressType.CLEANUP) {
+  if (msg === WorkerMessageType.CLEANUP) {
     try {
       await cleanup();
       process.exit(0);

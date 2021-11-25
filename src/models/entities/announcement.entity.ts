@@ -20,14 +20,14 @@
 import { Entity, ManyToOne } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
 
+import TransformerUtils from '../../utils/transformer.utils';
+
 import { DatabaseAttributeType } from '../enums';
 import { EntityColumn, EntityJoinColumn } from '../decorators';
 
 import BaseEntity, { EntityInitializer } from './base.entity';
 import RaceEntity from './race.entity';
 import TrackerEntity from './tracker.entity';
-
-import TransformerUtils from '../../utils/transformer.utils';
 
 /**
  * The announcement entity holds announcements posted

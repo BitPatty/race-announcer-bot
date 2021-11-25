@@ -18,6 +18,7 @@
  */
 
 import { JoinColumn } from 'typeorm';
+
 import TransformerUtils from '../../utils/transformer.utils';
 
 // Allow the type 'Object' to be used

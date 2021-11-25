@@ -18,12 +18,15 @@
  */
 
 import { Entity, ManyToOne } from 'typeorm';
-import { EntityColumn, EntityJoinColumn } from '../decorators';
 import { keys } from 'ts-transformer-keys';
+
+import TransformerUtils from '../../utils/transformer.utils';
+
+import { EntityColumn, EntityJoinColumn } from '../decorators';
+
 import BaseEntity, { EntityInitializer } from './base.entity';
 import CommunicationChannelEntity from './communication-channel.entity';
 import GameEntity from './game.entity';
-import TransformerUtils from '../../utils/transformer.utils';
 
 /**
  * The tracker entity holds the registered trackers

@@ -70,11 +70,11 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   }
 
   /**
-   * Transforms the speicfied race to its
-   * {@link RaceInformation} representation
-   * @param race The race
-   * @param entrants The races entrants
-   * @returns The transformed race details
+   * Transforms the speicfied race to its {@link RaceInformation} representation
+   *
+   * @param race      The race
+   * @param entrants  The races entrants
+   * @returns         The transformed race details
    */
   private raceEntityToRaceInformation(
     race: RaceEntity,
@@ -92,9 +92,9 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   }
 
   /**
-   * Gets the list of races that have been synced
-   * within the last 6 hours
-   * @returns The list of active races
+   * Gets the list of races that have been synced within the last 6 hours
+   *
+   * @returns  The list of active races
    */
   private getActiveRaces(): Promise<RaceEntity[]> {
     return this.databaseConnection.getRepository(RaceEntity).find({
@@ -106,9 +106,10 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   }
 
   /**
-   * Gets the posted announcements for the speicifed race
-   * @param race The race
-   * @returns The list of posted announcements
+   * Gets the posted announcements for the specified race
+   *
+   * @param race  The race
+   * @returns     The list of posted announcements
    */
   private getAnnouncementsForRace(
     race: RaceEntity,
@@ -129,8 +130,9 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
 
   /**
    * Gets the list of entrants for the specified race
-   * @param race The race
-   * @returns The list of entrants with their racer information
+   *
+   * @param race  The race
+   * @returns     The list of entrants with their racer information
    */
   private getRaceEntrants(race: RaceEntity): Promise<EntrantEntity[]> {
     return this.databaseConnection.getRepository(EntrantEntity).find({
@@ -142,12 +144,12 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   }
 
   /**
-   * Finds all active trackers mapped to the
-   * specified game where the channel is the
+   * Finds all active trackers mapped to the specified game where the channel is the
    * current connector
-   * @param game The game
-   * @returns The list of active trackers for the
-   * specified game mapped to this connector
+   *
+   * @param game  The game
+   * @returns     The list of active trackers for the specified game mapped to this
+   *              connector
    */
   private findActiveTrackersForGame(
     game: GameEntity,
@@ -165,8 +167,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   }
 
   /**
-   * Creates and updates announcements for the
-   * current connector
+   * Creates and updates announcements for the current connector
    */
   private async updateAnnouncements(): Promise<void> {
     LoggerService.log(`Updating announcements`);
@@ -311,8 +312,9 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
 
   /**
    * Initializes the cronjob that syncs the announcements
-   * @param lockTimeInSeconds Max time for the job lock to
-   * be held by this worker
+   *
+   * @param lockTimeInSeconds  Max time for the job lock to
+   *                           be held by this worker
    */
   private initAnnouncementSyncJob(lockTimeInSeconds = 60): void {
     this.announcementSyncJob = new CronJob(

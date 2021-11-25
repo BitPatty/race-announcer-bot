@@ -18,8 +18,10 @@
  */
 
 import { Column } from 'typeorm';
-import { DatabaseAttributeType } from '../enums';
+
 import TransformerUtils from '../../utils/transformer.utils';
+
+import { DatabaseAttributeType } from '../enums';
 
 // Allow the type 'Object' to be used
 /* eslint-disable @typescript-eslint/ban-types */

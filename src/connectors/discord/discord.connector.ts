@@ -79,7 +79,8 @@ class DiscordConnector
 
   /**
    * Removes all event listeners from the connector
-   * @returns The cleared event listener list
+   *
+   * @returns  The cleared event listener list
    */
   private removeAllEventListeners(): {
     [key in keyof DestinationEventListenerMap]: DestinationEventListenerMap[key][];
@@ -103,8 +104,9 @@ class DiscordConnector
   /**
    * Checks if the bot has the necessary permissions
    * to post messages in the specified channel
-   * @param channel The channel
-   * @returns True if the bot has the permissions
+   *
+   * @param channel  The channel
+   * @returns        True if the bot has the permissions
    */
   public async botHasRequiredPermissions(
     channel: ChatChannel,
@@ -124,10 +126,11 @@ class DiscordConnector
   }
 
   /**
-   * Checks if the user has the permissions to use
-   * bot commands in their guild
-   * @param user The guild member
-   * @returns True if the user has administrative permission
+   * Checks if the user has the permissions to use bot commands in
+   * the respective guild
+   *
+   * @param user  The guild member
+   * @returns     True if the user has administrative permission
    */
   private canUseBotCommands(user: Discord.GuildMember): boolean {
     return (
@@ -137,18 +140,10 @@ class DiscordConnector
   }
 
   /**
-   * Checks whether the message mentions the bot
-   * @param msg The message
-   * @returns True if the bot is mentioned
-   */
-  private isBotMention(msg: Discord.Message): boolean {
-    return this.client?.user != null && msg.mentions.has(this.client.user);
-  }
-
-  /**
    * Gets the listeners for the specified event type
-   * @param type The event type
-   * @returns The listeners mapped to the specified event
+   *
+   * @param type  The event type
+   * @returns     The listeners mapped to the specified event
    */
   public getListeners<TEvent extends DestinationEvent>(
     type: TEvent,
@@ -158,8 +153,9 @@ class DiscordConnector
 
   /**
    * Adds the specified listener to for the specified event type
-   * @param type The event type
-   * @param listener The listener function
+   *
+   * @param type      The event type
+   * @param listener  The listener function
    */
   public addEventListener<TEvent extends DestinationEvent>(
     type: TEvent,
@@ -171,8 +167,9 @@ class DiscordConnector
 
   /**
    * Removes the specified event listener
-   * @param type The event type the listener is mapped to
-   * @param listener The listener function
+   *
+   * @param type      The event type the listener is mapped to
+   * @param listener  The listener function
    */
   public removeEventListener<TEvent extends DestinationEvent>(
     type: TEvent,
@@ -218,7 +215,7 @@ class DiscordConnector
       .addField(
         'Adding a Tracker',
         `
-        \`<@Bot Mention> track <provider> <slug> <#channel mention>\`
+        \`/track <provider> <slug> <#channel mention>\`
 
         Example usage: 
 
@@ -230,7 +227,7 @@ class DiscordConnector
       .addField(
         'Removing a Tracker',
         `
-        \`<@Bot Mention> untrack <provider> <slug>\`
+        \`/untrack <provider> <slug>\`
 
         Example usage: 
 
@@ -255,8 +252,9 @@ class DiscordConnector
 
   /**
    * Transforms a @see Discord.Message to a @see ChatMessage
-   * @param msg The discord message
-   * @returns The transformed chat message
+   *
+   * @param msg  The discord message
+   * @returns    The transformed chat message
    */
   private transformDiscordMessageToChatMessage(
     msg: Discord.Message,
@@ -277,10 +275,10 @@ class DiscordConnector
   }
 
   /**
-   * Parse the type of channel in which
-   * the specifie message was posted
-   * @param msg The message
-   * @returns The channel type
+   * Parse the type of channel in which the specified message was posted
+   *
+   * @param msg  The message
+   * @returns    The channel type
    */
   private parseChannelType(msg: Discord.Message): MessageChannelType {
     switch (msg.channel.type) {
@@ -295,9 +293,10 @@ class DiscordConnector
 
   /**
    * Attempts to find the specified message
-   * @param channelId The channel in which the message is located
-   * @param messageId The message identifier
-   * @returns The message or null if it fails to load the message
+   *
+   * @param channelId  The channel in which the message is located
+   * @param messageId  The message identifier
+   * @returns          The message or null if it fails to load the message
    */
   private async findMessage(
     channelId: string,
@@ -330,8 +329,9 @@ class DiscordConnector
 
   /**
    * Attempts to find the specified text channel
-   * @param channelId The channel identifier
-   * @returns The channel or null if it fails to load the channel
+   *
+   * @param channelId  The channel identifier
+   * @returns          The channel or null if it fails to load the channel
    */
   private findTextChannel(
     channelId: string,
@@ -358,8 +358,9 @@ class DiscordConnector
 
   /**
    * Finds a channel by its id
-   * @param channelIdentifier The channel id
-   * @returns The channel with the specified id
+   *
+   * @param channelIdentifier  The channel id
+   * @returns                  The channel with the specified id
    */
   public async findChannel(
     channelIdentifier: string,
@@ -377,10 +378,10 @@ class DiscordConnector
   }
 
   /**
-   * Builds the embed for race updates on the
-   * specified race
-   * @param race The race
-   * @returns The embed
+   * Builds the embed for race updates on the specified race
+   *
+   * @param race  The race
+   * @returns     The embed
    */
   private buildRaceEmbed(race: RaceInformation): Discord.MessageEmbed {
     let embed = new Discord.MessageEmbed()
@@ -412,7 +413,6 @@ class DiscordConnector
       );
     }
 
-    // Only add image if it's a valid image
     // Note that if the image doesn't exist discord is smart enough
     // to simply not display it instead of displaying a broken image
     if (
@@ -433,8 +433,9 @@ class DiscordConnector
 
   /**
    * Builds the embed displaying the tracker list
-   * @param items The tracker list
-   * @returns The embed containing the tracker list
+   *
+   * @param items  The tracker list
+   * @returns      The embed containing the tracker list
    */
   private buildTrackerListEmbed(items: TrackerEntity[]): Discord.MessageEmbed {
     const embed = new Discord.MessageEmbed().setTitle('Active Trackers');
@@ -464,10 +465,8 @@ class DiscordConnector
 
     const sortedEntrants = MessageBuilderUtils.sortEntrants(entrants);
 
-    // Hide entrants to avoid hitting the content
-    // length limit but at the same time stay
-    // consistent with the max number of entrants
-    // being displayed
+    // Hide entrants to avoid hitting the content length limit but at the same time stay
+    // consistent with the max number of entrants being displayed
     const totalEntrants = sortedEntrants.length;
     const hiddenEntrantCount = totalEntrants - this.entrantDisplayLimitTrigger;
 
@@ -501,9 +500,10 @@ class DiscordConnector
 
   /**
    * Posts a race update to the specified channel
-   * @param channel The channel in which the update should be posted
-   * @param race The race
-   * @returns The posted message
+   *
+   * @param channel  The channel in which the update should be posted
+   * @param race     The race
+   * @returns        The posted message
    */
   public async postRaceMessage(
     channel: ChatChannel,
@@ -524,11 +524,12 @@ class DiscordConnector
 
   /**
    * Updates the specified race message
-   * @param originalPost The original chat message
-   * @param race The race
-   * @param hasGameChanged Pass true if the game is no
-   * longer associated with the tracker
-   * @returns The updated chat message
+   *
+   * @param originalPost    The original chat message
+   * @param race            The race
+   * @param hasGameChanged  Pass true if the game is no longer
+   *                        associated with the tracker
+   * @returns               The updated chat message
    */
   public async updateRaceMessage(
     originalPost: ChatMessage,
@@ -579,8 +580,9 @@ class DiscordConnector
 
   /**
    * Reply to the specified chat message
-   * @param to The message to reply to
-   * @param msg The message content
+   *
+   * @param to   The message to reply to
+   * @param msg  The message content
    */
   public async reply(
     to: ChatMessage,
@@ -755,8 +757,7 @@ class DiscordConnector
   }
 
   /**
-   * Destroy the connector and cleanup
-   * the resources
+   * Destroy the connector and cleanup used resources
    */
   public dispose(): Promise<void> {
     this.removeAllEventListeners();

@@ -48,12 +48,12 @@ class RedisService {
   /**
    * Try to reserve the specified task for the current process
    *
-   * @param taskIdentifier The task identifier
-   * @param postfix The postfix which is appended to the task identifier to
-   * uniquely identify the task
-   * @param instanceUuid The current instance UUID
-   * @param ttl The time to live for the reservation (in seconds)
-   * @returns True if the reservation was successful
+   * @param taskIdentifier  The task identifier
+   * @param postfix         The postfix which is appended to the task identifier to
+   *                        uniquely identify the task
+   * @param instanceUuid    The current instance UUID
+   * @param ttl             The time to live for the reservation (in seconds)
+   * @returns               True if the reservation was successful
    */
   public static tryReserveTask(
     taskIdentifier: TaskIdentifier,
@@ -85,9 +85,10 @@ class RedisService {
   /**
    * Removes the reservation associated for the specified task
    * if it is assigned to the specified instanceUuid
-   * @param taskIdentifier The task identifier
-   * @param postfix The identifier postfix
-   * @param instanceUuid The instance uuid
+   *
+   * @param taskIdentifier  The task identifier
+   * @param postfix         The identifier postfix
+   * @param instanceUuid    The instance uuid
    */
   public static async freeTask(
     taskIdentifier: TaskIdentifier,

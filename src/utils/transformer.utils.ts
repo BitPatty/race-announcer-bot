@@ -26,8 +26,9 @@
 class TransformerUtils {
   /**
    * Converts a camelCase string to its snake_case representation
-   * @param str The string to convert
-   * @returns The snake_case representation of the camelCase value
+   *
+   * @param str  The string to convert
+   * @returns    The snake_case representation of the camelCase value
    */
   private static camelCaseToSnakeCase(str: string): string {
     return str
@@ -39,8 +40,9 @@ class TransformerUtils {
   /**
    * Transforms the property to its attribute representation
    * in the database
-   * @param propName The name of the property
-   * @returns The attribute name
+   *
+   * @param propName  The name of the property
+   * @returns         The attribute name
    */
   public static toAttributeName(propName: string): string {
     return this.camelCaseToSnakeCase(propName);
@@ -49,20 +51,22 @@ class TransformerUtils {
   /**
    * Transforms the class name to its entity representation
    * in the database
-   * @param className The name of the class
-   * @returns The entity name
+   *
+   * @param className  The name of the class
+   * @returns          The entity name
    */
   public static toTableName<T>(className: new () => T): string {
     return this.camelCaseToSnakeCase(className.name).replace(/_entity$/, '');
   }
 
   /**
-   * Truncates the string to the specified number
-   * of characters if necessary
-   * @param str The string
-   * @param length The max length of the string
-   * @returns The truncated string or the original string,
-   * if it already met the constraints
+   * Truncates the string to the specified number of
+   * characters if necessary
+   *
+   * @param str     The string
+   * @param length  The max length of the string
+   * @returns       The truncated string or the original string,
+   *                if it already met the constraints
    */
   public static truncateString<T extends string | null>(
     str: T,

@@ -20,9 +20,10 @@
 import { Entity } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
 
+import TransformerUtils from '../../utils/transformer.utils';
+
 import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
 import { EntityColumn } from '../decorators';
-import TransformerUtils from '../../utils/transformer.utils';
 
 import BaseEntity, { EntityInitializer } from './base.entity';
 

@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-enum WorkerEgressType {
+enum WorkerMessageType {
   CLEANUP = 'cleanup',
 }
 
-export default WorkerEgressType;
+export default WorkerMessageType;

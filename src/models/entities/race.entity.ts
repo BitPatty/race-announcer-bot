@@ -20,6 +20,8 @@
 import { BeforeInsert, BeforeUpdate, Entity, ManyToOne } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
 
+import TransformerUtils from '../../utils/transformer.utils';
+
 import {
   DatabaseAttributeType,
   RaceStatus,
@@ -27,7 +29,6 @@ import {
 } from '../enums';
 
 import { EntityColumn, EntityJoinColumn } from '../decorators';
-import TransformerUtils from '../../utils/transformer.utils';
 
 import BaseEntity, { EntityInitializer } from './base.entity';
 import GameEntity from './game.entity';

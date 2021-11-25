@@ -25,7 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
-  WorkerEgressType,
+  WorkerMessageType,
   WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
@@ -130,7 +130,7 @@ class WorkerService<T extends WorkerType> {
 
       // Trigger the cleanup process
       LoggerService.log(`Cleaning up worker`);
-      this.worker.postMessage(WorkerEgressType.CLEANUP);
+      this.worker.postMessage(WorkerMessageType.CLEANUP);
     });
   }
 

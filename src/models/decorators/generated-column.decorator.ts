@@ -24,8 +24,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { EntityColumn } from './entity-column.decorator';
+
 import TransformerUtils from '../../utils/transformer.utils';
+
+import { EntityColumn } from './entity-column.decorator';
 
 // Allow the type 'Object' to be used
 /* eslint-disable @typescript-eslint/ban-types */

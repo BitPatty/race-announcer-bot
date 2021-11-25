@@ -70,8 +70,9 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
 
   /**
    * Registers/Updates a tracker for the specified server/channel
-   * @param cmd The tracker specification
-   * @returns The newly created tracker or NULL if a condition failed
+   *
+   * @param cmd  The tracker specification
+   * @returns    The newly created tracker or NULL if a condition failed
    */
   private async addTracker(
     cmd: AddTrackerCommand,
@@ -121,7 +122,8 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
   /**
    * Removes (disables) a tracker if there is a match on the specified
    * server or in the current channel
-   * @param cmd The removal command
+   *
+   * @param cmd  The removal command
    */
   private async removeTracker(cmd: RemoveTrackerCommand): Promise<void> {
     // Get all trackers available in the current context

@@ -34,8 +34,7 @@ class TrackerService {
   }
 
   /**
-   * Relations that should always be joined when
-   * returning trackers
+   * Relations that should always be joined when returning trackers
    */
   private readonly commonRelations = [
     nameof<TrackerEntity>((t) => t.game),
@@ -43,11 +42,11 @@ class TrackerService {
   ];
 
   /**
-   * Looks up a tracker mapped to the specified
-   * channel and game
-   * @param channel The channel
-   * @param game The game
-   * @returns The first match or null if there is no match
+   * Looks up a tracker mapped to the specified channel and game
+   *
+   * @param channel  The channel
+   * @param game     The game
+   * @returns        The first match or null if there is no match
    */
   private async findTracker(
     channel: CommunicationChannelEntity,
@@ -65,11 +64,11 @@ class TrackerService {
   }
 
   /**
-   * Adds a new tracker for the specified game
-   * and channel
-   * @param channel The target channel
-   * @param game The target game
-   * @returns The created tracker
+   * Adds a new tracker for the specified game and channel
+   *
+   * @param channel  The target channel
+   * @param game     The target game
+   * @returns        The created tracker
    */
   public async addTracker(
     channel: CommunicationChannelEntity,
@@ -102,10 +101,10 @@ class TrackerService {
   }
 
   /**
-   * Finds all trackers mapped to the specified
-   * channel
-   * @param channelIdentifier The channel identifier
-   * @returns The list of trackers mapped to the channel
+   * Finds all trackers mapped to the specified channel
+   *
+   * @param channelIdentifier  The channel identifier
+   * @returns                  The list of trackers mapped to the channel
    */
   public async findTrackersByChannel(
     channelIdentifier: string,
@@ -127,8 +126,9 @@ class TrackerService {
 
   /**
    * Finds all trackers mapped to the specified server
-   * @param serverIdentifier The server identifier
-   * @returns The list of trackers mapped to the server
+   *
+   * @param serverIdentifier  The server identifier
+   * @returns                 The list of trackers mapped to the server
    */
   public async findTrackersByServer(
     serverIdentifier: string,
@@ -157,7 +157,8 @@ class TrackerService {
 
   /**
    * Disables the specified tracker
-   * @param tracker The tracker to disable
+   *
+   * @param tracker  The tracker to disable
    */
   public async disableTracker(tracker: TrackerEntity): Promise<void> {
     const existingTracker = await this.trackerRepository.findOne(tracker.id);

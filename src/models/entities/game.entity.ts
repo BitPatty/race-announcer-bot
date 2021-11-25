@@ -18,11 +18,14 @@
  */
 
 import { BeforeInsert, BeforeUpdate, Entity } from 'typeorm';
+import { keys } from 'ts-transformer-keys';
+
+import TransformerUtils from '../../utils/transformer.utils';
+
 import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
 import { EntityColumn } from '../decorators';
-import { keys } from 'ts-transformer-keys';
+
 import BaseEntity, { EntityInitializer } from './base.entity';
-import TransformerUtils from '../../utils/transformer.utils';
 
 /**
  * The game entity holds the games available
