@@ -19,6 +19,7 @@
 
 enum WorkerMessageType {
   CLEANUP = 'cleanup',
+  CLEANUP_FINISHED = 'cleanup_finished',
 }
 
 export default WorkerMessageType;

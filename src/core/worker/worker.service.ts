@@ -26,7 +26,6 @@ import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
   WorkerMessageType,
-  WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
 
@@ -116,7 +115,7 @@ class WorkerService<T extends WorkerType> {
       this.worker.removeAllListeners();
 
       this.worker.on('message', (msg) => {
-        if (msg === WorkerIngressType.CLEANUP_FINISHED)
+        if (msg === WorkerMessageType.CLEANUP_FINISHED)
           LoggerService.log('Cleanup finished');
       });
 

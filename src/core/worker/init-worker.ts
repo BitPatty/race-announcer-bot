@@ -23,7 +23,6 @@ import {
   DestinationConnectorIdentifier,
   SourceConnectorIdentifier,
   WorkerMessageType,
-  WorkerIngressType,
   WorkerType,
 } from '../../models/enums';
 
@@ -82,7 +81,7 @@ const cleanup = async (): Promise<void> => {
   LoggerService.log(`Cleaning up`);
   await workerInstance.dispose();
   LoggerService.log(`Finished cleaning up`);
-  parentPort?.postMessage(WorkerIngressType.CLEANUP_FINISHED);
+  parentPort?.postMessage(WorkerMessageType.CLEANUP_FINISHED);
   parentPort?.close();
 };
 
