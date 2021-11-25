@@ -3,6 +3,7 @@
 ## v2.2.1
 
 - Updated response on failure to add tracker
+- Updated discord help text
 - Minor code cleanup
 - Updated dependencies
 
