@@ -68,7 +68,7 @@
     "eslint-plugin-jest": "^25.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.0",
     "stoppable": "^1.1.0",
     "ts-jest": "^27.0.7",
     "ts-loader": "^9.2.6",
