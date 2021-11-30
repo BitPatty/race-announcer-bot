@@ -99,7 +99,7 @@ class SpeedRunsLiveConnector
   private srlRaceToRace(srlRace: SRLRace): RaceInformation {
     return {
       identifier: srlRace.id.toString(),
-      url: `${ConfigService.speedRunsLiveBaseUrl}/race/?id=${srlRace.id}`,
+      url: `${ConfigService.speedRunsLiveBaseUrl}/race/${srlRace.id}`,
       game: this.srlGameToGame(srlRace.game),
       goal: this.formatGoal(srlRace.goal),
       status: this.numericRaceStateToStatus(srlRace.state),
