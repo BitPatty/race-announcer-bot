@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.2
+
+- Update SRL target URL format
+- Updated dependencies
+
 ## v2.2.1
 
 - Updated response on failure to add tracker
