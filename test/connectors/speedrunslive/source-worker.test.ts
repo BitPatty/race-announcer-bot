@@ -38,6 +38,7 @@ describe('SRL Source Worker', () => {
   afterAll(async (): Promise<void> => {
     await srlMockServer.dispose();
     await DatabaseService.closeConnection();
+    await RedisService.dispose();
   });
 
   describe('Game Sync', () => {
