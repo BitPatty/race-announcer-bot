@@ -61,6 +61,7 @@ class RedisService {
       `[Redis] Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`,
     );
     try {
+      await this.client.connect();
       const reply = await this.client.set(
         `${taskIdentifier}_${postfix}`,
         instanceUuid,
@@ -91,9 +92,17 @@ class RedisService {
     instanceUuid: string,
   ): Promise<void> {
     LoggerService.debug(`[Redis] Removing key ${taskIdentifier}_${postfix}`);
-    const existingValue = await this.client.get(`${taskIdentifier}_${postfix}`);
-    if (existingValue !== instanceUuid) return Promise.resolve();
-    await this.client.del(`${taskIdentifier}_${postfix}`);
+    try {
+      await this.client.connect();
+      const existingValue = await this.client.get(
+        `${taskIdentifier}_${postfix}`,
+      );
+      if (existingValue !== instanceUuid) return Promise.resolve();
+      await this.client.del(`${taskIdentifier}_${postfix}`);
+    } catch (err) {
+      LoggerService.error(JSON.stringify(err));
+      throw err;
+    }
   }
 
   /**
