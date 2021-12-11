@@ -36,7 +36,6 @@ describe('SRL Source Worker', () => {
 
   afterAll(async (): Promise<void> => {
     await srlMockServer.dispose();
-    await worker.dispose();
     await DatabaseService.closeConnection();
   });
 
