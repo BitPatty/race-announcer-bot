@@ -27,21 +27,17 @@ import LoggerService from '../logger/logger.service';
 class RedisService {
   private static readonly client = redis.createClient({
     ...ConfigService.redisConfiguration,
-    retry_strategy: (options) => {
-      // Exit with EX_UNAVAILABLE if cannot connect
-      if (options.error && options.error.code === 'ECONNREFUSED') {
-        LoggerService.fatal('The redis server refused the connection');
-        process.exit(69);
-      }
+    socket: {
+      reconnectStrategy: (retries) => {
+        // Exit with EX_UNAVAILABLE if failed to connect for over a minute
+        if (retries > 20) {
+          LoggerService.fatal('Connection to redis server timed out');
+          process.exit(69);
+        }
 
-      // Exit with EX_UNAVAILABLE if failed to connect for over a minute
-      if (options.total_retry_time > 1000 * 60 * 60) {
-        LoggerService.fatal('Connection to redis server timed out');
-        process.exit(69);
-      }
-
-      // retry after 3 seconds
-      return 3000;
+        // retry after 3 seconds
+        return 3000;
+      },
     },
   });
 
@@ -55,31 +51,30 @@ class RedisService {
    * @param ttl             The time to live for the reservation (in seconds)
    * @returns               True if the reservation was successful
    */
-  public static tryReserveTask(
+  public static async tryReserveTask(
     taskIdentifier: TaskIdentifier,
     postfix: string,
     instanceUuid: string,
     ttl: number,
   ): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      LoggerService.debug(
-        `[Redis] Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`,
-      );
-      this.client.set(
+    LoggerService.debug(
+      `[Redis] Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`,
+    );
+    try {
+      const reply = await this.client.set(
         `${taskIdentifier}_${postfix}`,
         instanceUuid,
-        'EX',
-        ttl,
-        'NX',
-        (err, reply) => {
-          if (err) {
-            LoggerService.error(JSON.stringify(err));
-            reject();
-          }
-          resolve(reply === 'OK');
+        {
+          NX: true,
+          EX: ttl,
         },
       );
-    });
+
+      return reply === 'OK';
+    } catch (err) {
+      LoggerService.error(JSON.stringify(err));
+      throw err;
+    }
   }
 
   /**
@@ -96,34 +91,16 @@ class RedisService {
     instanceUuid: string,
   ): Promise<void> {
     LoggerService.debug(`[Redis] Removing key ${taskIdentifier}_${postfix}`);
-
-    const existingValue = await new Promise<string>((resolve) =>
-      this.client.get(`${taskIdentifier}_${postfix}`, (err, data) => {
-        if (err) {
-          LoggerService.error('Something went wrong', err);
-          return;
-        }
-
-        resolve(data as string);
-      }),
-    );
-
+    const existingValue = await this.client.get(`${taskIdentifier}_${postfix}`);
     if (existingValue !== instanceUuid) return Promise.resolve();
-
-    return new Promise((resolve) => {
-      this.client.del(`${taskIdentifier}_${postfix}`, () => {
-        resolve();
-      });
-    });
+    await this.client.del(`${taskIdentifier}_${postfix}`);
   }
 
   /**
    * Disconnects the client and frees resources
    */
   public static async dispose(): Promise<void> {
-    await new Promise<void>((resolve) => {
-      this.client.quit(() => resolve());
-    });
+    await this.client.quit();
   }
 }
 
