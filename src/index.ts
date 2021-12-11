@@ -141,6 +141,7 @@ const bootstrap = async (): Promise<void> => {
   LoggerService.log(
     `Attempting to reserve migration task as ${ConfigService.instanceUuid}`,
   );
+  await RedisService.connect();
   const migrationTask = await RedisService.tryReserveTask(
     TaskIdentifier.MIGRATE_DATABASE,
     'init',

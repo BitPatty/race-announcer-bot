@@ -42,6 +42,13 @@ class RedisService {
   });
 
   /**
+   * Connect to the redis service
+   */
+  public static connect(): Promise<void> {
+    return this.client.connect();
+  }
+
+  /**
    * Try to reserve the specified task for the current process
    *
    * @param taskIdentifier  The task identifier
@@ -61,7 +68,6 @@ class RedisService {
       `[Redis] Setting ${taskIdentifier}_${postfix} to ${instanceUuid}`,
     );
     try {
-      await this.client.connect();
       const reply = await this.client.set(
         `${taskIdentifier}_${postfix}`,
         instanceUuid,
@@ -93,7 +99,6 @@ class RedisService {
   ): Promise<void> {
     LoggerService.debug(`[Redis] Removing key ${taskIdentifier}_${postfix}`);
     try {
-      await this.client.connect();
       const existingValue = await this.client.get(
         `${taskIdentifier}_${postfix}`,
       );

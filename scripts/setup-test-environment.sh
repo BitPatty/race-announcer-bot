@@ -41,8 +41,8 @@ chmod +x $BASE_DIRECTORY/scripts/wait-for-it.sh
 sh $BASE_DIRECTORY/scripts/wait-for-it.sh 127.0.0.1:3306 -t 60 || mysql_log_and_die
 
 # Wait for redis to be ready for connections (up to 60 seconds)
-echo "requirepass devel" >> /etc/redis.conf
-redis-server &
+# echo "requirepass devel" >> /etc/redis.conf
+redis-server --requirepass devel &
 sh $BASE_DIRECTORY/scripts/wait-for-it.sh 127.0.0.1:6379 -t 60 || redis_log_and_die
 
 # Run the initialization script for creating a new user

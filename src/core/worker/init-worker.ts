@@ -28,6 +28,7 @@ import {
 
 import AnnouncementWorker from './announcement-worker';
 import LoggerService from '../logger/logger.service';
+import RedisService from '../redis/redis-service';
 
 import ChatWorker from './chat-worker';
 import SourceWorker from './source-worker';
@@ -70,6 +71,7 @@ process.env.WORKER_NAME = `${selectedWorkerType}|${providerArg}`;
  */
 const bootstrap = async (): Promise<void> => {
   parentPort?.postMessage(`Starting..`);
+  await RedisService.connect();
   await workerInstance.start();
   parentPort?.postMessage(`Started`);
 };
