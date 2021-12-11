@@ -24,6 +24,7 @@ jobs:
       - name: Create Build
         run: docker build -t build:base -f ./dockerfiles/Build.Dockerfile .
       - name: Run Tests
+        timeout-minutes: 5
         run: docker build --build-arg BASE_IMAGE=build:base --build-arg DISCORD_BOT_TOKEN=abc -f ./dockerfiles/Test.Dockerfile .
 
   sonar-scan-pr:

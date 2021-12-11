@@ -239,7 +239,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
    */
   public async dispose(): Promise<void> {
     await DatabaseService.closeConnection();
-    return this.connector.dispose();
+    await this.connector.dispose();
   }
 }
 

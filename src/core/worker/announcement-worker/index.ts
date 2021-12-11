@@ -378,7 +378,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
    */
   public async dispose(): Promise<void> {
     await DatabaseService.closeConnection();
-    return this.connector.dispose();
+    await this.connector.dispose();
   }
 }
 

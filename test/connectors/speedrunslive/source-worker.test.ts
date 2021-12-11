@@ -25,6 +25,7 @@ describe('SRL Source Worker', () => {
     ]);
 
     await srlMockServer.start(MOCK_SRL_API_BASE_URL_PORT);
+    await RedisService.connect();
   });
 
   beforeEach(async (): Promise<void> => {
@@ -35,7 +36,7 @@ describe('SRL Source Worker', () => {
 
   afterAll(async (): Promise<void> => {
     await srlMockServer.dispose();
-    await RedisService.dispose();
+    await worker.dispose();
     await DatabaseService.closeConnection();
   });
 

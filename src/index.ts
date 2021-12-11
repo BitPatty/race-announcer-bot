@@ -34,15 +34,6 @@ process.on('uncaughtException', (err: Error, origin: string) => {
   process.exit(1);
 });
 
-const monitorMemoryInterval = setInterval(() => {
-  const { heapUsed, heapTotal } = process.memoryUsage();
-  LoggerService.debug(
-    `Heap usage is at ${Math.floor(heapUsed / 1024 / 1024)}/${Math.floor(
-      heapTotal / 1024 / 1024,
-    )}MB`,
-  );
-}, 10000);
-
 // Keeps track of active instances
 const workerInstances = new Map<
   string,
@@ -52,13 +43,20 @@ const workerInstances = new Map<
   }
 >();
 
-// CronJob to check if all workers are alive
-// if not, trigger a shutdown of the application.
-// It's easier to simply restart the whole application
-// automatically rather than trying to handle
-// revives of individual workers.
+// CronJob to check if all workers are alive if not, trigger a shutdown of the application.
+// It's easier to simply restart the whole application automatically rather than trying to
+// handle revives of individual workers.
 const healthCheck = new CronJob(ConfigService.workerHealthCheckInterval, () => {
   LoggerService.log('Running healthcheck');
+
+  // Log memory usage for traceability
+  const { heapUsed, heapTotal } = process.memoryUsage();
+  LoggerService.debug(
+    `Heap usage is at ${Math.floor(heapUsed / 1024 / 1024)}/${Math.floor(
+      heapTotal / 1024 / 1024,
+    )}MB`,
+  );
+
   for (const workerInstance of workerInstances.values()) {
     if (!workerInstance.worker.IsHealthy) {
       LoggerService.warn(
@@ -72,21 +70,17 @@ const healthCheck = new CronJob(ConfigService.workerHealthCheckInterval, () => {
   LoggerService.log('Healthcheck finished');
 });
 
-// Whenever worker shuts down, also shutdown
-// all the other workers to cause a restart
-// of the application itself.
+// Whenever worker shuts down, also shutdown all the other workers
 const workerShutdownCallback = async (
   workerIdentifier: string,
   error?: string,
 ): Promise<void> => {
   LoggerService.log(`Worker ${workerIdentifier} exited`, error);
 
-  // Remove the worker that has exited from the
-  // list of active instances
+  // Remove the worker that has exited from the list of active instances
   workerInstances.delete(workerIdentifier);
 
-  // If this was the last worker, shut down
-  // the application
+  // If this was the last worker, shut down the application
   if (workerInstances.size === 0) {
     LoggerService.log(`No workers left, exiting main thread`);
 
@@ -100,14 +94,11 @@ const workerShutdownCallback = async (
     // Remove the cronjob handle
     healthCheck.stop();
 
-    // Dump the list of active handles in debug mode
+    // Dump the list of active handles in debug mode for traceability
     if (ConfigService.logLevel === LogLevel.DEBUG) wtfnode.dump();
 
-    // Stop memory log interval
-    clearInterval(monitorMemoryInterval);
-
-    // Some handles may or may not take a bit longer
-    // to be freed. Force kill the process if this happens
+    // Some handles may or may not take a bit longer to be freed.
+    // Force kill the process if this happens
     setTimeout(() => {
       LoggerService.warn(`Process still alive, forcing exit`);
       process.kill(process.pid, 'SIGKILL');
@@ -123,8 +114,8 @@ const workerShutdownCallback = async (
 // Initialize the worker instances
 for (const worker of enabledWorkers) {
   for (const workerType of worker.types) {
-    // Don't use an arrow function for the callback
-    // since we wanna have the context available
+    // Don't use an arrow function for the callback since we wanna have
+    // the context available
     const workerInstance = new WorkerService(workerType, function (err) {
       void workerShutdownCallback(this.identifier, err);
     });
@@ -142,6 +133,8 @@ const bootstrap = async (): Promise<void> => {
     `Attempting to reserve migration task as ${ConfigService.instanceUuid}`,
   );
   await RedisService.connect();
+
+  // Migrate the database if necessary
   const migrationTask = await RedisService.tryReserveTask(
     TaskIdentifier.MIGRATE_DATABASE,
     'init',
@@ -150,7 +143,6 @@ const bootstrap = async (): Promise<void> => {
   );
 
   if (migrationTask) {
-    // Migrate the database
     LoggerService.log(`Migrating database`);
     const databaseConnection = await DatabaseService.getConnection();
     await databaseConnection.runMigrations();
@@ -170,7 +162,7 @@ const bootstrap = async (): Promise<void> => {
   }
 };
 
-// Actually start the application
+// Start the app
 void bootstrap().then(() => {
   healthCheck.start();
   LoggerService.log('Startup completed');

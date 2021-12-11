@@ -82,6 +82,7 @@ const bootstrap = async (): Promise<void> => {
 const cleanup = async (): Promise<void> => {
   LoggerService.log(`Cleaning up`);
   await workerInstance.dispose();
+  await RedisService.dispose();
   LoggerService.log(`Finished cleaning up`);
   parentPort?.postMessage(WorkerMessageType.CLEANUP_FINISHED);
   parentPort?.close();
