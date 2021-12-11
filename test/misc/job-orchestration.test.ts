@@ -3,6 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import RedisService from '../../src/core/redis/redis-service';
 
 describe('Job Orchestration', () => {
+  beforeAll(async () => {
+    await RedisService.connect();
+  });
+
   afterAll(async () => {
     await RedisService.dispose();
   });
