@@ -22,7 +22,9 @@ import { keys } from 'ts-transformer-keys';
 
 import TransformerUtils from '../../utils/transformer.utils';
 
-import { DatabaseAttributeType, SourceConnectorIdentifier } from '../enums';
+import { DatabaseAttributeType } from '../enums';
+import SourceConnectorIdentifier from '../../connectors/source-connector-identifier.enum';
+
 import { EntityColumn } from '../decorators';
 
 import BaseEntity, { EntityInitializer } from './base.entity';

@@ -20,7 +20,7 @@
 import { Connection, createConnection } from 'typeorm';
 import { Lock } from 'lock';
 
-import { LockIdentifier } from '../../models/enums';
+import { LOCK_IDENTIFIER_DATABASE_CONNECTION } from '../../constants';
 
 import ConfigService from '../config/config.service';
 import LoggerService from '../logger/logger.service';
@@ -30,7 +30,7 @@ class DatabaseService {
 
   public static getConnection(): Promise<Connection> {
     return new Promise<Connection>((resolve, reject) => {
-      Lock()(LockIdentifier.DATABASE_CONNECTION, async (release) => {
+      Lock()(LOCK_IDENTIFIER_DATABASE_CONNECTION, async (release) => {
         try {
           if (this.connection?.isConnected) {
             resolve(this.connection);
@@ -54,7 +54,7 @@ class DatabaseService {
 
   public static closeConnection(): Promise<void> {
     return new Promise((resolve, reject) => {
-      Lock()(LockIdentifier.DATABASE_CONNECTION, async (release) => {
+      Lock()(LOCK_IDENTIFIER_DATABASE_CONNECTION, async (release) => {
         try {
           if (this.connection?.isConnected) {
             await this.connection.close();

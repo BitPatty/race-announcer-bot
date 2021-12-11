@@ -44,8 +44,8 @@ class RedisService {
   /**
    * Connect to the redis service
    */
-  public static connect(): Promise<void> {
-    return this.client.connect();
+  public static async connect(): Promise<void> {
+    await this.client.connect();
   }
 
   /**

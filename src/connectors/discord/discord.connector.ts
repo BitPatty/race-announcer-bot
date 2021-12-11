@@ -37,13 +37,11 @@ import {
 import DestinationEventListenerMap from '../../models/interfaces/connectors/destination-event-listener-map.interface';
 
 import {
-  DestinationConnectorIdentifier,
   DestinationEvent,
   EntrantStatus,
   MessageChannelType,
   ReactionType,
   ReplyType,
-  SourceConnectorIdentifier,
   TaskIdentifier,
 } from '../../models/enums';
 
@@ -55,6 +53,9 @@ import MessageBuilderUtils from '../../utils/message-builder.utils';
 
 import RedisService from '../../core/redis/redis-service';
 import discordSlashCommands from './discord-slash-commands';
+
+import DestinationConnectorIdentifier from '../destination-connector-identifier.enum';
+import SourceConnectorIdentifier from '../source-connector-identifier.enum';
 
 class DiscordConnector
   implements DestinationConnector<DestinationConnectorIdentifier.DISCORD>
@@ -581,8 +582,8 @@ class DiscordConnector
   /**
    * Reply to the specified chat message
    *
-   * @param to   The message to reply to
-   * @param msg  The message content
+   * @param to       The message to reply to
+   * @param content  The message content
    */
   public async reply(
     to: ChatMessage,
@@ -655,7 +656,10 @@ class DiscordConnector
   }
 
   /**
-   * Connect the bot to the discord chati
+   * Connect the bot to the discord chat
+   *
+   * @param isMessageHandler  If true, runs the process as chat worker,
+   *                          else as announcement worker
    */
   public async connect(isMessageHandler: boolean): Promise<void> {
     try {
@@ -759,12 +763,12 @@ class DiscordConnector
   /**
    * Destroy the connector and cleanup used resources
    */
-  public dispose(): Promise<void> {
+  public dispose(): void {
     this.removeAllEventListeners();
-    if (!this.client) return Promise.resolve();
+    if (!this.client) return;
+
     this.client.destroy();
     this.client = undefined;
-    return Promise.resolve();
   }
 }
 

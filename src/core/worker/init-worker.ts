@@ -19,16 +19,14 @@
 
 import { parentPort } from 'worker_threads';
 
-import {
-  DestinationConnectorIdentifier,
-  SourceConnectorIdentifier,
-  WorkerMessageType,
-  WorkerType,
-} from '../../models/enums';
+import { WorkerMessageType, WorkerType } from '../../models/enums';
 
 import AnnouncementWorker from './announcement-worker';
 import LoggerService from '../logger/logger.service';
 import RedisService from '../redis/redis-service';
+
+import DestinationConnectorIdentifier from '../../connectors/destination-connector-identifier.enum';
+import SourceConnectorIdentifier from '../../connectors/source-connector-identifier.enum';
 
 import ChatWorker from './chat-worker';
 import SourceWorker from './source-worker';

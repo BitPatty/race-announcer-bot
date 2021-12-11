@@ -17,8 +17,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-enum LockIdentifier {
-  DATABASE_CONNECTION = 'database_connection',
-}
-
-export default LockIdentifier;
+export const LOCK_IDENTIFIER_DATABASE_CONNECTION = 'DATABASE_CONNECTION';

@@ -1,12 +1,13 @@
 import { GameEntity } from '../../../src/models/entities';
 import { MOCK_SRL_API_BASE_URL_PORT } from '../../test-environment';
-import { SourceConnectorIdentifier } from '../../../src/models/enums';
 import { srlGameMock, srlRaceMock } from './srl-mock-data';
 import DatabaseService from '../../../src/core/database/database-service';
 import MockAPIServer from '../../utils/mock-api-server';
 import RedisService from '../../../src/core/redis/redis-service';
 import SourceWorker from '../../../src/core/worker/source-worker';
 import clearDatabase from '../../utils/clear-database';
+
+import SourceConnectorIdentifier from '../../../src/connectors/source-connector-identifier.enum';
 
 describe('SRL Source Worker', () => {
   let srlMockServer: MockAPIServer;

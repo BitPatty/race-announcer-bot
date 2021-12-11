@@ -17,7 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { BotCommandType, SourceConnectorIdentifier } from '../../../enums';
+import SourceConnectorIdentifier from '../../../../connectors/source-connector-identifier.enum';
+
+import { BotCommandType } from '../../../enums';
 import ChatMessage from '../chat-message.interface';
 
 interface AddTrackerCommand {

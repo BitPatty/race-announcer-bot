@@ -33,12 +33,8 @@ import {
   SourceConnector,
 } from '../../../models/interfaces';
 
-import {
-  RaceStatus,
-  SourceConnectorIdentifier,
-  TaskIdentifier,
-  WorkerType,
-} from '../../../models/enums';
+import { RaceStatus, TaskIdentifier, WorkerType } from '../../../models/enums';
+import SourceConnectorIdentifier from '../../../connectors/source-connector-identifier.enum';
 
 import ConfigService from '../../config/config.service';
 import DatabaseService from '../../database/database-service';

@@ -32,13 +32,11 @@ import SRLGameList from './interfaces/srl-game-list.interface';
 import SRLRace from './interfaces/srl-race.interface';
 import SRLRaceList from './interfaces/srl-race-list.interface';
 
-import {
-  EntrantStatus,
-  RaceStatus,
-  SourceConnectorIdentifier,
-} from '../../models/enums';
+import { EntrantStatus, RaceStatus } from '../../models/enums';
 
 import ConfigService from '../../core/config/config.service';
+
+import SourceConnectorIdentifier from '../source-connector-identifier.enum';
 
 class SpeedRunsLiveConnector
   implements SourceConnector<SourceConnectorIdentifier.SPEEDRUNSLIVE>

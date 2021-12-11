@@ -22,12 +22,10 @@ import { Worker as WorkerThread } from 'worker_threads';
 import { join as joinPaths } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  DestinationConnectorIdentifier,
-  SourceConnectorIdentifier,
-  WorkerMessageType,
-  WorkerType,
-} from '../../models/enums';
+import { WorkerMessageType, WorkerType } from '../../models/enums';
+
+import DestinationConnectorIdentifier from '../../connectors/destination-connector-identifier.enum';
+import SourceConnectorIdentifier from '../../connectors/source-connector-identifier.enum';
 
 import LoggerService from '../logger/logger.service';
 
@@ -99,8 +97,8 @@ class WorkerService<T extends WorkerType> {
   /**
    * Cleanup function when exiting the worker
    */
-  private cleanupWorker(): Promise<void> {
-    return new Promise((resolve) => {
+  private async cleanupWorker(): Promise<void> {
+    await new Promise<void>((resolve) => {
       // If the worker has already exited,
       // don't even try to terminate the process
       if (this.hasExited) {
@@ -135,6 +133,8 @@ class WorkerService<T extends WorkerType> {
 
   /**
    * Starts the worker process
+   *
+   * @param connector  The connector the worker should use
    */
   public async start(
     connector: SourceConnectorIdentifier | DestinationConnectorIdentifier,

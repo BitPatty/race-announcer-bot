@@ -22,9 +22,9 @@ import { ConnectionOptions } from 'typeorm';
 import { join as joinPaths } from 'path';
 import { v4 as uuidV4 } from 'uuid';
 
-import { getEnumValues } from '../../utils/enum.utils';
+import LogLevel from '../logger/log-level.enum';
 
-import LogLevel from '../../models/enums/log-level.enum';
+import { getEnumValues } from '../../utils/enum.utils';
 
 class ConfigService {
   /**

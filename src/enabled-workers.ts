@@ -17,15 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-  DestinationConnectorIdentifier,
-  SourceConnectorIdentifier,
-  WorkerType,
-} from './models/enums';
+import { WorkerType } from './models/enums';
 
 import DiscordConnector from './connectors/discord/discord.connector';
 import RaceTimeGGConnector from './connectors/racetimegg/racetimegg.connector';
 import SpeedRunsLiveConnector from './connectors/speedrunslive/speedrunslive.connector';
+
+import DestinationConnectorIdentifier from './connectors/destination-connector-identifier.enum';
+import SourceConnectorIdentifier from './connectors/source-connector-identifier.enum';
 
 const enabledWorkers = [
   {

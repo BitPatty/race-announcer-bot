@@ -31,14 +31,11 @@ import RaceTimeRace from './interfaces/racetime-race.interface';
 import RaceTimeRaceDetail from './interfaces/racetime-race-detail.interface';
 import RaceTimeRaceList from './interfaces/racetime-race-list.interface';
 
-import {
-  EntrantStatus,
-  RaceStatus,
-  SourceConnectorIdentifier,
-} from '../../models/enums';
+import { EntrantStatus, RaceStatus } from '../../models/enums';
 
 import RaceTimeEntrantStatus from './enums/racetime-entrant-status.enum';
 import RaceTimeRaceStatus from './enums/racetime-race-status.enum';
+import SourceConnectorIdentifier from '../source-connector-identifier.enum';
 
 import ConfigService from '../../core/config/config.service';
 import DateTimeUtils from '../../utils/date-time.utils';

@@ -34,12 +34,9 @@ import {
   RaceInformation,
 } from '../../../models/interfaces';
 
-import {
-  DestinationConnectorIdentifier,
-  RaceStatus,
-  TaskIdentifier,
-  WorkerType,
-} from '../../../models/enums';
+import { RaceStatus, TaskIdentifier, WorkerType } from '../../../models/enums';
+
+import DestinationConnectorIdentifier from '../../../connectors/destination-connector-identifier.enum';
 
 import ConfigService from '../../config/config.service';
 import DatabaseService from '../../database/database-service';
@@ -190,8 +187,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       for (const activeAnnouncement of activeAnnouncements) {
         LoggerService.debug(`Synching announcement ${activeAnnouncement.id}`);
 
-        // Consider updates to no longer work
-        // if the they failed the previous 5 times
+        // Consider updates to no longer work if the they failed the previous 5 times
         if (activeAnnouncement.failedUpdateAttempts > 5) {
           LoggerService.warn(
             `Announcement sync for id ${activeAnnouncement.id} exceeded max failed update attempts`,
@@ -199,8 +195,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
           continue;
         }
 
-        // Don't update the announcement if the
-        // race hasn't changed
+        // Don't update the announcement if the race hasn't changed
         if (activeAnnouncement.changeCounter === activeRace.changeCounter) {
           LoggerService.debug(
             `Change counter unchanged, skipping announcement`,
@@ -214,8 +209,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
             activeAnnouncement.previousMessage,
           );
 
-          // Don't even try to update a post if the
-          // bot is missing the permissions
+          // Don't even try to update a post if the bot is missing the permissions
           const botHasRequiredPermissions =
             await this.connector.botHasRequiredPermissions(
               originalMessage.channel,
@@ -253,8 +247,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
         }
       }
 
-      // Don't announce races that are already
-      // finished or in an unknown state
+      // Don't announce races that are already finished or in an unknown state
       if (
         ![
           RaceStatus.ENTRY_OPEN,
@@ -265,10 +258,8 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       )
         continue;
 
-      // Races should be picked up within the first 3
-      // updates by the announcer. This is just to prevent
-      // announcements to be spammed in case  there's
-      // an oversight in the logic and/or network issue below
+      // Races should be picked up within the first 3 updates by the announcer. This is just to prevent
+      // announcements to be spammed in case  there's an oversight in the logic and/or network issue below
       // @TODO Add a transition state to either redis or mysql
       if (activeRace.changeCounter > 3) continue;
 
@@ -323,8 +314,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
         try {
           LoggerService.log('Attempting to reserve announcement sync job');
 
-          // Keep the job reserved for the specified time
-          // to ensure it's going to be released again
+          // Keep the job reserved for the specified time to ensure it's going to be released again
           const reservedByCurrentInstance = await RedisService.tryReserveTask(
             TaskIdentifier.ANNOUNCEMENT_SYNC,
             this.connector.connectorType,
@@ -343,8 +333,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
             LoggerService.error(err);
             throw err;
           } finally {
-            // Remove the reservation for the
-            // announcement sync after 10 seconds
+            // Remove the reservation for the announcement sync after 10 seconds
             await new Promise<void>((resolve) =>
               setTimeout(async () => {
                 await RedisService.freeTask(

@@ -17,7 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { DestinationConnectorIdentifier, DestinationEvent } from '../../enums';
+import { DestinationEvent } from '../../enums';
+
+import DestinationConnectorIdentifier from '../../../connectors/destination-connector-identifier.enum';
 import DestinationEventListenerMap from './destination-event-listener-map.interface';
 
 import {
@@ -72,7 +74,7 @@ interface DestinationConnector<T extends DestinationConnectorIdentifier> {
 
   connect(isMessageHandler: boolean): Promise<void>;
 
-  dispose(): Promise<void>;
+  dispose(): Promise<void> | void;
 }
 
 export default DestinationConnector;

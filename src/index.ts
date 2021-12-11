@@ -20,7 +20,8 @@
 import * as wtfnode from 'wtfnode';
 import { CronJob } from 'cron';
 
-import { LogLevel, TaskIdentifier, WorkerType } from './models/enums';
+import { TaskIdentifier, WorkerType } from './models/enums';
+import LogLevel from './core/logger/log-level.enum';
 
 import ConfigService from './core/config/config.service';
 import DatabaseService from './core/database/database-service';

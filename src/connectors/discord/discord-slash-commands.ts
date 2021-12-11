@@ -28,13 +28,11 @@ import {
   RemoveTrackerCommand,
 } from '../../models/interfaces';
 
-import {
-  BotCommandType,
-  MessageChannelType,
-  SourceConnectorIdentifier,
-} from '../../models/enums';
+import { BotCommandType, MessageChannelType } from '../../models/enums';
 
 import { parseEnumValue } from '../../utils/enum.utils';
+
+import SourceConnectorIdentifier from '../source-connector-identifier.enum';
 
 const providerChoices = [
   ['RaceTimeGG', SourceConnectorIdentifier.RACETIME_GG],

@@ -49,6 +49,14 @@
           "single"
         ]
       }
+    ],
+    "valid-jsdoc": [
+      "error",
+      {
+        "requireReturn": false,
+        "requireReturnType": false,
+        "requireParamType": false
+      }
     ]
   },
   "overrides": [

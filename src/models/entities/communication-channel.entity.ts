@@ -22,11 +22,8 @@ import { keys } from 'ts-transformer-keys';
 
 import TransformerUtils from '../../utils/transformer.utils';
 
-import {
-  DatabaseAttributeType,
-  DestinationConnectorIdentifier,
-  MessageChannelType,
-} from '../enums';
+import { DatabaseAttributeType, MessageChannelType } from '../enums';
+import DestinationConnectorIdentifier from '../../connectors/destination-connector-identifier.enum';
 
 import { EntityColumn } from '../decorators';
 

@@ -18,7 +18,8 @@
  */
 
 import { GameInformation, RaceInformation } from '..';
-import { SourceConnectorIdentifier } from '../../enums';
+
+import SourceConnectorIdentifier from '../../../connectors/source-connector-identifier.enum';
 
 interface SourceConnector<T extends SourceConnectorIdentifier> {
   get connectorType(): T;

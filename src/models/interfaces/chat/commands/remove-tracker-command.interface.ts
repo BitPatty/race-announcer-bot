@@ -17,8 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { BotCommandType, SourceConnectorIdentifier } from '../../../enums';
+import { BotCommandType } from '../../../enums';
 import ChatMessage from '../chat-message.interface';
+
+import SourceConnectorIdentifier from '../../../../connectors/source-connector-identifier.enum';
 
 interface RemoveTrackerCommand {
   type: BotCommandType.REMOVE_TRACKER;

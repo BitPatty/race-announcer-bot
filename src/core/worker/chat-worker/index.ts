@@ -32,7 +32,6 @@ import {
 
 import {
   BotCommandType,
-  DestinationConnectorIdentifier,
   DestinationEvent,
   ReactionType,
   ReplyType,
@@ -45,6 +44,8 @@ import {
   GameEntity,
   TrackerEntity,
 } from '../../../models/entities';
+
+import DestinationConnectorIdentifier from '../../../connectors/destination-connector-identifier.enum';
 
 import ConfigService from '../../config/config.service';
 import DatabaseService from '../../database/database-service';
@@ -153,7 +154,12 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     if (tracker) await this.trackerService.disableTracker(tracker);
   }
 
-  private async runCommand(
+  /**
+   * Executes a chat command
+   *
+   * @param cmd  The command
+   */
+  private async executeCommand(
     cmd:
       | AddTrackerCommand
       | RemoveTrackerCommand
@@ -228,7 +234,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
           3600,
         );
 
-        if (reservedForCurrentInstance) await this.runCommand(msg);
+        if (reservedForCurrentInstance) await this.executeCommand(msg);
       },
     );
     return this.connector.connect(true);
