@@ -1,8 +1,14 @@
 # Changelog
 
+## v2.3.0
+
+- Code Refactoring
+- Updated node-redis to 4.0.1
+- Updated dependencies
+
 ## v2.2.2
 
-- Update SRL target URL format
+- Updated SRL target URL format
 - Updated dependencies
 
 ## v2.2.1
