@@ -27,6 +27,8 @@ import TransformerUtils from '../../utils/transformer.utils';
 /**
  * Decorator override for the typeorm {@link JoinColumn} decorator
  * used to simplify the declaration process
+ *
+ * @returns  The join-column decorator
  */
 const EntityJoinColumn = (): PropertyDecorator => {
   return (target: Object, propertyKey: string | symbol): void => {

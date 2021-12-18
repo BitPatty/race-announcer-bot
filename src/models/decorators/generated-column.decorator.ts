@@ -42,7 +42,9 @@ enum GeneratedColumnType {
 
 /**
  * Decorator override for typeorm generated columns
- * @param type The generation strategy
+ *
+ * @param type  The generation strategy
+ * @returns     The column decorator
  */
 const GeneratedColumn = (type: GeneratedColumnType): PropertyDecorator => {
   return (target: Object, propertyKey: string | symbol): void => {

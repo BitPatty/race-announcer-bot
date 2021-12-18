@@ -38,7 +38,9 @@ type EntityColumnProps = {
 /**
  * Decorator override for the typeorm {@link Column} decorator
  * used to simplify the declaration process
- * @param columnProps Overrides for the declaration ({@link EntityColumnProps})
+ *
+ * @param columnProps  Overrides for the declaration ({@link EntityColumnProps})
+ * @returns            The column decorator
  */
 const EntityColumn = (columnProps?: EntityColumnProps): PropertyDecorator => {
   return (target: Object, propertyKey: string | symbol): void => {
