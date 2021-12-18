@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.1
+
+- Fix redis not working if not on localhost
+
 ## v2.3.0
 
 - Code Refactoring

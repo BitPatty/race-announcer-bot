@@ -26,8 +26,10 @@ import LoggerService from '../logger/logger.service';
 
 class RedisService {
   private static readonly client = redis.createClient({
-    ...ConfigService.redisConfiguration,
+    password: ConfigService.redisConfiguration.password,
     socket: {
+      host: ConfigService.redisConfiguration.host,
+      port: ConfigService.redisConfiguration.port,
       reconnectStrategy: (retries) => {
         // Exit with EX_UNAVAILABLE if failed to connect for over a minute
         if (retries > 20) {
