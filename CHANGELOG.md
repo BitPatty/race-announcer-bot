@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.4.0
+
+- Remved "Like" to lookup database values to avoid wildcarding
+- Updated dependencies
+
 ## v2.3.1
 
 - Fix redis not working if not on localhost
