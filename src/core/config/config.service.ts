@@ -47,6 +47,7 @@ class ConfigService {
       username: this.environmentConfiguration.DATABASE_USER,
       password: this.environmentConfiguration.DATABASE_PASSWORD,
       synchronize: Boolean(this.environmentConfiguration.DATABASE_SYNCHRONIZE),
+      charset: 'utf8mb4_unicode_ci',
       entities: [
         joinPaths(
           __dirname,
