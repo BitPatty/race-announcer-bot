@@ -47,6 +47,7 @@ class ConfigService {
       username: this.environmentConfiguration.DATABASE_USER,
       password: this.environmentConfiguration.DATABASE_PASSWORD,
       synchronize: Boolean(this.environmentConfiguration.DATABASE_SYNCHRONIZE),
+      charset: 'utf8mb4_unicode_ci',
       entities: [
         joinPaths(
           __dirname,
@@ -161,7 +162,7 @@ class ConfigService {
       DATABASE_USER: Joi.string().required(),
       DATABASE_PASSWORD: Joi.string().required(),
       DATABASE_NAME: Joi.string().required(),
-      DATABASE_TYPE: Joi.string().default('mysql'),
+      DATABASE_TYPE: Joi.valid('mysql', 'mariadb').default('mysql'),
       DATABASE_PORT: Joi.number().default(3306),
       DATABASE_LOGGING: Joi.string().default(LogLevel.INFO),
       DATABASE_SYNCHRONIZE: Joi.boolean()

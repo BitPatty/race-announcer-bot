@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Connection, Like } from 'typeorm';
+import { Connection } from 'typeorm';
 
 import {
   AddTrackerCommand,
@@ -83,8 +83,8 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       .getRepository(GameEntity)
       .findOne({
         where: {
-          abbreviation: Like(cmd.gameIdentifier),
-          connector: Like(cmd.sourceIdentifier),
+          abbreviation: cmd.gameIdentifier,
+          connector: cmd.sourceIdentifier,
         },
       });
     if (!game) return null;
@@ -98,8 +98,8 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
       .getRepository(CommunicationChannelEntity)
       .findOne({
         where: {
-          identifier: Like(cmd.targetChannelIdentifier),
-          connector: Like(this.connector.connectorType),
+          identifier: cmd.targetChannelIdentifier,
+          connector: this.connector.connectorType,
         },
       });
 

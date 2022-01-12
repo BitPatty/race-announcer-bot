@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.4.1
+
+- Set default database connection charset to `utf8mb4_unicode_ci`
+
+## v2.4.0
+
+- Removed "Like" to lookup database values to avoid wildcarding
+- Updated dependencies
+
 ## v2.3.1
 
 - Fix redis not working if not on localhost
