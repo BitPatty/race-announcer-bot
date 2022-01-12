@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.0.0
+
+- Replaced SRL API with the new one since the cert of the old API expired
+- Updated dependencies
+
 ## v2.4.1
 
 - Set default database connection charset to `utf8mb4_unicode_ci`
