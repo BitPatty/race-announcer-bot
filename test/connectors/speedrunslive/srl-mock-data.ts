@@ -2,7 +2,6 @@ import SRLGameList from '../../../src/connectors/speedrunslive/interfaces/srl-ga
 import SRLRaceList from '../../../src/connectors/speedrunslive/interfaces/srl-race-list.interface';
 
 const srlGameMock: SRLGameList = {
-  count: '5',
   data: [
     {
       gameName: 'Super Metroid',

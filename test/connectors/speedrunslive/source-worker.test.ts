@@ -20,7 +20,7 @@ describe('SRL Source Worker', () => {
         body: JSON.stringify(srlGameMock),
       },
       {
-        path: '/races',
+        path: '/currentraces',
         body: JSON.stringify(srlRaceMock),
       },
     ]);

@@ -1,4 +1,5 @@
 import { Server, createServer } from 'http';
+import { parse } from 'url';
 import stoppable from 'stoppable';
 
 type MockRoute = {
@@ -12,7 +13,14 @@ class MockAPIServer {
 
   public constructor(routes: MockRoute[]) {
     const server = createServer((req, res): void => {
-      const routeMatch = routes.find((r) => r.path === req.url);
+      if (!req.url) {
+        res.statusCode = 500;
+        res.end();
+        return;
+      }
+
+      const parsedUrl = parse(req.url, true);
+      const routeMatch = routes.find((r) => r.path === parsedUrl.pathname);
 
       if (!routeMatch) {
         res.statusCode = 404;

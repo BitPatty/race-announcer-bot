@@ -20,7 +20,6 @@
 import SRLGame from './srl-game.interface';
 
 interface SRLGameList {
-  count: string;
   data: SRLGame[];
 }
 
