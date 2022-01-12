@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.1
+
+- Fixed SRL race link
+
 ## v3.0.0
 
 - Replaced SRL API with the new one since the cert of the old API expired
