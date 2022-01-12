@@ -1,6 +1,6 @@
 /**
  * Race Announcer Bot - A race announcer bot for speedrunners
- * Copyright (C) 2021 Matteias Collet <matteias.collet@bluewin.ch>
+ * Copyright (C) 2022 Matteias Collet <matteias.collet@bluewin.ch>
  * Official Repository: https://github.com/BitPatty/RaceAnnouncerBot
  *
  * This program is free software: you can redistribute it and/or modify

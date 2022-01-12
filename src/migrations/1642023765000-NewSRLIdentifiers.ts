@@ -17,10 +17,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-enum MessageChannelType {
-  DIRECT_MESSAGE = 'direct_message',
-  TEXT_CHANNEL = 'text_channel',
-  OTHER = 'other',
-}
+/* eslint-disable */
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export default MessageChannelType;
+export class NewSRLIdentifiers1642023765000 implements MigrationInterface {
+  name = 'NewSRLIdentifiers1642023765000';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `UPDATE game set identifier=abbreviation where connector='SRL'`,
+    );
+  }
+
+  public async down(_: QueryRunner): Promise<void> {
+    // Left empty intentionally
+  }
+}
