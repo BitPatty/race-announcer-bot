@@ -20,8 +20,7 @@
 import SRLRace from './srl-race.interface';
 
 interface SRLRaceList {
-  count: string;
-  races: SRLRace[];
+  data: SRLRace[];
 }
 
 export default SRLRaceList;

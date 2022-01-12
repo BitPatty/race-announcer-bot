@@ -174,7 +174,7 @@ class ConfigService {
       SRL_BASE_URL: Joi.string().uri().default('https://speedrunslive.com'),
       SRL_API_BASE_URL: Joi.string()
         .uri()
-        .default('https://api.speedrunslive.com'),
+        .default('https://www.speedrunslive.com/api'),
       RACETIME_BASE_URL: Joi.string().uri().default('https://racetime.gg'),
       ANNOUNCEMENT_SYNC_INTERVAL: Joi.string().default('5/15 * * * * *'),
       RACE_SYNC_INTERVAL: Joi.string().default('*/15 * * * * *'),

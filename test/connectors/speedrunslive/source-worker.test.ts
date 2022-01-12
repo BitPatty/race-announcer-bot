@@ -44,7 +44,7 @@ describe('SRL Source Worker', () => {
   describe('Game Sync', () => {
     test('Game count matches', async () => {
       const gameList = await worker['connector'].listGames();
-      expect(gameList.length).toBe(srlGameMock.games.length - 1);
+      expect(gameList.length).toBe(srlGameMock.data.length - 1);
     });
 
     test('Does not include unlisted games', async () => {
@@ -60,18 +60,18 @@ describe('SRL Source Worker', () => {
         .getRepository(GameEntity)
         .find();
 
-      expect(games.length).toBe(srlGameMock.games.length - 1);
+      expect(games.length).toBe(srlGameMock.data.length - 1);
 
-      for (const gameMock of srlGameMock.games) {
-        if (gameMock.abbrev === 'newgame') continue;
+      for (const gameMock of srlGameMock.data) {
+        if (gameMock.gameAbbrev === 'newgame') continue;
         const gameMatch = games.find(
           (g) =>
             g.connector === worker['connector'].connectorType &&
-            g.abbreviation === gameMock.abbrev,
+            g.abbreviation === gameMock.gameAbbrev,
         );
 
         expect(gameMatch).toBeTruthy();
-        expect(gameMatch?.name).toBe(gameMock.name);
+        expect(gameMatch?.name).toBe(gameMock.gameName);
       }
     });
   });

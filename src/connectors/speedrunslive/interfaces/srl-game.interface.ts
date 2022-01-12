@@ -18,11 +18,9 @@
  */
 
 interface SRLGame {
-  id: number;
-  name: string;
-  abbrev: string;
-  popularity: number;
-  popularityrank: number;
+  gameName: string;
+  gameAbbrev: string;
+  gamePopularity: number;
 }
 
 export default SRLGame;

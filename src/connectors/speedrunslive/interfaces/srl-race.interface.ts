@@ -21,14 +21,13 @@ import SRLEntrant from './srl-entrant.interface';
 import SRLGame from './srl-game.interface';
 
 interface SRLRace {
-  id: string;
+  currentRaceId: string;
   game: SRLGame;
-  goal: string;
-  time: number;
-  state: number;
-  statetext: string;
-  filename: string;
-  numentrants: number;
+  currentRaceGoal: string;
+  elapsedTime: number;
+  currentRaceState: number;
+  currentRaceStateText: string;
+  currentRaceFilename: string;
   entrants: {
     [_: string]: SRLEntrant;
   };
