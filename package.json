@@ -37,7 +37,7 @@
     "axios": "0.24.0",
     "cron": "1.8.2",
     "discord-api-types": "0.26.1",
-    "discord.js": "13.5.1",
+    "discord.js": "13.6.0",
     "joi": "17.5.0",
     "lock": "1.1.0",
     "moment": "2.29.1",
