@@ -60,7 +60,7 @@
     "@types/stoppable": "1.1.1",
     "@types/ts-nameof": "4.2.1",
     "@types/wtfnode": "0.7.0",
-    "@typescript-eslint/eslint-plugin": "5.11.0",
+    "@typescript-eslint/eslint-plugin": "5.12.1",
     "@typescript-eslint/parser": "5.12.1",
     "eslint": "8.8.0",
     "eslint-config-prettier": "8.4.0",
