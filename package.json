@@ -45,7 +45,7 @@
     "pino": "7.8.0",
     "pino-elasticsearch": "6.2.0",
     "pino-multi-stream": "6.0.0",
-    "pino-pretty": "7.5.1",
+    "pino-pretty": "7.5.2",
     "redis": "4.0.4",
     "typeorm": "0.2.44",
     "uuid": "8.3.2",
