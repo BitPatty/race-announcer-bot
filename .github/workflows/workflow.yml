@@ -99,6 +99,13 @@ jobs:
         run: |
           docker tag ${{ env.IMAGE_NAME }} ghcr.io/bitpatty/race-announcer-bot-development:latest
           docker push ghcr.io/bitpatty/race-announcer-bot-development:latest
+      - name: Deploy to CapRover
+        uses: floms/action-caprover@v1
+        with:
+          host: '${{ secrets.CAPROVER_URL }}'
+          password: '${{ secrets.CAPROVER_PASSWORD }}'
+          app: 'race-announcer-bot-development'
+          image: ${{ env.IMAGE_NAME }}
 
   publish-production-image:
     name: Publish Production Image
