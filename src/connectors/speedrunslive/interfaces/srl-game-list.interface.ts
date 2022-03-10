@@ -20,7 +20,8 @@
 import SRLGame from './srl-game.interface';
 
 interface SRLGameList {
-  data: SRLGame[];
+  count: string;
+  games: SRLGame[];
 }
 
 export default SRLGameList;

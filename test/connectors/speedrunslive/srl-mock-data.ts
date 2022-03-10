@@ -1,5 +1,5 @@
-import SRLGameList from '../../../src/connectors/speedrunslive/interfaces/srl-game-list.interface';
-import SRLRaceList from '../../../src/connectors/speedrunslive/interfaces/srl-race-list.interface';
+import SRLGameList from '../../../src/connectors/speedrunslive-v2/interfaces/srl-game-list.interface';
+import SRLRaceList from '../../../src/connectors/speedrunslive-v2/interfaces/srl-race-list.interface';
 
 const srlGameMock: SRLGameList = {
   data: [

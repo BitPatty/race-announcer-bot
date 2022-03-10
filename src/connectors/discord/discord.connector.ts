@@ -429,13 +429,6 @@ class DiscordConnector
     const entrantString = this.buildEntrantList(race.entrants);
     embed = embed.addField('Entrants', entrantString);
 
-    if (race.url && race.url.indexOf('speedrunslive') > 0) {
-      embed = embed.addField(
-        '-',
-        "*Note: Due to expired SRL certificates race messages won't update when the last entrant finishes*",
-      );
-    }
-
     return embed;
   }
 

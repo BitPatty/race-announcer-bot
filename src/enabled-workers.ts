@@ -21,7 +21,7 @@ import { WorkerType } from './models/enums';
 
 import DiscordConnector from './connectors/discord/discord.connector';
 import RaceTimeGGConnector from './connectors/racetimegg/racetimegg.connector';
-import SpeedRunsLiveConnector from './connectors/speedrunslive/speedrunslive.connector';
+import SpeedRunsLiveConnectorV2 from './connectors/speedrunslive/speedrunslive.connector';
 
 import DestinationConnectorIdentifier from './connectors/destination-connector-identifier.enum';
 import SourceConnectorIdentifier from './connectors/source-connector-identifier.enum';
@@ -43,7 +43,7 @@ const enabledWorkers = [
     name: 'SpeedRunsLive',
     types: [WorkerType.SOURCE_SYNC],
     connector: SourceConnectorIdentifier.SPEEDRUNSLIVE,
-    ctor: SpeedRunsLiveConnector,
+    ctor: SpeedRunsLiveConnectorV2,
   },
 ];
 

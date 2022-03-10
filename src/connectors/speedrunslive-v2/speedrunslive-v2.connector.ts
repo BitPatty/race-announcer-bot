@@ -38,7 +38,7 @@ import ConfigService from '../../core/config/config.service';
 
 import SourceConnectorIdentifier from '../source-connector-identifier.enum';
 
-class SpeedRunsLiveConnector
+class SpeedRunsLiveConnectorV2
   implements SourceConnector<SourceConnectorIdentifier.SPEEDRUNSLIVE>
 {
   public get connectorType(): SourceConnectorIdentifier.SPEEDRUNSLIVE {
@@ -81,9 +81,9 @@ class SpeedRunsLiveConnector
 
   private srlEntrantToEntrant(srlEntrant: SRLEntrant): EntrantInformation {
     return {
-      identifier: srlEntrant.displayname.toLowerCase(),
-      displayName: srlEntrant.displayname,
-      fullName: srlEntrant.displayname,
+      identifier: srlEntrant.currentRacePlayerName.toLowerCase(),
+      displayName: srlEntrant.currentRacePlayerName,
+      fullName: srlEntrant.currentRacePlayerName,
       status: this.numericEntrantStateToStatus(srlEntrant.time),
       finalTime: srlEntrant.time > 0 ? srlEntrant.time : null,
     };
@@ -96,11 +96,11 @@ class SpeedRunsLiveConnector
 
   private srlRaceToRace(srlRace: SRLRace): RaceInformation {
     return {
-      identifier: srlRace.id.toString(),
-      url: `${ConfigService.speedRunsLiveBaseUrl}/race/${srlRace.id}`,
+      identifier: srlRace.currentRaceId.toString(),
+      url: `${ConfigService.speedRunsLiveBaseUrl}/race/${srlRace.currentRaceId}`,
       game: this.srlGameToGame(srlRace.game),
-      goal: this.formatGoal(srlRace.goal),
-      status: this.numericRaceStateToStatus(srlRace.state),
+      goal: this.formatGoal(srlRace.currentRaceGoal),
+      status: this.numericRaceStateToStatus(srlRace.currentRaceState),
       entrants: Object.values(srlRace.entrants).map((e) =>
         this.srlEntrantToEntrant(e),
       ),
@@ -109,42 +109,45 @@ class SpeedRunsLiveConnector
 
   private srlGameToGame(srlGame: SRLGame): GameInformation {
     return {
-      identifier: srlGame.abbrev,
-      name: srlGame.name,
-      abbreviation: srlGame.abbrev,
+      identifier: srlGame.gameAbbrev.toString(),
+      name: srlGame.gameName,
+      abbreviation: srlGame.gameAbbrev,
       // This is actually how the SRL website builds the URL,
       // no matter whether the image actually exists
-      imageUrl: `https://cdn.speedrunslive.com/images/games/${srlGame.abbrev}.jpg`,
+      imageUrl: `https://cdn.speedrunslive.com/images/games/${srlGame.gameAbbrev}.jpg`,
     };
   }
 
   public async getActiveRaces(): Promise<RaceInformation[]> {
     const { data } = await axios.get<SRLRaceList>(
-      `${ConfigService.speedRunsLiveApiBaseUrl}/races`,
+      `${ConfigService.speedRunsLiveApiBaseUrlV2}/currentraces?pageSize=1000`,
     );
-    return data.races.map((r) => this.srlRaceToRace(r));
+    return data.data.map((r) => this.srlRaceToRace(r));
   }
 
   public async getRaceById(
     identifier: string,
   ): Promise<RaceInformation | null> {
     const { data } = await axios.get<SRLRace>(
-      `${ConfigService.speedRunsLiveApiBaseUrl}/races/${identifier}`,
+      `${ConfigService.speedRunsLiveApiBaseUrlV2}/currentraces/${identifier}`,
     );
 
     // SRL returns an empty object ({}) on races that
     // that are no longer listed
-    return data && data.id ? this.srlRaceToRace(data) : null;
+    return data && data.currentRaceId ? this.srlRaceToRace(data) : null;
   }
 
   public async listGames(): Promise<GameInformation[]> {
     const { data } = await axios.get<SRLGameList>(
-      `${ConfigService.speedRunsLiveApiBaseUrl}/games`,
+      `${ConfigService.speedRunsLiveApiBaseUrlV2}/games?pageSize=10000`,
     );
-    return data.games
-      .filter((g) => g.name && g.name.length > 0 && g.abbrev !== 'newgame')
+    return data.data
+      .filter(
+        (g) =>
+          g.gameName && g.gameName.length > 0 && g.gameAbbrev !== 'newgame',
+      )
       .map((g) => this.srlGameToGame(g));
   }
 }
 
-export default SpeedRunsLiveConnector;
+export default SpeedRunsLiveConnectorV2;

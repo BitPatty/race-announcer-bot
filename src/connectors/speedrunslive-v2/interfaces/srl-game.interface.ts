@@ -17,14 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-interface SRLEntrant {
-  displayname: string;
-  place: number;
-  time: number;
-  message: string;
-  statetext: string;
-  twitch: string;
-  trueskill: string;
+interface SRLGame {
+  gameName: string;
+  gameAbbrev: string;
+  gamePopularity: number;
 }
 
-export default SRLEntrant;
+export default SRLGame;

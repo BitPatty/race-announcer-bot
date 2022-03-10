@@ -17,14 +17,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-interface SRLEntrant {
-  displayname: string;
-  place: number;
-  time: number;
-  message: string;
-  statetext: string;
-  twitch: string;
-  trueskill: string;
+import SRLEntrant from './srl-entrant.interface';
+import SRLGame from './srl-game.interface';
+
+interface SRLRace {
+  currentRaceId: string;
+  game: SRLGame;
+  currentRaceGoal: string;
+  elapsedTime: number;
+  currentRaceState: number;
+  currentRaceStateText: string;
+  currentRaceFilename: string;
+  entrants: {
+    [_: string]: SRLEntrant;
+  };
 }
 
-export default SRLEntrant;
+export default SRLRace;
