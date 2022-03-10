@@ -52,19 +52,19 @@ The following environment variables must be set in order to run the application:
 
 The following environment variables can be set optionally:
 
-| Name                         | Description                                                                          | Default                             |
-| ---------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------- |
-| RACETIME_BASE_URL            | The base url to racetime.gg                                                          | `https://racetime.gg`               |
-| SRL_BASE_URL                 | The base url to SpeedRunsLive                                                        | `https://speedrunslive.com`         |
-| SRL_API_BASE_URL             | The base url of the SpeedRunsLive API                                                | `https://www.speedrunslive.com/api` |
-| DISCORD_GLOBAL_ADMINS        | Comma-seperated list of user ids which should be considered bot admins on all guilds | -                                   |
-| LOG_LEVEL                    | The max log level. Can be `info`, `debug` or `trace`                                 | `debug`                             |
-| ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format                                 | `5/15 * * * * *`                    |
-| GAME_SYNC_INTERVAL           | The interval for game database synchronization                                       | `0 0 * * * * `                      |
-| WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks                                                | `*/10 * * * * *`                    |
-| ELASTICSEARCH_URL            | The URL to your elasticsearch instance (if any) which logs will be streamed to       | -                                   |
-| ELASTICSEARCH_INDEX          | The elasticsearch index name                                                         | `race-announcer-bot`                |
-| ELASTICSEARCH_USE_DATASTREAM | Set this to `true` if you use data streams for ES indexing                           | `false`                             |
+| Name                         | Description                                                                          | Default                         |
+| ---------------------------- | ------------------------------------------------------------------------------------ | ------------------------------- |
+| RACETIME_BASE_URL            | The base url to racetime.gg                                                          | `https://racetime.gg`           |
+| SRL_BASE_URL                 | The base url to SpeedRunsLive                                                        | `https://speedrunslive.com`     |
+| SRL_API_BASE_URL             | The base url of the SpeedRunsLive API                                                | `https://api.speedrunslive.com` |
+| DISCORD_GLOBAL_ADMINS        | Comma-seperated list of user ids which should be considered bot admins on all guilds | -                               |
+| LOG_LEVEL                    | The max log level. Can be `info`, `debug` or `trace`                                 | `debug`                         |
+| ANNOUNCEMENT_SYNC_INTERVAL   | The interval for announcement updates in cron format                                 | `5/15 * * * * *`                |
+| GAME_SYNC_INTERVAL           | The interval for game database synchronization                                       | `0 0 * * * * `                  |
+| WORKER_HEALTH_CHECK_INTERVAL | The interval for worker health checks                                                | `*/10 * * * * *`                |
+| ELASTICSEARCH_URL            | The URL to your elasticsearch instance (if any) which logs will be streamed to       | -                               |
+| ELASTICSEARCH_INDEX          | The elasticsearch index name                                                         | `race-announcer-bot`            |
+| ELASTICSEARCH_USE_DATASTREAM | Set this to `true` if you use data streams for ES indexing                           | `false`                         |
 
 ## License
 
