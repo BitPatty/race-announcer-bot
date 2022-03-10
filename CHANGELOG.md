@@ -1,8 +1,13 @@
 # Changelog
 
+## v4.0.1
+
+- Disable source worker tests for now
+
 ## v4.0.0
 
 - Restore old SRL provider since the SSL certificate has been restored and the new API doesn't provide all infos
+- Updated dependencies
 
 ## v3.0.1
 

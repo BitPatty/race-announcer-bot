@@ -44,6 +44,7 @@ import RedisService from '../../redis/redis-service';
 import DateTimeUtils from '../../../utils/date-time.utils';
 
 import Worker from '../worker.interface';
+
 import enabledWorkers from '../../../enabled-workers';
 
 class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {

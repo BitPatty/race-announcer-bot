@@ -15,7 +15,7 @@ export default (): Config.InitialOptions => {
     coverageReporters: ['lcov', 'html', 'json'],
     verbose: true,
     testMatch: [
-      '**/test/connectors/speedrunslive/**/*.test.ts',
+      // '**/test/connectors/speedrunslive/**/*.test.ts',
       '**/test/misc/**/*.test.ts',
     ],
   };
