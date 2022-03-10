@@ -69,7 +69,7 @@ The following environment variables can be set optionally:
 ## License
 
 ```
-Copyright 2021 Matteias Collet (https://github.com/BitPatty)
+Copyright 2022 Matteias Collet (https://github.com/BitPatty)
 
 This project and all source files in this repository are
 licensed under the GNU Affero General Public License v3
