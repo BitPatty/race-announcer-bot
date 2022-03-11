@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.0.2
+
+- Updated dependencies
+
 ## v4.0.1
 
 - Disable source worker tests for now
