@@ -1,4 +1,4 @@
-FROM node:16.13.0-alpine3.14 as install
+FROM node:gallium-alpine3.14 as install
 
 # Install build dependencies
 RUN apk --no-cache add shadow \
@@ -36,7 +36,7 @@ RUN rm -rf node_modules
 ENV NODE_ENV="production"
 RUN npm ci --production
 
-FROM node:16.13.0-alpine3.14 as final
+FROM node:gallium-alpine3.14 as final
 
 WORKDIR /app
 COPY --from=install /app/dist/src /app
