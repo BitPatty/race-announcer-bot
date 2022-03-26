@@ -47,7 +47,7 @@
     "pino-multi-stream": "6.0.0",
     "pino-pretty": "7.6.0",
     "redis": "4.0.4",
-    "typeorm": "0.2.45",
+    "typeorm": "0.3.3",
     "uuid": "8.3.2",
     "wtfnode": "0.9.1"
   },
