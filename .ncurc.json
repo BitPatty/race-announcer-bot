@@ -1,0 +1,4 @@
+{
+  "upgrade": true,
+  "reject": ["typeorm", "@types/node"]
+}
