@@ -67,7 +67,7 @@
     "eslint-plugin-jest": "26.1.4",
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-sort-imports-es6-autofix": "0.6.0",
-    "npm-check-updates": "12.5.8",
+    "npm-check-updates": "12.5.9",
     "prettier": "2.6.2",
     "stoppable": "1.1.0",
     "ts-jest": "27.1.4",
