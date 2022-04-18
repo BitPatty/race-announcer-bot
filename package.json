@@ -41,7 +41,7 @@
     "discord.js": "13.6.0",
     "joi": "17.6.0",
     "lock": "1.1.0",
-    "moment": "2.29.2",
+    "moment": "2.29.3",
     "mysql2": "2.3.3",
     "pino": "7.10.0",
     "pino-elasticsearch": "6.2.0",
