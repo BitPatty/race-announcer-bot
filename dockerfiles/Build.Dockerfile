@@ -26,7 +26,7 @@ WORKDIR /app
 COPY . .
 
 # Install the dependencies
-RUN npm i
+RUN npm i --force
 
 # Create a new build
 RUN npm run build
