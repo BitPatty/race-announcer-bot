@@ -26,7 +26,7 @@ WORKDIR /app
 COPY . .
 
 # Install the dependencies
-RUN npm ci
+RUN npm i
 
 # Create a new build
 RUN npm run build
@@ -34,7 +34,7 @@ RUN npm run build
 # Replace dependencies with prod dependencies
 RUN rm -rf node_modules
 ENV NODE_ENV="production"
-RUN npm ci --production
+RUN npm i --production
 
 FROM node:16.14.2-alpine3.14 as final
 
