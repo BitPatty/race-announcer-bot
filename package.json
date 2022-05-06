@@ -37,7 +37,7 @@
     "@types/uuid": "8.3.4",
     "axios": "0.26.1",
     "cron": "1.8.2",
-    "discord-api-types": "0.31.2",
+    "discord-api-types": "0.32.1",
     "discord.js": "13.6.0",
     "joi": "17.6.0",
     "lock": "1.1.0",
