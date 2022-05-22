@@ -35,9 +35,9 @@ import { parseEnumValue } from '../../utils/enum.utils';
 import SourceConnectorIdentifier from '../source-connector-identifier.enum';
 
 const providerChoices = [
-  ['RaceTimeGG', SourceConnectorIdentifier.RACETIME_GG],
-  ['SpeedRunsLive', SourceConnectorIdentifier.SPEEDRUNSLIVE],
-] as [string, string][];
+  { name: 'RaceTimeGG', value: SourceConnectorIdentifier.RACETIME_GG },
+  { name: 'SpeedRunsLive', value: SourceConnectorIdentifier.SPEEDRUNSLIVE },
+];
 
 const transformInteractionToChatMessage = (
   interaction: Discord.CommandInteraction,
@@ -99,7 +99,7 @@ const registerTrackerCommand = {
         .setName('provider')
         .setDescription('The race provider')
         .setRequired(true)
-        .addChoices(providerChoices),
+        .addChoices(...providerChoices),
     )
     .addStringOption((o) =>
       o.setName('slug').setDescription('The games slug').setRequired(true),
@@ -183,7 +183,7 @@ const removeTrackerCommand = {
         .setName('provider')
         .setDescription('The race provider')
         .setRequired(true)
-        .addChoices(providerChoices),
+        .addChoices(...providerChoices),
     )
     .addStringOption((o) =>
       o.setName('slug').setDescription('The games slug').setRequired(true),
