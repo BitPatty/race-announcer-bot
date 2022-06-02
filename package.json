@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@types/cron": "2.0.0",
-    "@types/jest": "27.5.1",
+    "@types/jest": "28.1.0",
     "@types/node": "16.11.36",
     "@types/stoppable": "1.1.1",
     "@types/ts-nameof": "4.2.1",
