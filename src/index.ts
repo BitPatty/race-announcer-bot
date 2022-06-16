@@ -24,7 +24,6 @@ import { TaskIdentifier, WorkerType } from './models/enums';
 import LogLevel from './core/logger/log-level.enum';
 
 import ConfigService from './core/config/config.service';
-import DatabaseService from './core/database/database-service';
 import LoggerService from './core/logger/logger.service';
 import RedisService from './core/redis/redis-service';
 import WorkerService from './core/worker/worker.service';
@@ -145,9 +144,10 @@ const bootstrap = async (): Promise<void> => {
 
   if (migrationTask) {
     LoggerService.log(`Migrating database`);
-    const databaseConnection = await DatabaseService.getConnection();
-    await databaseConnection.runMigrations();
-    await DatabaseService.closeConnection();
+    // @TODO
+    // const databaseConnection = await DatabaseService.getConnection();
+    // await databaseConnection.runMigrations();
+    // await DatabaseService.closeConnection();
     LoggerService.log(`Database migrated`);
     await RedisService.freeTask(
       TaskIdentifier.MIGRATE_DATABASE,

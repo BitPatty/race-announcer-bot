@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Announcement {
+  id                     Int       @id @default(autoincrement())
+  uuid                   String    @unique(map: "IDX_9163ed60c490f03694aa0fa70b") @db.Char(36)
+  created_at             DateTime  @default(now()) @db.DateTime(6)
+  updated_at             DateTime  @default(now()) @db.DateTime(6)
+  deleted_at             DateTime? @db.DateTime(6)
+  last_updated           DateTime  @db.DateTime(0)
+  change_counter         Int
+  failed_update_attempts Int
+  previous_message       String    @db.VarChar(4000)
+  trackerId              Int?      @map("tracker")
+  raceId                 Int?      @map("race")
+  race                   Race?     @relation(fields: [raceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f5c002ddb504f23295532a16d81")
+  tracker                Tracker?  @relation(fields: [trackerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_b7e350bbf051f5d657ea529665d")
+
+  @@index([trackerId], map: "FK_b7e350bbf051f5d657ea529665d")
+  @@index([raceId], map: "FK_f5c002ddb504f23295532a16d81")
+  @@map("announcement")
+}
+
+model CommunicationChannel {
+  id                Int                             @id @default(autoincrement())
+  uuid              String                          @unique(map: "IDX_bddc15eedaa6345cb741002cb9") @db.Char(36)
+  created_at        DateTime                        @default(now()) @db.DateTime(6)
+  updated_at        DateTime                        @default(now()) @db.DateTime(6)
+  deleted_at        DateTime?                       @db.DateTime(6)
+  is_active         Boolean                         @default(false) @db.TinyInt
+  identifier        String                          @db.VarChar(255)
+  name              String?                         @db.VarChar(255)
+  server_identifier String?                         @db.VarChar(255)
+  type              communication_channel_type
+  connector         communication_channel_connector
+  server_name       String?                         @db.VarChar(255)
+  tracker           Tracker[]
+
+  @@map("communication_channel")
+}
+
+model Entrant {
+  id         Int            @id @default(autoincrement())
+  uuid       String         @unique(map: "IDX_9b498f93d1d677fc927be899c7") @db.Char(36)
+  created_at DateTime       @default(now()) @db.DateTime(6)
+  updated_at DateTime       @default(now()) @db.DateTime(6)
+  deleted_at DateTime?      @db.DateTime(6)
+  status     entrant_status
+  final_time Int?
+  racerId    Int            @map("racer")
+  raceId     Int            @map("race")
+  race       Race           @relation(fields: [raceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_eff95102124964982bdc36efd1a")
+  racer      Racer          @relation(fields: [racerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_83ca39d3fcff0a8ae495dcad3eb")
+
+
+  @@index([racerId], map: "FK_83ca39d3fcff0a8ae495dcad3eb")
+  @@index([raceId], map: "FK_eff95102124964982bdc36efd1a")
+  @@map("entrant")
+}
+
+model Game {
+  id           Int            @id @default(autoincrement())
+  uuid         String         @unique(map: "IDX_6ee95d182173a211ff700a021b") @db.Char(36)
+  created_at   DateTime       @default(now()) @db.DateTime(6)
+  updated_at   DateTime       @default(now()) @db.DateTime(6)
+  deleted_at   DateTime?      @db.DateTime(6)
+  name         String         @db.VarChar(255)
+  identifier   String         @db.VarChar(255)
+  connector    game_connector
+  abbreviation String         @db.VarChar(255)
+  image_url    String?        @db.VarChar(255)
+  races        Race[]
+  trackers     Tracker[]
+
+  @@map("game")
+}
+
+model Race {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique(map: "IDX_b4cf9023727c1c302858d1bf32") @db.Char(36)
+  created_at     DateTime       @default(now()) @db.DateTime(6)
+  updated_at     DateTime       @default(now()) @db.DateTime(6)
+  deleted_at     DateTime?      @db.DateTime(6)
+  goal           String?        @db.VarChar(1000)
+  url            String?        @db.VarChar(255)
+  identifier     String         @db.VarChar(255)
+  connector      race_connector
+  status         race_status
+  last_sync_at   DateTime?      @db.DateTime(0)
+  change_counter Int
+  gameId         Int            @map("game")
+  game           Game           @relation(fields: [gameId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_31381c0f44bafb11dce63a33954")
+  announcements  Announcement[]
+  entrants       Entrant[]
+
+  @@index([gameId], map: "FK_31381c0f44bafb11dce63a33954")
+  @@map("race")
+}
+
+model Racer {
+  id           Int             @id @default(autoincrement())
+  uuid         String          @unique(map: "IDX_c215f7b49a703f633480f377f9") @db.Char(36)
+  created_at   DateTime        @default(now()) @db.DateTime(6)
+  updated_at   DateTime        @default(now()) @db.DateTime(6)
+  deleted_at   DateTime?       @db.DateTime(6)
+  identifier   String          @db.VarChar(255)
+  display_name String          @db.VarChar(255)
+  connector    racer_connector
+  full_name    String?         @db.VarChar(255)
+  entrants     Entrant[]
+
+  @@map("racer")
+}
+
+model Tracker {
+  id                    Int                  @id @default(autoincrement())
+  uuid                  String               @unique(map: "IDX_41304884f7bc06a1af5f1a9a5e") @db.Char(36)
+  created_at            DateTime             @default(now()) @db.DateTime(6)
+  updated_at            DateTime             @default(now()) @db.DateTime(6)
+  deleted_at            DateTime?            @db.DateTime(6)
+  is_active             Boolean              @default(false) @db.TinyInt
+  channelId             Int                  @map("channel")
+  gameId                Int                  @map("game")
+  communication_channel CommunicationChannel @relation(fields: [channelId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_9a7e70bc7f2ffaa6672fa41bd09")
+  game                  Game                 @relation(fields: [gameId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_4e47e0fcf025f3e8ff0b93e50c0")
+  announcements         Announcement[]
+
+  @@index([gameId], map: "FK_4e47e0fcf025f3e8ff0b93e50c0")
+  @@index([channelId], map: "FK_9a7e70bc7f2ffaa6672fa41bd09")
+  @@map("tracker")
+}
+
+enum communication_channel_type {
+  direct_message
+  text_channel
+  other
+}
+
+enum communication_channel_connector {
+  discord
+}
+
+enum entrant_status {
+  unknown
+  entered
+  ready
+  forfeit
+  done
+  disqualified
+  invited
+}
+
+enum game_connector {
+  SRL
+  racetime
+}
+
+enum race_connector {
+  SRL
+  racetime
+}
+
+enum race_status {
+  unknown
+  entry_open
+  entry_closed
+  in_progress
+  finished
+  over
+  cancelled
+  invitational
+}
+
+enum racer_connector {
+  SRL
+  racetime
+}

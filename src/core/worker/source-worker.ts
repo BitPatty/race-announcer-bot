@@ -17,39 +17,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Connection, In, MoreThan, Not, Repository } from 'typeorm';
 import { CronJob } from 'cron';
-
-import {
-  EntrantEntity,
-  GameEntity,
-  RaceEntity,
-  RacerEntity,
-} from '../../../models/entities';
+import { v4 } from 'uuid';
 
 import {
   EntrantInformation,
   RaceInformation,
   SourceConnector,
-} from '../../../models/interfaces';
+} from '../../models/interfaces';
 
-import { RaceStatus, TaskIdentifier, WorkerType } from '../../../models/enums';
-import SourceConnectorIdentifier from '../../../connectors/source-connector-identifier.enum';
+import { RaceStatus, TaskIdentifier, WorkerType } from '../../models/enums';
+import SourceConnectorIdentifier from '../../connectors/source-connector-identifier.enum';
 
-import ConfigService from '../../config/config.service';
-import DatabaseService from '../../database/database-service';
-import LoggerService from '../../logger/logger.service';
-import RedisService from '../../redis/redis-service';
+import ConfigService from '../config/config.service';
+import LoggerService from '../logger/logger.service';
+import RedisService from '../redis/redis-service';
 
-import DateTimeUtils from '../../../utils/date-time.utils';
+import DateTimeUtils from '../../utils/date-time.utils';
 
-import Worker from '../worker.interface';
+import Worker from './worker.interface';
 
-import enabledWorkers from '../../../enabled-workers';
+import { Entrant, PrismaClient, Race, Racer } from '@prisma/client';
+import { prisma } from '../../prisma';
+
+import enabledWorkers from '../../enabled-workers';
 
 class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   private readonly connector: SourceConnector<T>;
-  private databaseConnection: Connection;
+  private prismaClient: PrismaClient;
   private gameSyncJob: CronJob;
   private raceSyncJob: CronJob;
 
@@ -62,17 +57,127 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
 
     if (!worker) throw new Error(`Invalid source connector ${connector}`);
     this.connector = new worker.ctor() as unknown as SourceConnector<T>;
+    this.prismaClient = prisma;
   }
 
+  /**
+   * Creates a racer or updates it if it already exists
+   *
+   * @param entrant  The entrant data
+   * @returns        The old and updated entry
+   */
+  private async createOrUpdateRacer(
+    entrant: EntrantInformation,
+  ): Promise<[Racer | null, Racer]> {
+    const existingRacer = await this.prismaClient.racer.findFirst({
+      where: {
+        identifier: entrant.identifier,
+        connector: this.connector.connectorType,
+      },
+    });
+
+    if (existingRacer)
+      return [
+        existingRacer,
+        await this.prismaClient.racer.update({
+          where: {
+            id: existingRacer.id,
+          },
+          data: {
+            identifier: entrant.identifier,
+            display_name: entrant.displayName,
+            full_name: entrant.fullName,
+            connector: this.connector.connectorType,
+          },
+        }),
+      ];
+
+    return [
+      null,
+      await this.prismaClient.racer.create({
+        data: {
+          uuid: v4(),
+          identifier: entrant.identifier,
+          display_name: entrant.displayName,
+          full_name: entrant.fullName,
+          connector: this.connector.connectorType,
+        },
+      }),
+    ];
+  }
+
+  /**
+   * Creates a race or updated it if it already exists
+   *
+   * @param race    The race information
+   * @param gameId  The game ID
+   * @returns       The old and updated entry
+   */
+  private async createOrUpdateRace(
+    race: RaceInformation,
+    gameId: number,
+  ): Promise<[Race | null, Race]> {
+    const existingRace = await this.prismaClient.race.findFirst({
+      where: {
+        // Dupe identifiers are technically possible on SRL,
+        // maybe even on RaceTime. Filtering 1 week old races
+        // should avoid any collisions.
+        created_at: {
+          gt: DateTimeUtils.subtractHours(new Date(), 24 * 7),
+        },
+        identifier: race.identifier,
+        connector: this.connector.connectorType,
+      },
+    });
+
+    if (existingRace) {
+      return [
+        existingRace,
+        await this.prismaClient.race.update({
+          where: {
+            id: existingRace.id,
+          },
+          data: {
+            identifier: race.identifier,
+            goal: race.goal ?? '-',
+            url: race.url,
+            connector: this.connector.connectorType,
+            status: race.status,
+            gameId: gameId,
+            change_counter: existingRace.change_counter,
+          },
+        }),
+      ];
+    }
+
+    return [
+      null,
+      await this.prismaClient.race.create({
+        data: {
+          uuid: v4(),
+          identifier: race.identifier,
+          goal: race.goal ?? '-',
+          url: race.url,
+          connector: this.connector.connectorType,
+          status: race.status,
+          gameId: gameId,
+          change_counter: 0,
+        },
+      }),
+    ];
+  }
+
+  /**
+   * Syncs a race
+   *
+   * @param race           The race information
+   * @param syncTimeStamp  The timestamp of the sync
+   */
   private async syncRace(
     race: RaceInformation,
     syncTimeStamp: Date,
-    entrantRepository: Repository<EntrantEntity>,
-    gameRepository: Repository<GameEntity>,
-    raceRepository: Repository<RaceEntity>,
-    racerRepository: Repository<RacerEntity>,
   ): Promise<void> {
-    const game = await gameRepository.findOne({
+    const game = await this.prismaClient.game.findFirst({
       where: {
         identifier: race.game.identifier,
         connector: this.connector.connectorType,
@@ -83,70 +188,26 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     // other games cannot be tracked anyways
     if (!game) return;
 
-    const racers: RacerEntity[] = [];
+    const racers: Racer[] = [];
 
     // Update racer entities
-    for (const entrant of race.entrants) {
-      const existingRacer = await racerRepository.findOne({
-        where: [
-          {
-            identifier: entrant.identifier,
-            connector: this.connector.connectorType,
-          },
-        ],
-      });
+    for (const entrant of race.entrants)
+      racers.push(await this.createOrUpdateRacer(entrant)[1]);
 
-      const updatePayload: RacerEntity = {
-        ...(existingRacer ?? {}),
-        ...new RacerEntity({
-          identifier: entrant.identifier,
-          displayName: entrant.displayName,
-          fullName: entrant.fullName,
-          connector: this.connector.connectorType,
-        }),
-      };
-
-      const updatedRacer = await racerRepository.save(updatePayload);
-      racers.push(updatedRacer);
-    }
-
-    // Update the race itself
-    const existingRace = await raceRepository.findOne({
-      where: {
-        // Dupe identifiers are technically possible on SRL,
-        // maybe even on RaceTime. Filtering 1 week old races
-        // should avoid any collisions.
-        createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 24 * 7)),
-        identifier: race.identifier,
-        connector: this.connector.connectorType,
-      },
-    });
-
-    const updatedRace = await raceRepository.save({
-      ...(existingRace ?? {}),
-      ...new RaceEntity({
-        identifier: race.identifier,
-        goal: race.goal ?? '-',
-        url: race.url,
-        connector: this.connector.connectorType,
-        status: race.status,
-        game,
-        changeCounter: existingRace?.changeCounter ?? 0,
-      }),
-    });
+    const [oldRace, updatedRace] = await this.createOrUpdateRace(race, game.id);
 
     // Update the entrant list
-    const existingEntrants = await entrantRepository.find({
-      relations: [
-        nameof<EntrantEntity>((e) => e.racer),
-        nameof<EntrantEntity>((e) => e.race),
-      ],
+    const existingEntrants = await this.prismaClient.entrant.findMany({
       where: {
-        race: updatedRace,
+        raceId: updatedRace.id,
+      },
+      include: {
+        racer: true,
+        race: true,
       },
     });
 
-    const updatedEntrants: EntrantEntity[] = [];
+    const updatedEntrants: Entrant[] = [];
 
     // Add / Update entrants
     for (const racer of racers) {
@@ -158,17 +219,33 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
         (e) => e.identifier === racer.identifier,
       ) as EntrantInformation;
 
-      const updatedEntrant = await entrantRepository.save({
-        ...(existingEntrant ?? {}),
-        ...new EntrantEntity({
-          race: updatedRace,
-          racer,
-          status: entrantData.status,
-          finalTime: entrantData.finalTime,
-        }),
-      });
+      if (existingEntrant) {
+        const updatedEntrant = await this.prismaClient.entrant.update({
+          where: {
+            id: existingEntrant.id,
+          },
+          data: {
+            raceId: updatedRace.id,
+            racerId: racer.id,
+            status: entrantData.status,
+            final_time: entrantData.finalTime,
+          },
+        });
 
-      updatedEntrants.push(updatedEntrant);
+        updatedEntrants.push(updatedEntrant);
+      } else {
+        const createdEntrant = await this.prismaClient.entrant.create({
+          data: {
+            uuid: v4(),
+            raceId: updatedRace.id,
+            racerId: racer.id,
+            status: entrantData.status,
+            final_time: entrantData.finalTime,
+          },
+        });
+
+        updatedEntrants.push(createdEntrant);
+      }
     }
 
     // Remove entrants that have left
@@ -177,9 +254,10 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       .map((e) => e.id);
 
     if (removedEntrantIds.length > 0)
-      await entrantRepository.delete({
-        race: updatedRace,
-        id: In(removedEntrantIds),
+      await this.prismaClient.entrant.deleteMany({
+        where: {
+          id: { in: removedEntrantIds },
+        },
       });
 
     // Update the tracker timestamps
@@ -188,26 +266,31 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
       existingEntrants.length !== race.entrants.length ||
       updatedEntrants.some(
         (e) =>
-          existingEntrants.find((x) => x.id === e.id)?.updatedAt !==
-          e.updatedAt,
+          existingEntrants.find((x) => x.id === e.id)?.updated_at !==
+          e.updated_at,
       );
 
-    const hasRaceChanges = updatedRace.updatedAt !== existingRace?.updatedAt;
+    const hasRaceChanges = updatedRace.updated_at !== oldRace?.updated_at;
 
     if (hasRaceChanges || hasEntrantChanges) {
-      updatedRace.changeCounter++;
+      updatedRace.change_counter++;
       LoggerService.log(
-        `Race change detected: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
+        `Race change detected: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.change_counter}`,
       );
     } else {
       LoggerService.debug(
-        `Unchanged race: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.changeCounter}`,
+        `Unchanged race: ${race.identifier} / Game: ${game.id} (${game.abbreviation} of ${game.connector}) / Change Counter: ${updatedRace.change_counter}`,
       );
     }
 
-    await raceRepository.save({
-      ...updatedRace,
-      lastSyncAt: syncTimeStamp,
+    await this.prismaClient.race.update({
+      where: {
+        id: updatedRace.id,
+      },
+      data: {
+        change_counter: updatedRace.change_counter,
+        last_sync_at: syncTimeStamp,
+      },
     });
   }
 
@@ -218,24 +301,9 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     LoggerService.log('Synchronizing races');
     const syncTimeStamp = new Date();
 
-    const [raceRepository, gameRepository, entrantRepository, racerRepository] =
-      [
-        this.databaseConnection.getRepository(RaceEntity),
-        this.databaseConnection.getRepository(GameEntity),
-        this.databaseConnection.getRepository(EntrantEntity),
-        this.databaseConnection.getRepository(RacerEntity),
-      ];
-
     const syncToLocal = async (race: RaceInformation): Promise<void> => {
       try {
-        await this.syncRace(
-          race,
-          syncTimeStamp,
-          entrantRepository,
-          gameRepository,
-          raceRepository,
-          racerRepository,
-        );
+        await this.syncRace(race, syncTimeStamp);
       } catch (err) {
         LoggerService.error(
           `Failed to sync race ${JSON.stringify(race)}: ${err}`,
@@ -255,11 +323,17 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     // We fetch the data for those races manually in hopes to
     // be able to sync them
     LoggerService.log(`Syncing dropped races`);
-    const unsyncedRaces = await raceRepository.find({
+    const unsyncedRaces = await this.prismaClient.race.findMany({
       where: {
-        identifier: Not(In(raceList.map((r) => r.identifier))),
-        status: Not(In([RaceStatus.FINISHED, RaceStatus.OVER])),
-        createdAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 48)),
+        identifier: {
+          notIn: raceList.map((r) => r.identifier),
+        },
+        status: {
+          notIn: [RaceStatus.FINISHED, RaceStatus.OVER],
+        },
+        created_at: {
+          gt: DateTimeUtils.subtractHours(new Date(), 48),
+        },
         connector: this.connector.connectorType,
       },
     });
@@ -292,22 +366,40 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
     const gameCount = gameList.length;
 
     LoggerService.log(`Updating games in database (${gameCount} total)`);
-    const gameRepository = this.databaseConnection.getRepository(GameEntity);
 
     for (const [idx, game] of gameList.entries()) {
       LoggerService.log(`Updating ${idx + 1}/${gameCount}: ${game.name}`);
-      const existingGame = await gameRepository.findOne({
+      const existingGame = await this.prismaClient.game.findFirst({
         where: {
           identifier: game.identifier,
           connector: this.connector.connectorType,
         },
       });
 
-      await gameRepository.save({
-        ...(existingGame ?? {}),
-        ...game,
-        connector: this.connector.connectorType,
-      });
+      if (existingGame) {
+        await this.prismaClient.game.update({
+          where: {
+            id: existingGame.id,
+          },
+          data: {
+            identifier: game.identifier,
+            name: game.name,
+            abbreviation: game.abbreviation,
+            image_url: game.imageUrl,
+          },
+        });
+      } else {
+        await this.prismaClient.game.create({
+          data: {
+            uuid: v4(),
+            identifier: game.identifier,
+            name: game.name,
+            abbreviation: game.abbreviation,
+            image_url: game.imageUrl,
+            connector: this.connector.connectorType,
+          },
+        });
+      }
     }
   }
 
@@ -382,8 +474,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   /**
    * Start the workers routine
    */
-  public async start(): Promise<void> {
-    this.databaseConnection = await DatabaseService.getConnection();
+  public start(): void {
     this.initRaceSyncJob();
     this.initGameSyncJob();
     this.gameSyncJob.start();
@@ -393,13 +484,11 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
   /**
    * Cleans up used resources
    */
-  public async dispose(): Promise<void> {
+  public dispose(): void {
     LoggerService.log('Stopping Game Sync');
     this.gameSyncJob.stop();
     LoggerService.log('Stopping Race Sync');
     this.raceSyncJob.stop();
-    LoggerService.log('Closing Database Connection');
-    await this.databaseConnection.close();
   }
 }
 

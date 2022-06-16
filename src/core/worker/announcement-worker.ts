@@ -17,42 +17,52 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Connection, MoreThan } from 'typeorm';
 import { CronJob } from 'cron';
+import { v4 } from 'uuid';
 
 import {
-  AnnouncementEntity,
-  EntrantEntity,
-  GameEntity,
-  RaceEntity,
-  TrackerEntity,
-} from '../../../models/entities';
-
-import {
+  ChatChannel,
   ChatMessage,
   DestinationConnector,
   RaceInformation,
-} from '../../../models/interfaces';
+} from '../../models/interfaces';
 
-import { RaceStatus, TaskIdentifier, WorkerType } from '../../../models/enums';
+import {
+  EntrantStatus,
+  MessageChannelType,
+  RaceStatus,
+  TaskIdentifier,
+  WorkerType,
+} from '../../models/enums';
 
-import DestinationConnectorIdentifier from '../../../connectors/destination-connector-identifier.enum';
+import DestinationConnectorIdentifier from '../../connectors/destination-connector-identifier.enum';
 
-import ConfigService from '../../config/config.service';
-import DatabaseService from '../../database/database-service';
-import LoggerService from '../../logger/logger.service';
-import RedisService from '../../redis/redis-service';
+import ConfigService from '../config/config.service';
+import LoggerService from '../logger/logger.service';
+import RedisService from '../redis/redis-service';
 
-import DateTimeUtils from '../../../utils/date-time.utils';
+import DateTimeUtils from '../../utils/date-time.utils';
 
-import Worker from '../worker.interface';
-import enabledWorkers from '../../../enabled-workers';
+import {
+  Announcement,
+  CommunicationChannel,
+  Entrant,
+  Game,
+  PrismaClient,
+  Race,
+  Racer,
+  Tracker,
+} from '@prisma/client';
+import { prisma } from '../../prisma';
+
+import Worker from './worker.interface';
+import enabledWorkers from '../../enabled-workers';
 
 class AnnouncementWorker<T extends DestinationConnectorIdentifier>
   implements Worker
 {
   private readonly connector: DestinationConnector<T>;
-  private databaseConnection: Connection;
+  private prismaClient: PrismaClient;
   private announcementSyncJob: CronJob;
 
   public constructor(connector: T) {
@@ -64,27 +74,63 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
 
     if (!worker) throw new Error(`Invalid announcement connector ${connector}`);
     this.connector = new worker.ctor() as unknown as DestinationConnector<T>;
+    this.prismaClient = prisma;
   }
 
-  /**
-   * Transforms the speicfied race to its {@link RaceInformation} representation
-   *
-   * @param race      The race
-   * @param entrants  The races entrants
-   * @returns         The transformed race details
-   */
-  private raceEntityToRaceInformation(
-    race: RaceEntity,
-    entrants: EntrantEntity[],
+  // /**
+  //  * Transforms the speicfied race to its {@link RaceInformation} representation
+  //  *
+  //  * @param race      The race
+  //  * @param entrants  The races entrants
+  //  * @returns         The transformed race details
+  //  */
+  // private raceEntityToRaceInformation(
+  //   race: Race & { racer: Racer },
+  //   entrants: (Entrant & {racer. Rac[],
+  // ): RaceInformation {
+  //   return {
+  //     ...race,
+  //     entrants: entrants.map((e) => ({
+  //       ...e,
+  //       identifier: e.racer.identifier,
+  //       displayName: e.racer.displayName,
+  //       fullName: e.racer.fullName,
+  //     })),
+  //   };
+  // }
+
+  private raceToRaceInformation(
+    race: Awaited<ReturnType<typeof this.getActiveRaces>>[0],
   ): RaceInformation {
     return {
-      ...race,
-      entrants: entrants.map((e) => ({
-        ...e,
+      identifier: race.identifier,
+      game: {
+        name: race.game.name,
+        abbreviation: race.game.abbreviation,
+        identifier: race.game.identifier,
+        imageUrl: race.game.image_url,
+      },
+      url: race.url ?? undefined,
+      goal: race.goal ?? undefined,
+      status: race.status as RaceStatus,
+      // status: activeRace.status,
+      entrants: race.entrants.map((e) => ({
         identifier: e.racer.identifier,
-        displayName: e.racer.displayName,
-        fullName: e.racer.fullName,
+        displayName: e.racer.display_name,
+        fullName: e.racer.full_name,
+        finalTime: e.final_time,
+        status: e.status as EntrantStatus,
       })),
+    };
+  }
+
+  private channelToChatChannel(channel: CommunicationChannel): ChatChannel {
+    return {
+      identifier: channel.identifier,
+      serverIdentifier: channel.server_identifier,
+      name: channel.name,
+      serverName: channel.server_name,
+      type: channel.type as MessageChannelType,
     };
   }
 
@@ -93,71 +139,42 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
    *
    * @returns  The list of active races
    */
-  private getActiveRaces(): Promise<RaceEntity[]> {
-    return this.databaseConnection.getRepository(RaceEntity).find({
-      relations: [nameof<RaceEntity>((r) => r.game)],
+  private getActiveRaces(): Promise<
+    (Race & {
+      game: Game;
+      entrants: (Entrant & { racer: Racer })[];
+      announcements: (Announcement & {
+        tracker:
+          | (Tracker & {
+              game: Game;
+              communication_channel: CommunicationChannel;
+            })
+          | null;
+      })[];
+    })[]
+  > {
+    return this.prismaClient.race.findMany({
       where: {
-        lastSyncAt: MoreThan(DateTimeUtils.subtractHours(new Date(), 6)),
+        last_sync_at: {
+          gt: DateTimeUtils.subtractHours(new Date(), 6),
+        },
       },
-    });
-  }
-
-  /**
-   * Gets the posted announcements for the specified race
-   *
-   * @param race  The race
-   * @returns     The list of posted announcements
-   */
-  private getAnnouncementsForRace(
-    race: RaceEntity,
-  ): Promise<AnnouncementEntity[]> {
-    return this.databaseConnection.getRepository(AnnouncementEntity).find({
-      relations: [
-        nameof<AnnouncementEntity>((a) => a.race),
-        nameof<AnnouncementEntity>((a) => a.tracker),
-        `${nameof<AnnouncementEntity>(
-          (a) => a.tracker,
-        )}.${nameof<TrackerEntity>((t) => t.game)}`,
-      ],
-      where: {
-        race,
-      },
-    });
-  }
-
-  /**
-   * Gets the list of entrants for the specified race
-   *
-   * @param race  The race
-   * @returns     The list of entrants with their racer information
-   */
-  private getRaceEntrants(race: RaceEntity): Promise<EntrantEntity[]> {
-    return this.databaseConnection.getRepository(EntrantEntity).find({
-      relations: [nameof<EntrantEntity>((e) => e.racer)],
-      where: {
-        race,
-      },
-    });
-  }
-
-  /**
-   * Finds all active trackers mapped to the specified game where the channel is the
-   * current connector
-   *
-   * @param game  The game
-   * @returns     The list of active trackers for the specified game mapped to this
-   *              connector
-   */
-  private findActiveTrackersForGame(
-    game: GameEntity,
-  ): Promise<TrackerEntity[]> {
-    return this.databaseConnection.getRepository(TrackerEntity).find({
-      relations: [nameof<TrackerEntity>((e) => e.channel)],
-      where: {
-        isActive: true,
-        game,
-        channel: {
-          connector: this.connector.connectorType,
+      include: {
+        game: true,
+        entrants: {
+          include: {
+            racer: true,
+          },
+        },
+        announcements: {
+          include: {
+            tracker: {
+              include: {
+                game: true,
+                communication_channel: true,
+              },
+            },
+          },
         },
       },
     });
@@ -174,29 +191,31 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
 
     for (const activeRace of activeRaces) {
       // Get existing announcements for the race
-      const activeAnnouncements = await this.getAnnouncementsForRace(
-        activeRace,
-      );
       LoggerService.debug(
-        `Synching ${activeAnnouncements.length} announcements for ${activeRace.id}`,
+        `Synching ${activeRace.announcements.length} announcements for ${activeRace.id}`,
       );
 
-      // Get races entrants
-      const raceEntrants = await this.getRaceEntrants(activeRace);
+      for (const announcement of activeRace.announcements) {
+        LoggerService.debug(`Synching announcement ${announcement.id}`);
 
-      for (const activeAnnouncement of activeAnnouncements) {
-        LoggerService.debug(`Synching announcement ${activeAnnouncement.id}`);
+        // Must have a tracker
+        if (!announcement.tracker) {
+          LoggerService.error(
+            `No tracker assigned to announcement with id ${announcement.id}`,
+          );
+          continue;
+        }
 
         // Consider updates to no longer work if the they failed the previous 5 times
-        if (activeAnnouncement.failedUpdateAttempts > 5) {
+        if (announcement.failed_update_attempts > 5) {
           LoggerService.warn(
-            `Announcement sync for id ${activeAnnouncement.id} exceeded max failed update attempts`,
+            `Announcement sync for id ${announcement.id} exceeded max failed update attempts`,
           );
           continue;
         }
 
         // Don't update the announcement if the race hasn't changed
-        if (activeAnnouncement.changeCounter === activeRace.changeCounter) {
+        if (announcement.change_counter === activeRace.change_counter) {
           LoggerService.debug(
             `Change counter unchanged, skipping announcement`,
           );
@@ -204,9 +223,9 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
         }
 
         try {
-          LoggerService.debug(`Updating announcement ${activeAnnouncement.id}`);
+          LoggerService.debug(`Updating announcement ${announcement.id}`);
           const originalMessage: ChatMessage = JSON.parse(
-            activeAnnouncement.previousMessage,
+            announcement.previous_message,
           );
 
           // Don't even try to update a post if the bot is missing the permissions
@@ -225,25 +244,31 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
           LoggerService.debug(`Updating post`);
           const updatedMessage = await this.connector.updateRaceMessage(
             originalMessage,
-            this.raceEntityToRaceInformation(activeRace, raceEntrants),
-            activeRace.game.id !== activeAnnouncement.tracker.game.id,
+            this.raceToRaceInformation(activeRace),
+            activeRace.game.id !== announcement.tracker.game.id,
           );
 
-          activeAnnouncement.changeCounter = activeRace.changeCounter;
-          activeAnnouncement.failedUpdateAttempts = 0;
-          activeAnnouncement.previousMessage = JSON.stringify(updatedMessage);
-          activeAnnouncement.lastUpdated = new Date();
-
-          // Persist the update
-          await this.databaseConnection
-            .getRepository(AnnouncementEntity)
-            .save(activeAnnouncement);
+          await this.prismaClient.announcement.update({
+            where: {
+              id: announcement.id,
+            },
+            data: {
+              change_counter: activeRace.change_counter,
+              failed_update_attempts: 0,
+              previous_message: JSON.stringify(updatedMessage),
+              last_updated: new Date(),
+            },
+          });
         } catch (err) {
           LoggerService.error(err);
-          activeAnnouncement.failedUpdateAttempts++;
-          await this.databaseConnection
-            .getRepository(AnnouncementEntity)
-            .save(activeAnnouncement);
+          await this.prismaClient.announcement.update({
+            where: {
+              id: announcement.id,
+            },
+            data: {
+              failed_update_attempts: announcement.failed_update_attempts + 1,
+            },
+          });
         }
       }
 
@@ -254,46 +279,69 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
           RaceStatus.INVITATIONAL,
           RaceStatus.ENTRY_CLOSED,
           RaceStatus.IN_PROGRESS,
-        ].includes(activeRace.status)
+        ].includes(activeRace.status as RaceStatus)
       )
         continue;
 
       // Races should be picked up within the first 3 updates by the announcer. This is just to prevent
       // announcements to be spammed in case  there's an oversight in the logic and/or network issue below
       // @TODO Add a transition state to either redis or mysql
-      if (activeRace.changeCounter > 3) continue;
+      if (activeRace.change_counter > 3) continue;
 
       // Lookup which trackers still need an announcement
-      const trackers = await this.findActiveTrackersForGame(activeRace.game);
+      const trackers = await this.prismaClient.tracker.findMany({
+        where: {
+          is_active: true,
+          gameId: activeRace.game.id,
+        },
+        include: {
+          communication_channel: true,
+        },
+      });
+
       const trackersWithoutAnnouncements = trackers.filter(
-        (t) => !activeAnnouncements.some((a) => a.tracker.id === t.id),
+        (t) =>
+          !activeRace.announcements.some(
+            (a) => a.tracker != null && a.tracker.id === t.id,
+          ),
       );
+
+      // identifier: string;
+      // serverIdentifier: string | null;
+      // name: string | null;
+      // serverName: string | null;
+      // type: MessageChannelType;
 
       // Post announcements for the trackers
       for (const trackerWithoutAnnouncement of trackersWithoutAnnouncements) {
         try {
           const botHasRequiredPermissions =
             await this.connector.botHasRequiredPermissions(
-              trackerWithoutAnnouncement.channel,
+              this.channelToChatChannel(
+                trackerWithoutAnnouncement.communication_channel,
+              ),
             );
 
           if (!botHasRequiredPermissions) continue;
 
           const postedAnnouncement = await this.connector.postRaceMessage(
-            trackerWithoutAnnouncement.channel,
-            this.raceEntityToRaceInformation(activeRace, raceEntrants),
+            this.channelToChatChannel(
+              trackerWithoutAnnouncement.communication_channel,
+            ),
+            this.raceToRaceInformation(activeRace),
           );
 
-          await this.databaseConnection.getRepository(AnnouncementEntity).save(
-            new AnnouncementEntity({
-              changeCounter: activeRace.changeCounter,
-              tracker: trackerWithoutAnnouncement,
-              previousMessage: JSON.stringify(postedAnnouncement),
-              failedUpdateAttempts: 0,
-              lastUpdated: new Date(),
-              race: activeRace,
-            }),
-          );
+          await this.prismaClient.announcement.create({
+            data: {
+              uuid: v4(),
+              change_counter: activeRace.change_counter,
+              trackerId: trackerWithoutAnnouncement.id,
+              previous_message: JSON.stringify(postedAnnouncement),
+              failed_update_attempts: 0,
+              last_updated: new Date(),
+              raceId: activeRace.id,
+            },
+          });
         } catch (err) {
           LoggerService.error(err);
         }
@@ -356,17 +404,15 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
    * Starts the worker
    */
   public async start(): Promise<void> {
-    this.databaseConnection = await DatabaseService.getConnection();
     this.initAnnouncementSyncJob();
     this.announcementSyncJob.start();
-    return this.connector.connect(false);
+    await this.connector.connect(false);
   }
 
   /**
    * Frees used ressources and shuts down the tasks
    */
   public async dispose(): Promise<void> {
-    await DatabaseService.closeConnection();
     await this.connector.dispose();
   }
 }

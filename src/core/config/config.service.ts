@@ -18,8 +18,6 @@
  */
 
 import * as Joi from 'joi';
-import { ConnectionOptions } from 'typeorm';
-import { join as joinPaths } from 'path';
 import { v4 as uuidV4 } from 'uuid';
 
 import LogLevel from '../logger/log-level.enum';
@@ -34,34 +32,6 @@ class ConfigService {
     ConfigService.validateEnv();
 
   private static readonly _instanceUuid: string = uuidV4();
-
-  /**
-   * Load the database configuration from the current enviroment
-   */
-  public static get databaseConfiguration(): ConnectionOptions {
-    return {
-      database: this.environmentConfiguration.DATABASE_NAME,
-      type: this.environmentConfiguration.DATABASE_TYPE,
-      host: this.environmentConfiguration.DATABASE_HOST,
-      port: this.environmentConfiguration.DATABASE_PORT,
-      username: this.environmentConfiguration.DATABASE_USER,
-      password: this.environmentConfiguration.DATABASE_PASSWORD,
-      synchronize: Boolean(this.environmentConfiguration.DATABASE_SYNCHRONIZE),
-      charset: 'utf8mb4_unicode_ci',
-      entities: [
-        joinPaths(
-          __dirname,
-          '..',
-          '..',
-          'models',
-          'entities',
-          '*.entity.{ts,js}',
-        ),
-      ],
-      migrations: [joinPaths(__dirname, '..', '..', 'migrations', '*.{js,ts}')],
-      logging: this.environmentConfiguration.DATABASE_LOGGING,
-    } as ConnectionOptions;
-  }
 
   public static get redisConfiguration(): {
     host: string;

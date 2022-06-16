@@ -24,6 +24,8 @@ import * as path from 'path';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
+import { CommunicationChannel, Game, Tracker } from '@prisma/client';
+
 import {
   ChatChannel,
   ChatMessage,
@@ -44,8 +46,6 @@ import {
   ReplyType,
   TaskIdentifier,
 } from '../../models/enums';
-
-import { TrackerEntity } from '../../models/entities';
 
 import ConfigService from '../../core/config/config.service';
 import LoggerService from '../../core/logger/logger.service';
@@ -438,17 +438,22 @@ class DiscordConnector
    * @param items  The tracker list
    * @returns      The embed containing the tracker list
    */
-  private buildTrackerListEmbed(items: TrackerEntity[]): Discord.MessageEmbed {
+  private buildTrackerListEmbed(
+    items: (Tracker & {
+      game: Game;
+      communication_channel: CommunicationChannel;
+    })[],
+  ): Discord.MessageEmbed {
     const embed = new Discord.MessageEmbed().setTitle('Active Trackers');
 
     if (items.length === 0)
       return embed.setDescription('No tracker registered');
 
     const activeTrackerList = items
-      .filter((i) => i.isActive)
+      .filter((i) => i.is_active)
       .map(
         (i) =>
-          `${i.game.name} (${i.game.connector}) in <#${i.channel.identifier}>`,
+          `${i.game.name} (${i.game.connector}) in <#${i.communication_channel.identifier}>`,
       )
       .sort((prev, next) => (prev < next ? -1 : 1))
       .join('\r\n');

@@ -17,12 +17,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TrackerEntity } from '../../../entities';
+import { CommunicationChannel, Game, Tracker } from '@prisma/client';
+
 import ReplyType from '../../../enums/reply-type.enum';
 
 interface TrackerListReply {
   type: ReplyType.TRACKER_LIST;
-  items: TrackerEntity[];
+  items: (Tracker & {
+    game: Game;
+    communication_channel: CommunicationChannel;
+  })[];
 }
 
 export default TrackerListReply;

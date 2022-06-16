@@ -18,9 +18,9 @@
  */
 
 interface WorkerInterface {
-  start(): Promise<void>;
+  start(): Promise<void> | void;
 
-  dispose(): Promise<void>;
+  dispose(): Promise<void> | void;
 }
 
 export default WorkerInterface;

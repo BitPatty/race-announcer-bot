@@ -21,7 +21,8 @@
     "ryanluker.vscode-coverage-gutters",
     "wayou.vscode-todo-highlight",
     "xshrim.txt-syntax",
-    "cweijan.vscode-redis-client"
+    "cweijan.vscode-redis-client",
+    "prisma.prisma"
   ],
   "forwardPorts": [
     4000,
