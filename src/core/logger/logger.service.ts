@@ -17,8 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as PinoMultiStream from 'pino-multi-stream';
-
 import { inspect } from 'util';
 import ecsFormat from '@elastic/ecs-pino-format';
 import pino from 'pino';
@@ -36,7 +34,7 @@ class LoggerService {
       ...(ConfigService.elasticsearchConfiguration.url ? ecsFormat() : {}),
     },
     ConfigService.elasticsearchConfiguration.url
-      ? PinoMultiStream.multistream([
+      ? pino.multistream([
           {
             level: ConfigService.logLevel,
             stream: process.stdout,
@@ -57,7 +55,7 @@ class LoggerService {
             }),
           },
         ])
-      : undefined,
+      : process.stdout,
   );
 
   private static get logPrefix(): string {
