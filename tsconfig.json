@@ -15,7 +15,6 @@
     "sourceRoot": "./src",
     "strictNullChecks": true,
     "target": "es2020",
-    // @TODO: Remove once jest is fixed => https://github.com/facebook/jest/issues/11640
     "skipLibCheck": true,
     "plugins": [
       {
