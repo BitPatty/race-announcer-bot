@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { EntrantStatus, RaceStatus } from '@prisma/client';
+
 import {
   EntrantInformation,
   GameInformation,
@@ -30,8 +32,6 @@ import RaceTimeEntrant from './interfaces/racetime-entrant.interface';
 import RaceTimeRace from './interfaces/racetime-race.interface';
 import RaceTimeRaceDetail from './interfaces/racetime-race-detail.interface';
 import RaceTimeRaceList from './interfaces/racetime-race-list.interface';
-
-import { EntrantStatus, RaceStatus } from '../../models/enums';
 
 import RaceTimeEntrantStatus from './enums/racetime-entrant-status.enum';
 import RaceTimeRaceStatus from './enums/racetime-race-status.enum';
@@ -53,40 +53,39 @@ class RaceTimeGGConnector
   ): EntrantStatus {
     switch (state) {
       case RaceTimeEntrantStatus.DONE:
-        return EntrantStatus.DONE;
+        return 'done';
       case RaceTimeEntrantStatus.READY:
-        return EntrantStatus.READY;
       case RaceTimeEntrantStatus.IN_PROGRESS:
-        return EntrantStatus.READY;
+        return 'ready';
       case RaceTimeEntrantStatus.NOT_READY:
-        return EntrantStatus.ENTERED;
+        return 'entered';
       case RaceTimeEntrantStatus.DID_NOT_FINISH:
-        return EntrantStatus.FORFEIT;
+        return 'forfeit';
       case RaceTimeEntrantStatus.DISQUALIFIED:
-        return EntrantStatus.DISQUALIFIED;
+        return 'disqualified';
       case RaceTimeEntrantStatus.INVITED:
-        return EntrantStatus.INVITED;
+        return 'invited';
       default:
-        return EntrantStatus.UNKNOWN;
+        return 'unknown';
     }
   }
 
   private raceTimeRaceStateToStatus(state: RaceTimeRaceStatus): RaceStatus {
     switch (state) {
       case RaceTimeRaceStatus.CANCELLED:
-        return RaceStatus.OVER;
+        return 'over';
       case RaceTimeRaceStatus.FINISHED:
-        return RaceStatus.FINISHED;
+        return 'finished';
       case RaceTimeRaceStatus.IN_PROGRESS:
-        return RaceStatus.IN_PROGRESS;
+        return 'in_progress';
       case RaceTimeRaceStatus.OPEN:
-        return RaceStatus.ENTRY_OPEN;
+        return 'entry_open';
       case RaceTimeRaceStatus.PENDING:
-        return RaceStatus.ENTRY_CLOSED;
+        return 'entry_closed';
       case RaceTimeRaceStatus.INVITATIONAL:
-        return RaceStatus.INVITATIONAL;
+        return 'invitational';
       default:
-        return RaceStatus.UNKNOWN;
+        return 'unknown';
     }
   }
 
@@ -96,6 +95,7 @@ class RaceTimeGGConnector
       name: category.name,
       abbreviation: category.slug,
       imageUrl: category.image,
+      connector: this.connectorType,
     };
   }
 

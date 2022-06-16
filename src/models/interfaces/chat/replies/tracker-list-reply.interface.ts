@@ -17,16 +17,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { CommunicationChannel, Game, Tracker } from '@prisma/client';
-
 import ReplyType from '../../../enums/reply-type.enum';
+
+import { GameInformation } from '../../raceinfo';
+import ChatChannel from '../chat-channel.interface';
 
 interface TrackerListReply {
   type: ReplyType.TRACKER_LIST;
-  items: (Tracker & {
-    game: Game;
-    communication_channel: CommunicationChannel;
-  })[];
+  items: {
+    isActive: boolean;
+    channel: ChatChannel;
+    game: GameInformation;
+  }[];
 }
 
 export default TrackerListReply;

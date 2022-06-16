@@ -17,14 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { MessageChannelType } from '../../enums';
+import { CommunicationChannelType } from '@prisma/client';
 
 interface ChatChannel {
   identifier: string;
   serverIdentifier: string | null;
   name: string | null;
   serverName: string | null;
-  type: MessageChannelType;
+  type: CommunicationChannelType;
 }
 
 export default ChatChannel;

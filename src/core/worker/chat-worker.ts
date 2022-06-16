@@ -33,7 +33,6 @@ import {
 import {
   BotCommandType,
   DestinationEvent,
-  MessageChannelType,
   ReactionType,
   ReplyType,
   TaskIdentifier,
@@ -48,6 +47,7 @@ import RedisService from '../redis/redis-service';
 
 import {
   CommunicationChannel,
+  CommunicationChannelType,
   Game,
   PrismaClient,
   Tracker,
@@ -76,7 +76,7 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
     identifier: string;
     serverIdentifier: string | null;
     serverName: string | null;
-    type: MessageChannelType;
+    type: CommunicationChannelType;
   }): Promise<[CommunicationChannel | null, CommunicationChannel]> {
     const existingDatabaseChannel =
       await this.prismaClient.communicationChannel.findFirst({
@@ -320,7 +320,23 @@ class ChatWorker<T extends DestinationConnectorIdentifier> implements Worker {
 
           return {
             type: ReplyType.TRACKER_LIST,
-            items: trackers,
+            items: trackers.map((t) => ({
+              isActive: t.is_active,
+              game: {
+                identifier: t.game.identifier,
+                name: t.game.name,
+                imageUrl: t.game.image_url,
+                abbreviation: t.game.abbreviation,
+                connector: t.game.connector,
+              },
+              channel: {
+                identifier: t.communication_channel.identifier,
+                name: t.communication_channel.name,
+                serverIdentifier: t.communication_channel.server_identifier,
+                serverName: t.communication_channel.server_name,
+                type: t.communication_channel.type,
+              },
+            })),
           };
         }
         case BotCommandType.HELP: {

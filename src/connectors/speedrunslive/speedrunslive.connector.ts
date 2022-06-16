@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { EntrantStatus, RaceStatus } from '@prisma/client';
 import axios from 'axios';
 
 import {
@@ -32,8 +33,6 @@ import SRLGameList from './interfaces/srl-game-list.interface';
 import SRLRace from './interfaces/srl-race.interface';
 import SRLRaceList from './interfaces/srl-race-list.interface';
 
-import { EntrantStatus, RaceStatus } from '../../models/enums';
-
 import ConfigService from '../../core/config/config.service';
 
 import SourceConnectorIdentifier from '../source-connector-identifier.enum';
@@ -48,17 +47,17 @@ class SpeedRunsLiveConnector
   private readonly numericRaceStateToStatus = (state: number): RaceStatus => {
     switch (state) {
       case 1:
-        return RaceStatus.ENTRY_OPEN;
+        return 'entry_open';
       case 2:
-        return RaceStatus.ENTRY_CLOSED;
+        return 'entry_closed';
       case 3:
-        return RaceStatus.IN_PROGRESS;
+        return 'in_progress';
       case 4:
-        return RaceStatus.FINISHED;
+        return 'finished';
       case 5:
-        return RaceStatus.OVER;
+        return 'over';
       default:
-        return RaceStatus.UNKNOWN;
+        return 'unknown';
     }
   };
 
@@ -67,15 +66,15 @@ class SpeedRunsLiveConnector
   ): EntrantStatus => {
     switch (time) {
       case -3:
-        return EntrantStatus.READY;
+        return 'ready';
       case -2:
-        return EntrantStatus.DISQUALIFIED;
+        return 'disqualified';
       case -1:
-        return EntrantStatus.FORFEIT;
+        return 'forfeit';
       case 0:
-        return EntrantStatus.ENTERED;
+        return 'entered';
       default:
-        return time > 0 ? EntrantStatus.DONE : EntrantStatus.UNKNOWN;
+        return time > 0 ? 'done' : 'unknown';
     }
   };
 
@@ -115,6 +114,7 @@ class SpeedRunsLiveConnector
       // This is actually how the SRL website builds the URL,
       // no matter whether the image actually exists
       imageUrl: `https://cdn.speedrunslive.com/images/games/${srlGame.abbrev}.jpg`,
+      connector: this.connectorType,
     };
   }
 

@@ -22,6 +22,7 @@ interface GameInformation {
   name: string;
   abbreviation: string;
   imageUrl: string | null;
+  connector: string;
 }
 
 export default GameInformation;

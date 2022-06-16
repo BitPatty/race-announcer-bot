@@ -20,9 +20,6 @@
 import BotCommandType from './bot-command-type.enum';
 import DatabaseAttributeType from './database-attribute-type.enum';
 import DestinationEvent from './destination-event.enum';
-import EntrantStatus from './entrant-status.enum';
-import MessageChannelType from './message-channel-type.enum';
-import RaceStatus from './race-status.enum';
 import ReactionType from './reaction-type.enum';
 import ReplyType from './reply-type.enum';
 import TaskIdentifier from './task-identifier.enum';
@@ -33,9 +30,6 @@ export {
   BotCommandType,
   DatabaseAttributeType,
   DestinationEvent,
-  EntrantStatus,
-  MessageChannelType,
-  RaceStatus,
   ReactionType,
   ReplyType,
   TaskIdentifier,

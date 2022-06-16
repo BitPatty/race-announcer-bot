@@ -24,7 +24,7 @@ import * as path from 'path';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
-import { CommunicationChannel, Game, Tracker } from '@prisma/client';
+import { CommunicationChannelType, EntrantStatus } from '@prisma/client';
 
 import {
   ChatChannel,
@@ -40,8 +40,6 @@ import DestinationEventListenerMap from '../../models/interfaces/connectors/dest
 
 import {
   DestinationEvent,
-  EntrantStatus,
-  MessageChannelType,
   ReactionType,
   ReplyType,
   TaskIdentifier,
@@ -281,14 +279,14 @@ class DiscordConnector
    * @param msg  The message
    * @returns    The channel type
    */
-  private parseChannelType(msg: Discord.Message): MessageChannelType {
+  private parseChannelType(msg: Discord.Message): CommunicationChannelType {
     switch (msg.channel.type) {
       case 'DM':
-        return MessageChannelType.DIRECT_MESSAGE;
+        return 'direct_message';
       case 'GUILD_TEXT':
-        return MessageChannelType.TEXT_CHANNEL;
+        return 'text_channel';
       default:
-        return MessageChannelType.OTHER;
+        return 'other';
     }
   }
 
@@ -374,7 +372,7 @@ class DiscordConnector
       serverIdentifier: channel.guild.id,
       name: channel.name,
       serverName: channel.guild.name,
-      type: MessageChannelType.TEXT_CHANNEL,
+      type: 'text_channel',
     };
   }
 
@@ -439,10 +437,7 @@ class DiscordConnector
    * @returns      The embed containing the tracker list
    */
   private buildTrackerListEmbed(
-    items: (Tracker & {
-      game: Game;
-      communication_channel: CommunicationChannel;
-    })[],
+    items: TrackerListReply['items'],
   ): Discord.MessageEmbed {
     const embed = new Discord.MessageEmbed().setTitle('Active Trackers');
 
@@ -450,10 +445,10 @@ class DiscordConnector
       return embed.setDescription('No tracker registered');
 
     const activeTrackerList = items
-      .filter((i) => i.is_active)
+      .filter((i) => i.isActive)
       .map(
         (i) =>
-          `${i.game.name} (${i.game.connector}) in <#${i.communication_channel.identifier}>`,
+          `${i.game.name} (${i.game.connector}) in <#${i.channel.identifier}>`,
       )
       .sort((prev, next) => (prev < next ? -1 : 1))
       .join('\r\n');
@@ -486,11 +481,9 @@ class DiscordConnector
 
         const statusText = MessageBuilderUtils.getEntrantStatusText(e);
 
-        const formattedStatusText = [
-          EntrantStatus.DONE,
-          EntrantStatus.READY,
-          EntrantStatus.ENTERED,
-        ].includes(e.status)
+        const inProgressStates: EntrantStatus[] = ['done', 'ready', 'entered'];
+
+        const formattedStatusText = inProgressStates.includes(e.status)
           ? statusText
           : `*${statusText}*`;
 

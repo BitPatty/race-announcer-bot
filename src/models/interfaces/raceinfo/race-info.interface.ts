@@ -17,7 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { RaceStatus } from '../../enums';
+import { RaceStatus } from '@prisma/client';
+
 import EntrantInformation from './entrant-info.interface';
 import GameInformation from './game-info.interface';
 

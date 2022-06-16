@@ -28,35 +28,35 @@ model Announcement {
 }
 
 model CommunicationChannel {
-  id                Int                             @id @default(autoincrement())
-  uuid              String                          @unique(map: "IDX_bddc15eedaa6345cb741002cb9") @db.Char(36)
-  created_at        DateTime                        @default(now()) @db.DateTime(6)
-  updated_at        DateTime                        @default(now()) @db.DateTime(6)
-  deleted_at        DateTime?                       @db.DateTime(6)
-  is_active         Boolean                         @default(false) @db.TinyInt
-  identifier        String                          @db.VarChar(255)
-  name              String?                         @db.VarChar(255)
-  server_identifier String?                         @db.VarChar(255)
-  type              communication_channel_type
-  connector         communication_channel_connector
-  server_name       String?                         @db.VarChar(255)
+  id                Int                           @id @default(autoincrement())
+  uuid              String                        @unique(map: "IDX_bddc15eedaa6345cb741002cb9") @db.Char(36)
+  created_at        DateTime                      @default(now()) @db.DateTime(6)
+  updated_at        DateTime                      @default(now()) @db.DateTime(6)
+  deleted_at        DateTime?                     @db.DateTime(6)
+  is_active         Boolean                       @default(false) @db.TinyInt
+  identifier        String                        @db.VarChar(255)
+  name              String?                       @db.VarChar(255)
+  server_identifier String?                       @db.VarChar(255)
+  type              CommunicationChannelType
+  connector         CommunicationChannelConnector
+  server_name       String?                       @db.VarChar(255)
   tracker           Tracker[]
 
   @@map("communication_channel")
 }
 
 model Entrant {
-  id         Int            @id @default(autoincrement())
-  uuid       String         @unique(map: "IDX_9b498f93d1d677fc927be899c7") @db.Char(36)
-  created_at DateTime       @default(now()) @db.DateTime(6)
-  updated_at DateTime       @default(now()) @db.DateTime(6)
-  deleted_at DateTime?      @db.DateTime(6)
-  status     entrant_status
+  id         Int           @id @default(autoincrement())
+  uuid       String        @unique(map: "IDX_9b498f93d1d677fc927be899c7") @db.Char(36)
+  created_at DateTime      @default(now()) @db.DateTime(6)
+  updated_at DateTime      @default(now()) @db.DateTime(6)
+  deleted_at DateTime?     @db.DateTime(6)
+  status     EntrantStatus
   final_time Int?
-  racerId    Int            @map("racer")
-  raceId     Int            @map("race")
-  race       Race           @relation(fields: [raceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_eff95102124964982bdc36efd1a")
-  racer      Racer          @relation(fields: [racerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_83ca39d3fcff0a8ae495dcad3eb")
+  racerId    Int           @map("racer")
+  raceId     Int           @map("race")
+  race       Race          @relation(fields: [raceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_eff95102124964982bdc36efd1a")
+  racer      Racer         @relation(fields: [racerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_83ca39d3fcff0a8ae495dcad3eb")
 
 
   @@index([racerId], map: "FK_83ca39d3fcff0a8ae495dcad3eb")
@@ -65,16 +65,16 @@ model Entrant {
 }
 
 model Game {
-  id           Int            @id @default(autoincrement())
-  uuid         String         @unique(map: "IDX_6ee95d182173a211ff700a021b") @db.Char(36)
-  created_at   DateTime       @default(now()) @db.DateTime(6)
-  updated_at   DateTime       @default(now()) @db.DateTime(6)
-  deleted_at   DateTime?      @db.DateTime(6)
-  name         String         @db.VarChar(255)
-  identifier   String         @db.VarChar(255)
-  connector    game_connector
-  abbreviation String         @db.VarChar(255)
-  image_url    String?        @db.VarChar(255)
+  id           Int           @id @default(autoincrement())
+  uuid         String        @unique(map: "IDX_6ee95d182173a211ff700a021b") @db.Char(36)
+  created_at   DateTime      @default(now()) @db.DateTime(6)
+  updated_at   DateTime      @default(now()) @db.DateTime(6)
+  deleted_at   DateTime?     @db.DateTime(6)
+  name         String        @db.VarChar(255)
+  identifier   String        @db.VarChar(255)
+  connector    GameConnector
+  abbreviation String        @db.VarChar(255)
+  image_url    String?       @db.VarChar(255)
   races        Race[]
   trackers     Tracker[]
 
@@ -90,8 +90,8 @@ model Race {
   goal           String?        @db.VarChar(1000)
   url            String?        @db.VarChar(255)
   identifier     String         @db.VarChar(255)
-  connector      race_connector
-  status         race_status
+  connector      RaceConnector
+  status         RaceStatus
   last_sync_at   DateTime?      @db.DateTime(0)
   change_counter Int
   gameId         Int            @map("game")
@@ -104,15 +104,15 @@ model Race {
 }
 
 model Racer {
-  id           Int             @id @default(autoincrement())
-  uuid         String          @unique(map: "IDX_c215f7b49a703f633480f377f9") @db.Char(36)
-  created_at   DateTime        @default(now()) @db.DateTime(6)
-  updated_at   DateTime        @default(now()) @db.DateTime(6)
-  deleted_at   DateTime?       @db.DateTime(6)
-  identifier   String          @db.VarChar(255)
-  display_name String          @db.VarChar(255)
-  connector    racer_connector
-  full_name    String?         @db.VarChar(255)
+  id           Int            @id @default(autoincrement())
+  uuid         String         @unique(map: "IDX_c215f7b49a703f633480f377f9") @db.Char(36)
+  created_at   DateTime       @default(now()) @db.DateTime(6)
+  updated_at   DateTime       @default(now()) @db.DateTime(6)
+  deleted_at   DateTime?      @db.DateTime(6)
+  identifier   String         @db.VarChar(255)
+  display_name String         @db.VarChar(255)
+  connector    RacerConnector
+  full_name    String?        @db.VarChar(255)
   entrants     Entrant[]
 
   @@map("racer")
@@ -136,17 +136,21 @@ model Tracker {
   @@map("tracker")
 }
 
-enum communication_channel_type {
+enum CommunicationChannelType {
   direct_message
   text_channel
   other
+
+  @@map("communication_channel_type")
 }
 
-enum communication_channel_connector {
+enum CommunicationChannelConnector {
   discord
+
+  @@map("communication_channel_connector")
 }
 
-enum entrant_status {
+enum EntrantStatus {
   unknown
   entered
   ready
@@ -154,19 +158,25 @@ enum entrant_status {
   done
   disqualified
   invited
+
+  @@map("entrant_status")
 }
 
-enum game_connector {
+enum GameConnector {
   SRL
   racetime
+
+  @@map("game_connector")
 }
 
-enum race_connector {
+enum RaceConnector {
   SRL
   racetime
+
+  @@map("race_connector")
 }
 
-enum race_status {
+enum RaceStatus {
   unknown
   entry_open
   entry_closed
@@ -175,9 +185,13 @@ enum race_status {
   over
   cancelled
   invitational
+
+  @@map("race_status")
 }
 
-enum racer_connector {
+enum RacerConnector {
   SRL
   racetime
+
+  @@map("racer_connector")
 }

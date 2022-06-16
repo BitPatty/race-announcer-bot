@@ -26,7 +26,7 @@ import {
   SourceConnector,
 } from '../../models/interfaces';
 
-import { RaceStatus, TaskIdentifier, WorkerType } from '../../models/enums';
+import { TaskIdentifier, WorkerType } from '../../models/enums';
 import SourceConnectorIdentifier from '../../connectors/source-connector-identifier.enum';
 
 import ConfigService from '../config/config.service';
@@ -329,7 +329,7 @@ class SourceWorker<T extends SourceConnectorIdentifier> implements Worker {
           notIn: raceList.map((r) => r.identifier),
         },
         status: {
-          notIn: [RaceStatus.FINISHED, RaceStatus.OVER],
+          notIn: ['finished', 'over'],
         },
         created_at: {
           gt: DateTimeUtils.subtractHours(new Date(), 48),

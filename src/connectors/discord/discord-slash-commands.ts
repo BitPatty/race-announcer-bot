@@ -28,7 +28,7 @@ import {
   RemoveTrackerCommand,
 } from '../../models/interfaces';
 
-import { BotCommandType, MessageChannelType } from '../../models/enums';
+import { BotCommandType } from '../../models/enums';
 
 import { parseEnumValue } from '../../utils/enum.utils';
 
@@ -49,7 +49,7 @@ const transformInteractionToChatMessage = (
       identifier: interaction.channelId,
       serverIdentifier: interaction.guildId,
       serverName: interaction.guild?.name ?? null,
-      type: MessageChannelType.TEXT_CHANNEL,
+      type: 'text_channel',
     },
     author: {
       identifier: interaction.user.id,

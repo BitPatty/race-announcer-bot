@@ -27,13 +27,7 @@ import {
   RaceInformation,
 } from '../../models/interfaces';
 
-import {
-  EntrantStatus,
-  MessageChannelType,
-  RaceStatus,
-  TaskIdentifier,
-  WorkerType,
-} from '../../models/enums';
+import { TaskIdentifier, WorkerType } from '../../models/enums';
 
 import DestinationConnectorIdentifier from '../../connectors/destination-connector-identifier.enum';
 
@@ -50,6 +44,7 @@ import {
   Game,
   PrismaClient,
   Race,
+  RaceStatus,
   Racer,
   Tracker,
 } from '@prisma/client';
@@ -77,28 +72,6 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
     this.prismaClient = prisma;
   }
 
-  // /**
-  //  * Transforms the speicfied race to its {@link RaceInformation} representation
-  //  *
-  //  * @param race      The race
-  //  * @param entrants  The races entrants
-  //  * @returns         The transformed race details
-  //  */
-  // private raceEntityToRaceInformation(
-  //   race: Race & { racer: Racer },
-  //   entrants: (Entrant & {racer. Rac[],
-  // ): RaceInformation {
-  //   return {
-  //     ...race,
-  //     entrants: entrants.map((e) => ({
-  //       ...e,
-  //       identifier: e.racer.identifier,
-  //       displayName: e.racer.displayName,
-  //       fullName: e.racer.fullName,
-  //     })),
-  //   };
-  // }
-
   private raceToRaceInformation(
     race: Awaited<ReturnType<typeof this.getActiveRaces>>[0],
   ): RaceInformation {
@@ -109,17 +82,18 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
         abbreviation: race.game.abbreviation,
         identifier: race.game.identifier,
         imageUrl: race.game.image_url,
+        connector: race.game.connector,
       },
       url: race.url ?? undefined,
       goal: race.goal ?? undefined,
-      status: race.status as RaceStatus,
+      status: race.status,
       // status: activeRace.status,
       entrants: race.entrants.map((e) => ({
         identifier: e.racer.identifier,
         displayName: e.racer.display_name,
         fullName: e.racer.full_name,
         finalTime: e.final_time,
-        status: e.status as EntrantStatus,
+        status: e.status,
       })),
     };
   }
@@ -130,7 +104,7 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       serverIdentifier: channel.server_identifier,
       name: channel.name,
       serverName: channel.server_name,
-      type: channel.type as MessageChannelType,
+      type: channel.type,
     };
   }
 
@@ -273,15 +247,13 @@ class AnnouncementWorker<T extends DestinationConnectorIdentifier>
       }
 
       // Don't announce races that are already finished or in an unknown state
-      if (
-        ![
-          RaceStatus.ENTRY_OPEN,
-          RaceStatus.INVITATIONAL,
-          RaceStatus.ENTRY_CLOSED,
-          RaceStatus.IN_PROGRESS,
-        ].includes(activeRace.status as RaceStatus)
-      )
-        continue;
+      const disabledStates: RaceStatus[] = [
+        'entry_open',
+        'entry_closed',
+        'invitational',
+        'in_progress',
+      ];
+      if (disabledStates.includes(activeRace.status)) continue;
 
       // Races should be picked up within the first 3 updates by the announcer. This is just to prevent
       // announcements to be spammed in case  there's an oversight in the logic and/or network issue below

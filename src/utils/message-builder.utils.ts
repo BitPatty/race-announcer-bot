@@ -17,47 +17,48 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { EntrantStatus, RaceStatus } from '@prisma/client';
+
 import { EntrantInformation, RaceInformation } from '../models/interfaces';
-import { EntrantStatus, RaceStatus } from '../models/enums';
 import LoggerService from '../core/logger/logger.service';
 
 class MessageBuilderUtils {
   private static readonly raceStatusIndicatorColor: {
     [key in RaceStatus]: string;
   } = {
-    [RaceStatus.UNKNOWN]: '#D3D3D3',
-    [RaceStatus.ENTRY_OPEN]: '#008000',
-    [RaceStatus.ENTRY_CLOSED]: '#FFA500',
-    [RaceStatus.IN_PROGRESS]: '#FFA500',
-    [RaceStatus.FINISHED]: '#FF0000',
-    [RaceStatus.OVER]: '#FF0000',
-    [RaceStatus.CANCELLED]: '#FF0000',
-    [RaceStatus.INVITATIONAL]: '#0092A6',
+    unknown: '#D3D3D3',
+    entry_open: '#008000',
+    entry_closed: '#FFA500',
+    in_progress: '#FFA500',
+    finished: '#FF0000',
+    over: '#FF0000',
+    cancelled: '#FF0000',
+    invitational: '#0092A6',
   };
 
   private static readonly raceStatusIndicatorText: {
     [key in RaceStatus]: string;
   } = {
-    [RaceStatus.UNKNOWN]: 'Unknown',
-    [RaceStatus.ENTRY_OPEN]: 'Entry Open',
-    [RaceStatus.ENTRY_CLOSED]: 'Entry Closed',
-    [RaceStatus.IN_PROGRESS]: 'Race In Progress',
-    [RaceStatus.FINISHED]: 'Race Finished',
-    [RaceStatus.OVER]: 'Race Over',
-    [RaceStatus.CANCELLED]: 'Race Cancelled',
-    [RaceStatus.INVITATIONAL]: 'Invitational',
+    unknown: 'Unknown',
+    entry_open: 'Entry Open',
+    entry_closed: 'Entry Closed',
+    in_progress: 'Race In Progress',
+    finished: 'Race Finished',
+    over: 'Race Over',
+    cancelled: 'Race Cancelled',
+    invitational: 'Invitational',
   };
 
   private static readonly entrantStatusIndicatorText: {
     [key in EntrantStatus]: string;
   } = {
-    [EntrantStatus.UNKNOWN]: 'Unknown',
-    [EntrantStatus.ENTERED]: 'Entered',
-    [EntrantStatus.READY]: 'Ready',
-    [EntrantStatus.FORFEIT]: 'Forfeit',
-    [EntrantStatus.DONE]: 'Finished',
-    [EntrantStatus.DISQUALIFIED]: 'DQ',
-    [EntrantStatus.INVITED]: 'Invited',
+    unknown: 'Unknown',
+    entered: 'Entered',
+    ready: 'Ready',
+    forfeit: 'Forfeit',
+    done: 'Finished',
+    disqualified: 'DQ',
+    invited: 'Invited',
   };
 
   public static getRaceStatusIndicatorColor(status: RaceStatus): string {
@@ -87,7 +88,7 @@ class MessageBuilderUtils {
 
     entrantList.push(
       ...entrants
-        .filter((e) => e.status === EntrantStatus.DONE && e.finalTime != null)
+        .filter((e) => e.status === 'done' && e.finalTime != null)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .sort((a, b) => a.finalTime! - b.finalTime!), // NOSONAR
     );
@@ -96,9 +97,7 @@ class MessageBuilderUtils {
       prev.displayName.toLowerCase() < next.displayName.toLowerCase() ? -1 : 1;
 
     entrantList.push(
-      ...entrants
-        .filter((e) => e.status === EntrantStatus.READY)
-        .sort(sortByDisplayName),
+      ...entrants.filter((e) => e.status === 'ready').sort(sortByDisplayName),
     );
 
     entrantList.push(
@@ -111,7 +110,7 @@ class MessageBuilderUtils {
 
   public static getEntrantStatusText(entrant: EntrantInformation): string {
     const additionalContext =
-      entrant.status === EntrantStatus.DONE
+      entrant.status === 'done'
         ? ` (${this.formatFinalTime(entrant.finalTime ?? 0)})`
         : '';
 
